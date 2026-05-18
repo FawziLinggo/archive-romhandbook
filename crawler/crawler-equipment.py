@@ -5,7 +5,13 @@ import requests
 
 from bs4 import BeautifulSoup
 
-BASE_URL = "https://romhandbook.com"
+# get from .env 
+import os
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="../.env")
+
+BASE_URL = os.getenv("BASE_URL", "https://romhandbook.com")
 
 HEADERS = {
     "User-Agent": (
@@ -20,36 +26,24 @@ session = requests.Session()
 # SQLITE
 # =========================================
 
-conn = sqlite3.connect("database.db")
+
+DB_FILE = os.getenv("DB_FILE", "database.db")
+conn = sqlite3.connect(DB_FILE)
 
 cursor = conn.cursor()
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS formulas (
-    id TEXT PRIMARY KEY,
-    raw_json TEXT
-)
-""")
+with open(
+    "sql/init.sql",
+    "r",
+    encoding="utf-8"
+) as f:
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS equipments (
-    id TEXT PRIMARY KEY,
-    detail_url TEXT,
-    image TEXT,
-    name TEXT,
-    type TEXT,
-    description TEXT,
-    effect_text TEXT,
-    unlock_text TEXT,
-    deposit_stats TEXT,
-    unlock_stats TEXT,
-    jobs TEXT,
-    formula_id TEXT,
-    raw_html TEXT
-);
-""")
+    sql_script = f.read()
+
+cursor.executescript(sql_script)
 
 conn.commit()
+
 
 # =========================================
 # GET LISTING
@@ -66,7 +60,7 @@ def get_listing_items(page):
         headers=HEADERS
     )
 
-    print("[STATUS]", response.status_code)
+    # print("[STATUS]", response.status_code)
 
     soup = BeautifulSoup(
         response.text,
@@ -110,7 +104,7 @@ def get_listing_items(page):
 
 def get_item_detail(item):
 
-    print(f"[DETAIL] {item['detail_url']}")
+    # print(f"[DETAIL] {item['detail_url']}")
 
     response = session.get(
         item["detail_url"],
@@ -371,7 +365,7 @@ def get_item_detail(item):
 
     conn.commit()
 
-    print(f"[OK] {name}")
+    # print(f"[OK] {name}")
 
     return True
 

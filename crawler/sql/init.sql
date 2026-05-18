@@ -1,3 +1,4 @@
+CREATE TABLE IF NOT EXISTS formulas (id TEXT PRIMARY KEY, raw_json TEXT);
 CREATE TABLE IF NOT EXISTS equipments (
     id TEXT PRIMARY KEY,
     detail_url TEXT,
