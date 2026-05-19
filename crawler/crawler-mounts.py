@@ -279,7 +279,7 @@ def get_mount_detail(item):
 
     url = item["detail_url"]
 
-    print(f"[DETAIL] {url}")
+    # print(f"[DETAIL] {url}")
 
     response = session.get(
         url,
@@ -458,9 +458,9 @@ def main():
                     detail["formulas"]
                 )
 
-                print(
-                    f"[SAVED] {detail['name']}"
-                )
+                # print(
+                #     f"[SAVED] {detail['name']}"
+                # )
 
                 time.sleep(0.3)
 

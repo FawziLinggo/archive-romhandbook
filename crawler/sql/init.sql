@@ -124,8 +124,6 @@ CREATE TABLE IF NOT EXISTS cards (
     craft_materials TEXT,
     raw_html TEXT
 );
-DROP TABLE IF EXISTS mount_formulas;
-DROP TABLE IF EXISTS mounts;
 CREATE TABLE IF NOT EXISTS mounts (
     id TEXT PRIMARY KEY,
     detail_url TEXT,
