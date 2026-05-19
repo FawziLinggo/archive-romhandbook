@@ -143,3 +143,20 @@ CREATE TABLE IF NOT EXISTS mount_formulas (
     formula_index INTEGER,
     formula_json TEXT
 );
+CREATE TABLE IF NOT EXISTS pets (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    race TEXT,
+    element TEXT,
+    size TEXT,
+    description TEXT,
+    unlock_text TEXT,
+    egg_name TEXT,
+    egg_url TEXT,
+    egg_image TEXT,
+    skills TEXT,
+    formula_ids TEXT,
+    raw_html TEXT
+);
