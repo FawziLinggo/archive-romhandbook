@@ -104,3 +104,25 @@ CREATE TABLE IF NOT EXISTS buffs (
     raw_html TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_buffs_name ON buffs(name);
+drop table if exists card_formulas;
+CREATE TABLE IF NOT EXISTS card_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id TEXT,
+    formula_index INTEGER,
+    formula_json TEXT,
+    FOREIGN KEY(card_id) REFERENCES cards(id)
+);
+drop table if exists cards;
+CREATE TABLE IF NOT EXISTS cards (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    card_type TEXT,
+    quality TEXT,
+    effect_text TEXT,
+    deposit_text TEXT,
+    unlock_text TEXT,
+    craft_materials TEXT,
+    raw_html TEXT
+);
