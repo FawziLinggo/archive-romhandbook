@@ -94,3 +94,13 @@ CREATE TABLE IF NOT EXISTS formulas_code (
     raw_html TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_formulas_code_name ON formulas_code(name);
+CREATE TABLE IF NOT EXISTS buffs (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    detail_url TEXT,
+    image TEXT,
+    description TEXT,
+    raw_json TEXT,
+    raw_html TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_buffs_name ON buffs(name);
