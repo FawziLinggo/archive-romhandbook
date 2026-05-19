@@ -86,3 +86,11 @@ CREATE TABLE IF NOT EXISTS skill_levels (
     raw_tags TEXT,
     FOREIGN KEY(skill_id) REFERENCES skills(id)
 );
+CREATE TABLE IF NOT EXISTS formulas_code (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    detail_url TEXT,
+    formula_code TEXT,
+    raw_html TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_formulas_code_name ON formulas_code(name);
