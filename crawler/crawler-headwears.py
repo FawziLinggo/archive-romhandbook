@@ -349,7 +349,7 @@ def get_item_detail(item):
 
     conn.commit()
 
-    print(f"[OK] {name}")
+    # print(f"[OK] {name}")
 
 
 # =========================================
