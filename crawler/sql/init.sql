@@ -60,3 +60,29 @@ CREATE TABLE IF NOT EXISTS monsters (
     raw_json TEXT,
     raw_html TEXT
 );
+CREATE TABLE IF NOT EXISTS skills (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    max_level INTEGER,
+    skill_type TEXT,
+    damage_type TEXT,
+    cooldown TEXT,
+    range_value TEXT,
+    cast_time TEXT,
+    fixed_cast_time TEXT,
+    description TEXT,
+    formula_type TEXT,
+    formula_raw TEXT,
+    raw_tags TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS skill_levels (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    skill_id TEXT,
+    level INTEGER,
+    description TEXT,
+    raw_tags TEXT,
+    FOREIGN KEY(skill_id) REFERENCES skills(id)
+);
