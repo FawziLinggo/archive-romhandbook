@@ -124,3 +124,24 @@ CREATE TABLE IF NOT EXISTS cards (
     craft_materials TEXT,
     raw_html TEXT
 );
+DROP TABLE IF EXISTS mount_formulas;
+DROP TABLE IF EXISTS mounts;
+CREATE TABLE IF NOT EXISTS mounts (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    mount_type TEXT,
+    description TEXT,
+    quality TEXT,
+    effect_text TEXT,
+    unlock_text TEXT,
+    jobs TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS mount_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mount_id TEXT,
+    formula_index INTEGER,
+    formula_json TEXT
+);
