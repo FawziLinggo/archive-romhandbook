@@ -172,3 +172,13 @@ CREATE TABLE IF NOT EXISTS things (
 );
 CREATE INDEX IF NOT EXISTS idx_things_type ON things(type);
 CREATE INDEX IF NOT EXISTS idx_things_name ON things(name);
+CREATE TABLE IF NOT EXISTS crafting_materials (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    material_type TEXT,
+    quality TEXT,
+    description TEXT,
+    raw_html TEXT
+);
