@@ -124,9 +124,9 @@ CREATE TABLE IF NOT EXISTS cards (
     craft_materials TEXT,
     raw_html TEXT
 );
-CREATE INDEX idx_cards_name ON cards(name);
-CREATE INDEX idx_cards_type ON cards(card_type);
-CREATE INDEX idx_cards_quality ON cards(quality);
+CREATE INDEX IF NOT EXISTS idx_cards_name ON cards(name);
+CREATE INDEX IF NOT EXISTS idx_cards_type ON cards(card_type);
+CREATE INDEX IF NOT EXISTS idx_cards_quality ON cards(quality);
 CREATE TABLE IF NOT EXISTS mounts (
     id TEXT PRIMARY KEY,
     detail_url TEXT,
