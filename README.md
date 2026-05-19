@@ -7,7 +7,7 @@ See you in Rune Midgard ⚔️
 
 # Archive ROM Handbook
 
-ROM Handbook, one of the most valuable community resources for Ragnarok Online M: Classic (ROMC), is scheduled to shut down.  
+ROM Handbook, one of the most valuable community resources, is scheduled to shut down.  
 This project was created to preserve as much information as possible before the website goes offline.
 
 The crawler extracts and stores data from ROM Handbook into a local SQLite database, including:
@@ -143,5 +143,3 @@ All game assets, names, and related intellectual property belong to their respec
 # Contribution
 
 Pull requests and improvements are welcome.
-
-If you want to help preserve ROM Handbook data, feel free to contribute.
