@@ -172,6 +172,13 @@ CREATE TABLE IF NOT EXISTS things (
 );
 CREATE INDEX IF NOT EXISTS idx_things_type ON things(type);
 CREATE INDEX IF NOT EXISTS idx_things_name ON things(name);
+CREATE TABLE IF NOT EXISTS crafting_material_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    material_id TEXT,
+    formula_index INTEGER,
+    formula_json TEXT,
+    FOREIGN KEY(material_id) REFERENCES crafting_materials(id)
+);
 CREATE TABLE IF NOT EXISTS crafting_materials (
     id TEXT PRIMARY KEY,
     detail_url TEXT,

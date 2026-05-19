@@ -109,16 +109,28 @@ for table in sources:
             text and "Craft Materials" in text
         )
 
+        if len(labels) == 0:
+            continue
+
+
         for label in labels:
 
-            # cari parent container
-            parent = label.find_parent()
+            # cari wrapper title
+            title_wrapper = label.find_parent("div")
 
-            if not parent:
+            if not title_wrapper:
                 continue
 
-            # ambil semua link things
-            links = parent.find_all(
+            # cari container material
+            materials_container = (
+                title_wrapper.find_next_sibling("div")
+            )
+
+            if not materials_container:
+                continue
+
+            # ambil semua link
+            links = materials_container.find_all(
                 "a",
                 href=True
             )
@@ -130,6 +142,8 @@ for table in sources:
                 # hanya /things/
                 if "/things/" not in href:
                     continue
+
+                print(f"Found link: {href}")
 
                 # =========================================
                 # EXTRACT ID
@@ -273,9 +287,11 @@ print(f"\nTotal materials: {len(materials)}")
 for row in materials:
 
     material_id = row[0]
-    detail_url = BASE_URL + row[1] if row[1].startswith("/") else row[1]
+    detail_url = row[1]
 
     print(f"\nFetching: {detail_url}")
+
+    time.sleep(0.5)
 
     try:
 
@@ -302,13 +318,40 @@ for row in materials:
         )
 
         # =========================================
+        # VALIDATE TYPE
+        # =========================================
+
+        badges = soup.select(
+            "span.inline-flex"
+        )
+
+        is_crafting_material = any(
+
+            badge.get_text(
+                strip=True
+            ) == "Crafting Material"
+
+            for badge in badges
+
+        )
+
+        if not is_crafting_material:
+
+            print(
+                f"[SKIP] "
+                f"Not crafting material"
+            )
+
+            continue
+
+        # =========================================
         # NAME
         # =========================================
 
         name = None
 
-        title = soup.find(
-            class_="text font-semibold"
+        title = soup.select_one(
+            "span.text.font-semibold"
         )
 
         if title:
@@ -323,16 +366,24 @@ for row in materials:
 
         description = None
 
-        desc = soup.find(
-            "p",
-            class_="text-base"
-        )
+        paragraphs = soup.find_all("p")
 
-        if desc:
+        for p in paragraphs:
 
-            description = desc.get_text(
+            text = p.get_text(
                 strip=True
             )
+
+            if (
+                text
+                and
+                "Formula" not in text
+                and
+                len(text) > 10
+            ):
+
+                description = text
+                break
 
         # =========================================
         # QUALITY
@@ -340,56 +391,47 @@ for row in materials:
 
         quality = None
 
-        quality_label = soup.find(
-            string=lambda text:
-            text and "Quality" in text
-        )
+        all_spans = soup.find_all("span")
 
-        if quality_label:
+        qualities = [
+            "White",
+            "Green",
+            "Blue",
+            "Purple"
+        ]
 
-            quality_parent = (
-                quality_label
-                .find_parent()
+        for span in all_spans:
+
+            text = span.get_text(
+                strip=True
             )
 
-            if quality_parent:
+            if text in qualities:
 
-                next_div = (
-                    quality_parent
-                    .find_next_sibling()
-                )
-
-                if next_div:
-
-                    quality = (
-                        next_div.get_text(
-                            strip=True
-                        )
-                    )
-
-                    quality = (
-                        quality
-                        .replace("►", "")
-                        .strip()
-                    )
+                quality = text
+                break
 
         # =========================================
-        # MAIN IMAGE
+        # IMAGE
         # =========================================
 
         image = None
 
-        main_image = soup.find(
+        img = soup.find(
             "img",
             class_="h-12"
         )
 
-        if main_image:
+        if img:
 
-            image = main_image.get("src")
+            image = (
+                img.get("src")
+                or
+                img.get("data-src")
+            )
 
         # =========================================
-        # UPDATE DB
+        # UPDATE MATERIAL
         # =========================================
 
         cursor.execute("""
@@ -416,9 +458,66 @@ for row in materials:
 
         ))
 
+        # =========================================
+        # DELETE OLD FORMULAS
+        # =========================================
+
+        cursor.execute("""
+
+            DELETE FROM
+            crafting_material_formulas
+
+            WHERE material_id = ?
+
+        """, (
+            material_id,
+        ))
+
+        # =========================================
+        # EXTRACT FORMULAS
+        # =========================================
+
+        formula_blocks = soup.find_all(
+            "code",
+            class_="language-json"
+        )
+
+        for index, formula in enumerate(
+            formula_blocks
+        ):
+
+            formula_text = (
+                formula.get_text(
+                    strip=True
+                )
+            )
+
+            cursor.execute("""
+
+                INSERT INTO
+                crafting_material_formulas (
+
+                    material_id,
+                    formula_index,
+                    formula_json
+
+                )
+                VALUES (?, ?, ?)
+
+            """, (
+
+                material_id,
+                index,
+                formula_text
+
+            ))
+
         conn.commit()
 
-        print(f"[OK] {name}")
+        print(
+            f"[OK] "
+            f"{name}"
+        )
 
         time.sleep(0.5)
 
@@ -428,7 +527,6 @@ for row in materials:
             f"[ERROR] "
             f"{material_id}: {e}"
         )
-
 # =========================================
 # DONE
 # =========================================
