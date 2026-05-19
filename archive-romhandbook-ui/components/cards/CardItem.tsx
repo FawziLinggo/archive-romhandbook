@@ -54,7 +54,7 @@ export default function CardItem({ card }: CardItemProps) {
     return (
 
         <Link
-            href={`/cards/${slugify(card.name)}-${card.id}`}
+            href={`/things/${slugify(card.name)}-${card.id}`}
         >
 
             <div

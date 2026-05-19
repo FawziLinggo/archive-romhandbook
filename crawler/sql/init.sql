@@ -163,3 +163,12 @@ CREATE TABLE IF NOT EXISTS pets (
     formula_ids TEXT,
     raw_html TEXT
 );
+CREATE TABLE IF NOT EXISTS things (
+    id TEXT PRIMARY KEY,
+    type TEXT,
+    name TEXT,
+    image TEXT,
+    detail_url TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_things_type ON things(type);
+CREATE INDEX IF NOT EXISTS idx_things_name ON things(name);

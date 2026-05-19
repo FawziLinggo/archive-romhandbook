@@ -135,3 +135,94 @@ export function getCardFormulas(
     }))
 
 }
+
+
+export function getThingTypeById(
+    id: string
+) {
+
+    return db
+        .prepare(`
+            SELECT id, 'card' as type
+            FROM cards
+            WHERE id = ?
+
+            UNION ALL
+
+            SELECT id, 'equipment' as type
+            FROM equipments
+            WHERE id = ?
+
+            UNION ALL
+
+            SELECT id, 'monster' as type
+            FROM monsters
+            WHERE id = ?
+
+            UNION ALL
+
+            SELECT id, 'pet' as type
+            FROM pets
+            WHERE id = ?
+
+            UNION ALL
+
+            SELECT id, 'mount' as type
+            FROM mounts
+            WHERE id = ?
+
+            UNION ALL
+            SELECT id, 'headwear' as type
+            FROM headwears
+            WHERE id = ?
+
+            LIMIT 1
+        `)
+        .get(
+            id,
+            id,
+            id,
+            id,
+            id,
+            id
+        )
+
+}
+
+
+export function getEquipmentById(
+    id: string
+) {
+
+    const equipment: any = db
+        .prepare(`
+            SELECT *
+            FROM equipments
+            WHERE id = ?
+        `)
+        .get(id)
+
+    // not found
+    if (!equipment) {
+        return null
+    }
+
+    return {
+
+        ...equipment,
+
+        effects: JSON.parse(
+            equipment.effects || "[]"
+        ),
+
+        formulas: JSON.parse(
+            equipment.formulas || "[]"
+        ),
+
+        craft_materials: JSON.parse(
+            equipment.craft_materials || "[]"
+        )
+
+    }
+
+}

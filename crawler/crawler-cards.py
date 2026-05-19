@@ -484,6 +484,27 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
     conn.commit()
 
+    # save to things table
+
+    cursor.execute("""
+    INSERT OR REPLACE INTO things (
+        id,
+        type,
+        name,
+        image,
+        detail_url
+    )   
+    VALUES (?, ?, ?, ?, ?)
+    """, (
+        data["id"],
+        "card",
+        data["name"],
+        data["image"],
+        data["detail_url"]
+    ))
+
+    conn.commit()
+
 
 # =========================================
 # SAVE FORMULAS

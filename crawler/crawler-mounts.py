@@ -462,6 +462,27 @@ def main():
                     f"[SAVED] {detail['name']}"
                 )
 
+                # save to things table
+
+                cursor.execute("""
+                INSERT OR REPLACE INTO things (
+                    id,
+                    type,
+                    name,
+                    image,
+                    detail_url
+                )   
+                VALUES (?, ?, ?, ?, ?)
+                """, (
+                    detail["id"],
+                    "mount",
+                    detail["name"],
+                    detail["image"],
+                    detail["detail_url"]
+                ))
+
+                conn.commit()
+
                 time.sleep(0.5)
 
             except Exception as e:

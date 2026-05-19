@@ -328,6 +328,27 @@ def get_item_detail(item):
 
     conn.commit()
 
+       # save to things table
+
+    cursor.execute("""
+    INSERT OR REPLACE INTO things (
+        id,
+        type,
+        name,
+        image,
+        detail_url
+    )   
+    VALUES (?, ?, ?, ?, ?)
+    """, (
+        item["id"],
+        "monster",
+        name,
+        item["image"],
+        item["detail_url"]
+    ))
+
+    conn.commit()
+
     print(f"[OK] {name}")
 
 # =========================================
