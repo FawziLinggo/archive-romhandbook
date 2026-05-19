@@ -6,6 +6,12 @@ ROM Handbook, a popular resource for the game Ragnarok Online, is shutting down.
 ![alt text](assets/img/docs/statement.png "ROM Handbook shutdown statement")
 
 
+# TO DO
+- [-] Crawler Data 
+- [ ] Make UI
+- [ ] Create AI assistant for Q&A
+
+
 
 
 
