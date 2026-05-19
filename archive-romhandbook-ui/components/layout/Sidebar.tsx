@@ -16,13 +16,17 @@ export default function Sidebar() {
 
         <aside
             className="
-                w-64
-                border-r
-                border-zinc-800
-                bg-zinc-950
-                min-h-screen
-                p-4
-            "
+        sticky
+        top-16
+        h-[calc(100vh-4rem)]
+        overflow-y-auto
+
+        w-64
+        border-r
+        border-zinc-800
+        bg-zinc-950
+        p-4
+    "
         >
 
             <div className="space-y-2">

@@ -1,3 +1,7 @@
+import { slugify } from "@/lib/utils"
+import Link from "next/link"
+
+
 type CardItemProps = {
     card: any
 }
@@ -49,8 +53,12 @@ export default function CardItem({ card }: CardItemProps) {
 
     return (
 
-        <div
-            className={`
+        <Link
+            href={`/cards/${slugify(card.name)}-${card.id}`}
+        >
+
+            <div
+                className={`
   bg-zinc-900
   border
   ${qualityColor.border}
@@ -62,54 +70,54 @@ export default function CardItem({ card }: CardItemProps) {
   shadow-lg
   cursor-pointer
 `}
-        >
+            >
 
-            {/* IMAGE */}
-            <div className="p-3">
+                {/* IMAGE */}
+                <div className="p-3">
 
-                <div
-                    className="
+                    <div
+                        className="
                         rounded-xl
                         overflow-hidden
                         bg-zinc-800
                     "
-                >
+                    >
 
-                    <img
-                        src={card.image}
-                        alt={card.name}
-                        className="
+                        <img
+                            src={card.image}
+                            alt={card.name}
+                            className="
                             w-full
                             aspect-square
                             object-cover
                         "
-                    />
+                        />
+
+                    </div>
 
                 </div>
 
-            </div>
+                {/* CONTENT */}
+                <div className="px-4 pb-4">
 
-            {/* CONTENT */}
-            <div className="px-4 pb-4">
-
-                {/* NAME */}
-                <h2
-                    className="
+                    {/* NAME */}
+                    <h2
+                        className="
                         text-sm
                         font-bold
                         text-white
                         line-clamp-2
                         min-h-[40px]
                     "
-                >
-                    {card.name}
-                </h2>
+                    >
+                        {card.name}
+                    </h2>
 
-                {/* TYPE */}
-                <div className="mt-2">
+                    {/* TYPE */}
+                    <div className="mt-2">
 
-                    <span
-                        className={`
+                        <span
+                            className={`
     inline-block
     px-2
     py-1
@@ -117,31 +125,31 @@ export default function CardItem({ card }: CardItemProps) {
     rounded-full
     ${qualityColor.badge}
 `}
-                    >
-                        {card.card_type || "Card"}
+                        >
+                            {card.card_type || "Card"}
 
-                    </span>
+                        </span>
 
-                </div>
+                    </div>
 
-                {/* EFFECT */}
-                <div className="mt-3">
+                    {/* EFFECT */}
+                    <div className="mt-3">
 
-                    <p
-                        className="
+                        <p
+                            className="
                             text-xs
                             text-zinc-400
                             line-clamp-2
                         "
-                    >
-                        {card.effect_texts?.[0]}
-                    </p>
+                        >
+                            {card.effect_texts?.[0]}
+                        </p>
+
+                    </div>
 
                 </div>
 
             </div>
-
-        </div>
-
+        </Link>
     )
 }

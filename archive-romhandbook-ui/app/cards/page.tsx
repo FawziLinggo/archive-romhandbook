@@ -21,7 +21,11 @@ export default async function CardsPage({
     const quality =
         params.quality || ""
 
-    const cards = getCards(query)
+    const cards = getCards(
+        query,
+        type,
+        quality
+    )
 
     return (
 
@@ -88,16 +92,29 @@ export default async function CardsPage({
                         All Types
                     </option>
 
-                    <option value="Weapon Card">
-                        Weapon Card
+                    <option value="Accessory Card">
+                        Accessory Card
                     </option>
 
                     <option value="Armor Card">
                         Armor Card
                     </option>
 
-                    <option value="Accessory Card">
-                        Accessory Card
+                    <option value="Garments Card">
+                        Garments Card
+                    </option>
+
+                    <option value="Headwear Card">
+                        Headwear Card
+                    </option>
+                    <option value="Off Hand Card">
+                        Off Hand Card
+                    </option>
+                    <option value="Shoe Card">
+                        Shoe Card
+                    </option>
+                    <option value="Weapon Card">
+                        Weapon Card
                     </option>
 
                 </select>

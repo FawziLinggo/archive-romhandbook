@@ -72,3 +72,66 @@ export function getCards(
         .all(...params)
 
 }
+
+
+export function getCardById(id: string) {
+
+    const card: any = db
+        .prepare(`
+            SELECT *
+            FROM cards
+            WHERE id = ?
+        `)
+        .get(id)
+
+    // kalau tidak ada
+    if (!card) {
+        return null
+    }
+
+    // parse JSON text
+    return {
+
+        ...card,
+
+        effect_texts: JSON.parse(
+            card.effect_text || "[]"
+        ),
+
+        deposit_texts: JSON.parse(
+            card.deposit_text || "[]"
+        ),
+
+        unlock_texts: JSON.parse(
+            card.unlock_text || "[]"
+        ),
+
+        craft_materials: JSON.parse(
+            card.craft_materials || "[]"
+        )
+
+    }
+
+}
+
+export function getCardFormulas(
+    cardId: string
+) {
+
+    const formulas = db
+        .prepare(`
+            SELECT *
+            FROM card_formulas
+            WHERE card_id = ?
+            ORDER BY formula_index ASC
+        `)
+        .all(cardId)
+
+    return formulas.map((formula: any) => ({
+        ...formula,
+        formula_json: JSON.parse(
+            formula.formula_json || "{}"
+        )
+    }))
+
+}

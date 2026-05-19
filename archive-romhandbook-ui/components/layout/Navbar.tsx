@@ -1,27 +1,5 @@
-"use client"
-
-import { useRouter } from "next/navigation"
-import { useState } from "react"
 
 export default function Navbar() {
-
-    const router = useRouter()
-
-    const [search, setSearch] = useState("")
-
-    function handleSearch(
-        e: React.FormEvent
-    ) {
-
-        e.preventDefault()
-
-
-        console.log("SEARCH")
-
-        router.push(
-            `/cards?q=${search}`
-        )
-    }
 
     return (
 
@@ -54,44 +32,24 @@ export default function Navbar() {
                         text-xl
                         font-bold
                         text-white
-                        shrink-0
                     "
                 >
-                    ROM Handbook
+                    ROM Handbook Archive
                 </div>
 
-                {/* SEARCH */}
-                <form
-                    onSubmit={handleSearch}
+                {/* GITHUB */}
+                <a
+                    href="https://github.com/FawziLinggo/archive-romhandbook"
+                    target="_blank"
                     className="
-                        w-full
-                        max-w-xl
-                        mx-6
+                        text-sm
+                        text-zinc-400
+                        hover:text-white
+                        transition-colors
                     "
                 >
-
-                    <input
-                        type="text"
-                        placeholder="Search cards..."
-                        value={search}
-                        onChange={(e) =>
-                            setSearch(e.target.value)
-                        }
-                        className="
-                            w-full
-                            bg-zinc-900
-                            border
-                            border-zinc-800
-                            rounded-xl
-                            px-4
-                            py-2
-                            text-sm
-                            outline-none
-                            focus:border-violet-500
-                        "
-                    />
-
-                </form>
+                    GitHub
+                </a>
 
             </div>
 
