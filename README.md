@@ -59,3 +59,8 @@ Run crawler:
 ```bash
 python crawler-equipment.py
 ```
+
+
+
+
+Lets be friend in game ROMC SEA, my uid is "5310144193". See you in Rune Midgard!
