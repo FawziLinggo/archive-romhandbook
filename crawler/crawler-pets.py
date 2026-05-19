@@ -499,11 +499,11 @@ def main():
 
                 save_pet(detail)
 
-                # print(
-                #     f"[SAVED] {detail['name']}"
-                # )
+                print(
+                    f"[SAVED] {detail['name']}"
+                )
 
-                time.sleep(0.3)
+                time.sleep(0.5)
 
             except Exception as e:
 

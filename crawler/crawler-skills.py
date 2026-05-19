@@ -477,7 +477,7 @@ def get_skill_detail(item):
 
     conn.commit()
 
-    # print(f"[OK] {name}")
+    print(f"[OK] {name}")
 
 # =========================================
 # MAIN
@@ -521,7 +521,7 @@ while True:
 
             get_skill_detail(item)
 
-            time.sleep(0.3)
+            time.sleep(0.5)
 
         except Exception as e:
 

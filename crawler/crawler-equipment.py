@@ -104,7 +104,7 @@ def get_listing_items(page):
 
 def get_item_detail(item):
 
-    # print(f"[DETAIL] {item['detail_url']}")
+    print(f"[DETAIL] {item['detail_url']}")
 
     response = session.get(
         item["detail_url"],
@@ -365,7 +365,7 @@ def get_item_detail(item):
 
     conn.commit()
 
-    # print(f"[OK] {name}")
+    print(f"[OK] {name}")
 
     return True
 
@@ -412,7 +412,7 @@ while True:
 
             get_item_detail(item)
 
-            time.sleep(0.3)
+            time.sleep(0.5)
 
         except Exception as e:
 

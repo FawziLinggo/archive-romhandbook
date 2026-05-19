@@ -141,7 +141,7 @@ def download_image(
             f"[DOWNLOADED] {filepath}"
         )
 
-        time.sleep(0.1)
+        time.sleep(0.5)
 
     except Exception as e:
 

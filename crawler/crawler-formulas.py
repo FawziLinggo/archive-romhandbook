@@ -126,7 +126,7 @@ def get_formula_detail(item):
 
     url = item["detail_url"]
 
-    # print(f"[DETAIL] {url}")
+    print(f"[DETAIL] {url}")
 
     response = session.get(
         url,
@@ -216,11 +216,11 @@ def main():
 
                 save_formula(detail)
 
-                # print(
-                #     f"[SAVED] {detail['name']}"
-                # )
+                print(
+                    f"[SAVED] {detail['name']}"
+                )
 
-                time.sleep(0.3)
+                time.sleep(0.5)
 
             except Exception as e:
 
