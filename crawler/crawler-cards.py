@@ -54,6 +54,50 @@ conn.commit()
 # HELPERS
 # =========================================
 
+def extract_link_items(soup, label):
+
+    results = []
+
+    labels = soup.select(
+        "span.text-sm.font-light.leading-6.text-emerald-200"
+    )
+
+    for lbl in labels:
+
+        current_label = clean_text(
+            lbl.get_text()
+        )
+
+        if current_label != label:
+            continue
+
+        label_div = lbl.find_parent("div")
+
+        if not label_div:
+            continue
+
+        content_div = label_div.find_next_sibling("div")
+
+        if not content_div:
+            continue
+
+        items = content_div.select(
+            "span.text-sm.font-semibold.leading-6.text-emerald-200"
+        )
+
+        for item in items:
+
+            value = clean_text(
+                item.get_text()
+            )
+
+            if value:
+                results.append(value)
+
+        break
+
+    return results
+
 def clean_text(text):
 
     if not text:
@@ -344,39 +388,21 @@ def get_card_detail(item):
 
 
     # craft materials
-    craft_materials = []
+    craft_materials = extract_link_items(
+    soup,
+    "Craft Materials"
+)
 
-    for label in labels:
+    craftable = extract_link_items(
+        soup,
+        "Craftable"
+    )
 
-        label_text = clean_text(
-            label.get_text()
-        )
+    dropped_by = extract_link_items(
+        soup,
+        "Dropped by"
+    )
 
-        if label_text != "Craft Materials":
-            continue
-
-        parent = label.find_parent(
-            "div",
-            class_="grid"
-        )
-
-        if not parent:
-            continue
-
-        spans = parent.select(
-            "span.text.font-semibold.leading-6.text-emerald-200"
-        )
-
-        for sp in spans:
-
-            val = clean_text(
-                sp.get_text()
-            )
-
-            if val:
-                craft_materials.append(val)
-
-        break
 
     # formulas
     formulas = []
@@ -410,6 +436,8 @@ def get_card_detail(item):
         "deposits": deposits,
         "unlocks": unlocks,
         "craft_materials": craft_materials,
+        "craftable": craftable,
+        "dropped_by": dropped_by,
         "formulas": formulas,
         "raw_html": raw_html
     }
@@ -422,32 +450,36 @@ def get_card_detail(item):
 def save_card(data):
 
     cursor.execute("""
-        INSERT OR REPLACE INTO cards (
-            id,
-            detail_url,
-            image,
-            name,
-            card_type,
-            quality,
-            effect_text,
-            deposit_text,
-            unlock_text,
-            craft_materials,
-            raw_html
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT OR REPLACE INTO cards (
+    id,
+    detail_url,
+    image,
+    name,
+    card_type,
+    quality,
+    effect_text,
+    deposit_text,
+    unlock_text,
+    craft_materials,
+    craftable,
+    dropped_by,
+    raw_html
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        data["id"],
-        data["detail_url"],
-        data["image"],
-        data["name"],
-        data["card_type"],
-        data["quality"],
-        json.dumps(data["effects"]),
-        json.dumps(data["deposits"]),
-        json.dumps(data["unlocks"]),
-        json.dumps(data["craft_materials"]),
-        data["raw_html"]
+    data["id"],
+    data["detail_url"],
+    data["image"],
+    data["name"],
+    data["card_type"],
+    data["quality"],
+    json.dumps(data["effects"]),
+    json.dumps(data["deposits"]),
+    json.dumps(data["unlocks"]),
+    json.dumps(data["craft_materials"]),
+    json.dumps(data["craftable"]),
+    json.dumps(data["dropped_by"]),
+    data["raw_html"]
     ))
 
     conn.commit()
