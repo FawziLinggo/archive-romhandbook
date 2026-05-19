@@ -30,3 +30,33 @@ CREATE TABLE IF NOT EXISTS headwears (
     formula_id TEXT,
     raw_html TEXT
 );
+CREATE TABLE IF NOT EXISTS monsters (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    race TEXT,
+    element TEXT,
+    size TEXT,
+    location TEXT,
+    level INTEGER,
+    hp TEXT,
+    base_exp TEXT,
+    job_exp TEXT,
+    str INTEGER,
+    agi INTEGER,
+    vit INTEGER,
+    int_stat INTEGER,
+    dex INTEGER,
+    luk INTEGER,
+    atk TEXT,
+    matk TEXT,
+    def TEXT,
+    mdef TEXT,
+    hit TEXT,
+    flee TEXT,
+    move_speed TEXT,
+    aspd TEXT,
+    raw_json TEXT,
+    raw_html TEXT
+);
