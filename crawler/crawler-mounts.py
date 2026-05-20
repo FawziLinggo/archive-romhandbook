@@ -364,6 +364,12 @@ def get_mount_detail(item):
 
 def save_mount(data):
 
+    
+    if data["detail_url"].startswith(BASE_URL):
+        data["detail_url"] = data["detail_url"][len(BASE_URL):]
+    if data["image"] and data["image"].startswith(BASE_URL):
+        data["image"] = data["image"][len(BASE_URL):]
+        
     cursor.execute("""
         INSERT OR REPLACE INTO mounts (
             id,
@@ -463,6 +469,11 @@ def main():
                 )
 
                 # save to things table
+
+                if detail["detail_url"].startswith(BASE_URL):
+                    detail["detail_url"] = detail["detail_url"][len(BASE_URL):]
+                if detail["image"] and detail["image"].startswith(BASE_URL):
+                    detail["image"] = detail["image"][len(BASE_URL):]
 
                 cursor.execute("""
                 INSERT OR REPLACE INTO things (

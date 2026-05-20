@@ -166,6 +166,154 @@ def extract_tag_value(tags, prefix):
     return None
 
 # =========================================
+# REWRITE LOCAL ASSET PATHS
+# =========================================
+
+def rewrite_local_assets(body_tag):
+
+    # =========================
+    # IMG SRC
+    # =========================
+
+    for img in body_tag.find_all("img"):
+
+        src = img.get("src")
+
+        if not src:
+            continue
+
+        # only romhandbook assets
+        if "https://romhandbook.com/assets/" in src:
+
+            # remove domain
+            local_src = src.replace(
+                "https://romhandbook.com",
+                ""
+            )
+
+            # prepend local public path
+            # local_src = (
+            #     "/romhandbook"
+            #     + local_src
+            # )
+
+            img["src"] = local_src
+
+    # =========================
+    # LINK HREF
+    # =========================
+
+    for link in body_tag.find_all("link"):
+
+        href = link.get("href")
+
+        if not href:
+            continue
+
+        if "https://romhandbook.com/assets/" in href:
+
+            local_href = href.replace(
+                "https://romhandbook.com",
+                ""
+            )
+
+            # local_href = (
+            #     "/romhandbook"
+            #     + local_href
+            # )
+
+            link["href"] = local_href
+
+    return body_tag
+
+# =========================================
+# CLEAN BODY HTML
+# =========================================
+
+def get_clean_body_html(soup):
+
+    # =========================
+    # GET BODY
+    # =========================
+
+    body_tag = soup.select_one("body")
+
+    if not body_tag:
+        return ""
+
+    # =========================
+    # REMOVE HEADER
+    # =========================
+
+    for el in body_tag.select(
+        "header, .sticky-top"
+    ):
+        el.decompose()
+
+    # =========================
+    # REMOVE SIDEBAR
+    # =========================
+
+    for el in body_tag.select(
+        ".docs-sidebar"
+    ):
+        el.decompose()
+
+    # =========================
+    # REMOVE FOOTER
+    # =========================
+
+    for el in body_tag.select(
+        "footer"
+    ):
+        el.decompose()
+
+    # =========================
+    # REMOVE SCRIPTS
+    # =========================
+
+    for el in body_tag.select(
+        "script"
+    ):
+        el.decompose()
+
+    # =========================
+    # REMOVE STYLE TAGS
+    # =========================
+
+    for el in body_tag.select(
+        "style"
+    ):
+        el.decompose()
+
+    # =========================
+    # REMOVE SHUTDOWN NOTICE
+    # =========================
+
+    for el in body_tag.find_all(
+        string=lambda t:
+        t and "will shut down" in t
+    ):
+
+        parent = el.find_parent("div")
+
+        if parent:
+            parent.decompose()
+
+    # =========================
+    # REWRITE LOCAL ASSETS
+    # =========================
+
+    body_tag = rewrite_local_assets(
+        body_tag
+    )
+
+    # =========================
+    # RETURN HTML
+    # =========================
+
+    return str(body_tag)
+# =========================================
 # DETAIL
 # =========================================
 
@@ -187,6 +335,10 @@ def get_skill_detail(item):
     soup = BeautifulSoup(
         raw_html,
         "lxml"
+    )
+
+    raw_html = get_clean_body_html(
+        soup
     )
 
     # =====================================
@@ -328,6 +480,12 @@ def get_skill_detail(item):
     # =====================================
     # SAVE MAIN SKILL
     # =====================================
+
+
+    if item["detail_url"].startswith(BASE_URL):
+        item["detail_url"] = item["detail_url"][len(BASE_URL):]
+    if item["image"] and item["image"].startswith(BASE_URL):
+        item["image"] = item["image"][len(BASE_URL):]
 
     cursor.execute("""
     INSERT OR REPLACE INTO skills (

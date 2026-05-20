@@ -14,6 +14,11 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
 
+BASE_URL = os.getenv(
+    "BASE_URL",
+    "https://romhandbook.com"
+)
+
 DB_FILE = os.getenv(
     "DB_FILE",
     "database.db"
@@ -85,9 +90,9 @@ def download_image(
 
     try:
 
-        ext = get_extension(
-            image_url
-        )
+        # ext = get_extension(
+        #     image_url
+        # )
 
 
         folder = os.path.join(
@@ -106,7 +111,11 @@ def download_image(
             exist_ok=True
         )
 
-        filename = f"{item_id}{ext}"
+        # filename = f"{item_id}{ext}"
+        # filename as is from url
+        filename = os.path.basename(
+            urlparse(image_url).path
+        )
 
         filepath = os.path.join(
             folder,
@@ -190,7 +199,7 @@ def main():
 
                 item_id = row[0]
 
-                image_url = row[1]
+                image_url = BASE_URL + row[1] if row[1].startswith("/") else row[1]
 
                 download_image(
                     image_url,
