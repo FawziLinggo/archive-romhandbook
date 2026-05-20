@@ -15,12 +15,5 @@ raw_html/
 
 .env
 
-
-
-crawler/assets/img/cards/
-crawler/assets/img/equipments/
-crawler/assets/img/headwears/
-crawler/assets/img/monsters/
-crawler/assets/img/mounts/
-crawler/assets/img/pets/
-crawler/assets/img/skills/
+archive-romhandbook-ui/public/assets/
+/crawler/assets
