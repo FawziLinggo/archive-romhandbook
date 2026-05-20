@@ -143,7 +143,7 @@ for table in sources:
                 if "/things/" not in href:
                     continue
 
-                print(f"Found link: {href}")
+                # print(f"Found link: {href}")
 
                 # =========================================
                 # EXTRACT ID
@@ -204,10 +204,10 @@ for table in sources:
                         + detail_url
                     )
 
-                print(
-                    f"[DISCOVER] "
-                    f"{text} ({material_id})"
-                )
+                # print(
+                #     f"[DISCOVER] "
+                #     f"{text} ({material_id})"
+                # )
 
                 # =========================================
                 # INSERT MATERIAL
@@ -512,6 +512,210 @@ for row in materials:
 
             ))
 
+        # =========================================
+        # DELETE OLD CRAFTABLES
+        # =========================================
+
+        cursor.execute("""
+
+            DELETE FROM
+            crafting_material_craftables
+
+            WHERE material_id = ?
+
+        """, (
+            material_id,
+        ))
+
+        # =========================================
+        # FIND CRAFTABLE SECTION
+        # =========================================
+
+        craftable_labels = soup.find_all(
+            string=lambda text:
+            text and "Craftable" in text
+        )
+
+        for label in craftable_labels:
+
+            title_wrapper = label.find_parent("div")
+
+            if not title_wrapper:
+                continue
+
+            container = (
+                title_wrapper.find_next_sibling("div")
+            )
+
+            if not container:
+                continue
+
+            links = container.find_all(
+                "a",
+                href=True
+            )
+
+            for link in links:
+
+                href = link.get("href", "")
+
+                if "/things/" not in href:
+                    continue
+
+                item_name = link.get_text(
+                    strip=True
+                )
+
+                if not item_name:
+                    continue
+
+                img = link.find("img")
+
+                item_image = None
+
+                if img:
+
+                    item_image = (
+                        img.get("src")
+                        or
+                        img.get("data-src")
+                    )
+
+                item_url = href
+
+                if item_url.startswith("/"):
+
+                    item_url = (
+                        BASE_URL
+                        + item_url
+                    )
+
+                cursor.execute("""
+
+                    INSERT INTO
+                    crafting_material_craftables (
+
+                        material_id,
+
+                        item_name,
+                        item_image,
+                        item_url
+
+                    )
+                    VALUES (?, ?, ?, ?)
+
+                """, (
+
+                    material_id,
+
+                    item_name,
+                    item_image,
+                    item_url
+
+                ))
+
+
+        # =========================================
+        # DELETE OLD DROPS
+        # =========================================
+
+        cursor.execute("""
+
+            DELETE FROM
+            crafting_material_dropped_by
+
+            WHERE material_id = ?
+
+        """, (
+            material_id,
+        ))
+
+        # =========================================
+        # FIND DROPPED BY
+        # =========================================
+
+        drop_labels = soup.find_all(
+            string=lambda text:
+            text and "Dropped by" in text
+        )
+
+        for label in drop_labels:
+
+            title_wrapper = label.find_parent("div")
+
+            if not title_wrapper:
+                continue
+
+            container = (
+                title_wrapper.find_next_sibling("div")
+            )
+
+            if not container:
+                continue
+
+            links = container.find_all(
+                "a",
+                href=True
+            )
+
+            for link in links:
+
+                href = link.get("href", "")
+
+                if "/monsters/" not in href:
+                    continue
+
+                monster_name = link.get_text(
+                    strip=True
+                )
+
+                if not monster_name:
+                    continue
+
+                img = link.find("img")
+
+                monster_image = None
+
+                if img:
+
+                    monster_image = (
+                        img.get("src")
+                        or
+                        img.get("data-src")
+                    )
+
+                monster_url = href
+
+                if monster_url.startswith("/"):
+
+                    monster_url = (
+                        BASE_URL
+                        + monster_url
+                    )
+
+                cursor.execute("""
+
+                    INSERT INTO
+                    crafting_material_dropped_by (
+
+                        material_id,
+
+                        monster_name,
+                        monster_image,
+                        monster_url
+
+                    )
+                    VALUES (?, ?, ?, ?)
+
+                """, (
+
+                    material_id,
+
+                    monster_name,
+                    monster_image,
+                    monster_url
+
+                ))
         conn.commit()
 
         print(

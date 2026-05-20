@@ -189,3 +189,19 @@ CREATE TABLE IF NOT EXISTS crafting_materials (
     description TEXT,
     raw_html TEXT
 );
+CREATE TABLE IF NOT EXISTS crafting_material_craftables (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    material_id TEXT,
+    item_name TEXT,
+    item_image TEXT,
+    item_url TEXT,
+    FOREIGN KEY(material_id) REFERENCES crafting_materials(id)
+);
+CREATE TABLE IF NOT EXISTS crafting_material_dropped_by (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    material_id TEXT,
+    monster_name TEXT,
+    monster_image TEXT,
+    monster_url TEXT,
+    FOREIGN KEY(material_id) REFERENCES crafting_materials(id)
+);
