@@ -54,7 +54,10 @@ conn.commit()
 # HELPERS
 # =========================================
 
-def extract_link_items(soup, label):
+def extract_link_items(
+    soup,
+    label
+):
 
     results = []
 
@@ -71,28 +74,67 @@ def extract_link_items(soup, label):
         if current_label != label:
             continue
 
-        label_div = lbl.find_parent("div")
+        label_div = lbl.find_parent(
+            "div"
+        )
 
         if not label_div:
             continue
 
-        content_div = label_div.find_next_sibling("div")
+        content_div = label_div.find_next_sibling(
+            "div"
+        )
 
         if not content_div:
             continue
 
-        items = content_div.select(
-            "span.text-sm.font-semibold.leading-6.text-emerald-200"
+        links = content_div.select(
+            "a[href]"
         )
 
-        for item in items:
+        for link in links:
 
-            value = clean_text(
-                item.get_text()
+            href = link.get("href")
+
+            if not href:
+                continue
+
+            img = link.select_one(
+                "img"
             )
 
-            if value:
-                results.append(value)
+            image = None
+
+            if img:
+
+                image = (
+                    img.get("src")
+                )
+
+            name_tag = link.select_one(
+                "span.text-sm.font-semibold.leading-6.text-emerald-200"
+            )
+
+            name = None
+
+            if name_tag:
+
+                name = clean_text(
+                    name_tag.get_text()
+                )
+
+            if not name:
+                continue
+
+            results.append({
+
+                "name": name,
+
+                "image": image,
+
+                "url": BASE_URL + href
+
+            })
 
         break
 
@@ -387,6 +429,13 @@ def get_card_detail(item):
             break
 
 
+    
+    skills = extract_link_items(
+    soup,
+    "Skills"
+)
+
+
     # craft materials
     craft_materials = extract_link_items(
     soup,
@@ -426,21 +475,24 @@ def get_card_detail(item):
             })
 
     return {
-        "id": item["id"],
-        "detail_url": item["detail_url"],
-        "image": item["image"],
-        "name": item["name"],
-        "card_type": item["card_type"],
-        "quality": quality,
-        "effects": effects,
-        "deposits": deposits,
-        "unlocks": unlocks,
-        "craft_materials": craft_materials,
-        "craftable": craftable,
-        "dropped_by": dropped_by,
-        "formulas": formulas,
-        "raw_html": raw_html
-    }
+
+    "id": item["id"],
+    "detail_url": item["detail_url"],
+    "image": item["image"],
+    "name": item["name"],
+    "card_type": item["card_type"],
+    "quality": quality,
+    "effects": effects,
+    "deposits": deposits,
+    "unlocks": unlocks,
+    "craft_materials": craft_materials,
+    "craftable": craftable,
+    "skills": skills,
+    "dropped_by": dropped_by,
+    "formulas": formulas,
+    "raw_html": raw_html
+
+}
 
 
 # =========================================
@@ -450,36 +502,36 @@ def get_card_detail(item):
 def save_card(data):
 
     cursor.execute("""
-INSERT OR REPLACE INTO cards (
-    id,
-    detail_url,
-    image,
-    name,
-    card_type,
-    quality,
-    effect_text,
-    deposit_text,
-    unlock_text,
-    craft_materials,
-    craftable,
-    dropped_by,
-    raw_html
-)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+    INSERT OR REPLACE INTO cards (
+
+        id,
+        detail_url,
+        image,
+        name,
+        card_type,
+        quality,
+        effect_text,
+        raw_html
+
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+
     """, (
-    data["id"],
-    data["detail_url"],
-    data["image"],
-    data["name"],
-    data["card_type"],
-    data["quality"],
-    json.dumps(data["effects"]),
-    json.dumps(data["deposits"]),
-    json.dumps(data["unlocks"]),
-    json.dumps(data["craft_materials"]),
-    json.dumps(data["craftable"]),
-    json.dumps(data["dropped_by"]),
-    data["raw_html"]
+
+        data["id"],
+        data["detail_url"],
+        data["image"],
+        data["name"],
+        data["card_type"],
+        data["quality"],
+
+        json.dumps(
+            data["effects"]
+        ),
+
+        data["raw_html"]
+
     ))
 
     conn.commit()
@@ -502,6 +554,108 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         data["image"],
         data["detail_url"]
     ))
+
+    conn.commit()
+
+
+def save_card_bonuses(
+    card_id,
+    deposits,
+    unlocks
+):
+
+    cursor.execute("""
+        DELETE FROM
+        card_account_bonuses
+        WHERE card_id = ?
+    """, (card_id,))
+
+    for item in deposits:
+
+        cursor.execute("""
+
+            INSERT INTO
+            card_account_bonuses (
+
+                card_id,
+                bonus_type,
+                bonus_text
+
+            )
+            VALUES (?, ?, ?)
+
+        """, (
+
+            card_id,
+            "deposit",
+            item
+
+        ))
+
+    for item in unlocks:
+
+        cursor.execute("""
+
+            INSERT INTO
+            card_account_bonuses (
+
+                card_id,
+                bonus_type,
+                bonus_text
+
+            )
+            VALUES (?, ?, ?)
+
+        """, (
+
+            card_id,
+            "unlock",
+            item
+
+        ))
+
+    conn.commit()
+
+
+
+def save_relation_items(
+    table,
+    card_id,
+    items,
+    name_field,
+    image_field,
+    url_field
+):
+
+    cursor.execute(f"""
+        DELETE FROM {table}
+        WHERE card_id = ?
+    """, (card_id,))
+
+    for item in items:
+
+        cursor.execute(f"""
+
+            INSERT INTO {table} (
+
+                card_id,
+
+                {name_field},
+                {image_field},
+                {url_field}
+
+            )
+            VALUES (?, ?, ?, ?)
+
+        """, (
+
+            card_id,
+
+            item["name"],
+            item["image"],
+            item["url"]
+
+        ))
 
     conn.commit()
 
@@ -573,11 +727,54 @@ def main():
                     detail["formulas"]
                 )
 
+
+                save_card_bonuses(
+                    detail["id"],
+                    detail["deposits"],
+                    detail["unlocks"]
+                )
+
+                save_relation_items(
+                    "card_craft_materials",
+                    detail["id"],
+                    detail["craft_materials"],
+                    "material_name",
+                    "material_image",
+                    "material_url"
+                )
+
+                save_relation_items(
+                    "card_skills",
+                    detail["id"],
+                    detail["skills"],
+                    "skill_name",
+                    "skill_image",
+                    "skill_url"
+                )
+
+                save_relation_items(
+                    "card_dropped_by",
+                    detail["id"],
+                    detail["dropped_by"],
+                    "monster_name",
+                    "monster_image",
+                    "monster_url"
+                )
+
+                save_relation_items(
+                    "card_craftable",
+                    detail["id"],
+                    detail["craftable"],
+                    "item_name",
+                    "item_image",
+                    "item_url"
+                )
+
                 print(
                     f"[SAVED] {detail['name']}"
                 )
 
-                time.sleep(0.3)
+                time.sleep(0.5)
 
             except Exception as e:
 

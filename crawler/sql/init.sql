@@ -104,6 +104,48 @@ CREATE TABLE IF NOT EXISTS buffs (
     raw_html TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_buffs_name ON buffs(name);
+drop table if exists card_formulas;
+drop table if exists cards;
+CREATE TABLE IF NOT EXISTS card_craftable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id TEXT,
+    item_name TEXT,
+    item_image TEXT,
+    item_url TEXT,
+    FOREIGN KEY(card_id) REFERENCES cards(id)
+);
+CREATE TABLE IF NOT EXISTS card_dropped_by (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id TEXT,
+    monster_name TEXT,
+    monster_image TEXT,
+    monster_url TEXT,
+    FOREIGN KEY(card_id) REFERENCES cards(id)
+);
+CREATE TABLE IF NOT EXISTS card_skills (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id TEXT,
+    skill_name TEXT,
+    skill_image TEXT,
+    skill_url TEXT,
+    FOREIGN KEY(card_id) REFERENCES cards(id)
+);
+CREATE TABLE IF NOT EXISTS card_craft_materials (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id TEXT,
+    material_name TEXT,
+    material_image TEXT,
+    material_url TEXT,
+    material_type TEXT,
+    FOREIGN KEY(card_id) REFERENCES cards(id)
+);
+CREATE TABLE IF NOT EXISTS card_account_bonuses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id TEXT,
+    bonus_type TEXT,
+    bonus_text TEXT,
+    FOREIGN KEY(card_id) REFERENCES cards(id)
+);
 CREATE TABLE IF NOT EXISTS card_formulas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     card_id TEXT,
@@ -119,9 +161,6 @@ CREATE TABLE IF NOT EXISTS cards (
     card_type TEXT,
     quality TEXT,
     effect_text TEXT,
-    deposit_text TEXT,
-    unlock_text TEXT,
-    craft_materials TEXT,
     raw_html TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_cards_name ON cards(name);
