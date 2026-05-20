@@ -325,21 +325,32 @@ for row in materials:
             "span.inline-flex"
         )
 
-        is_crafting_material = any(
 
-            badge.get_text(
+        # pastikan salah satu badgenya "Crafting Material" and "Blueprint"
+        allowed_types = [
+            "Crafting Material",
+            "Blueprint"
+        ]
+
+        found_type = None
+
+        for badge in badges:
+
+            badge_text = badge.get_text(
                 strip=True
-            ) == "Crafting Material"
+            )
 
-            for badge in badges
+            if badge_text in allowed_types:
 
-        )
+                found_type = badge_text
+                break
 
-        if not is_crafting_material:
+        # skip kalau tidak valid
+        if not found_type:
 
             print(
-                f"[SKIP] "
-                f"Not crafting material"
+                f"Skipped: "
+                f"Type not found"
             )
 
             continue
