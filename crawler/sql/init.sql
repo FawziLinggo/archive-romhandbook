@@ -104,8 +104,6 @@ CREATE TABLE IF NOT EXISTS buffs (
     raw_html TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_buffs_name ON buffs(name);
-drop table if exists card_formulas;
-drop table if exists cards;
 CREATE TABLE IF NOT EXISTS card_craftable (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     card_id TEXT,
