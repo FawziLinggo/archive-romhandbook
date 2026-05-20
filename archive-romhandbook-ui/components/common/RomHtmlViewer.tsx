@@ -11,16 +11,26 @@ export default function RomHtmlViewer({
     // =========================
 
     const fullHtml = `
-        <html>
+                <html>
 
-        <head>
+                <head>
 
-            <link
-                rel="stylesheet"
-                href="https://romhandbook.com/assets/application.css"
-            />
+<link
+    rel="stylesheet"
+    href="/assets/romhandbook/application.css"
+/>
 
-            <style>
+<link
+    rel="stylesheet"
+    href="/assets/romhandbook/tailwind.css"
+/>
+
+<link
+    rel="stylesheet"
+    href="/assets/romhandbook/inter-font.css"
+/>
+
+                <style>
 
                 body{
                     background:#09090b;
@@ -34,18 +44,18 @@ export default function RomHtmlViewer({
                     text-decoration:none !important;
                 }
 
-            </style>
+                </style>
 
-        </head>
+                </head>
 
-        <body>
+                <body>
 
-            ${html}
+                ${html}
 
-        </body>
+                </body>
 
-        </html>
-    `
+                </html>
+`
 
     return (
 
