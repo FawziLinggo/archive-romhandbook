@@ -30,14 +30,14 @@ SAVE_DIR = os.getenv(
 )
 
 TABLES = [
-    "cards",
-    "equipments",
-    "headwears",
-    "monsters",
-    "mounts",
-    "pets",
-    "skills",
-    "crafting_materials"
+    # "cards",
+    # "equipments",
+    # "headwears",
+    "monsters"
+    # "mounts",
+    # "pets",
+    # "skills",
+    # "crafting_materials"
 ]
 
 HEADERS = {
@@ -95,21 +95,39 @@ def download_image(
         # )
 
 
+        # folder = os.path.join(
+        #     SAVE_DIR,
+        #     table_name
+        # )
+
+        # folder get from url after assest /faces/
+
         folder = os.path.join(
             SAVE_DIR,
-            table_name
+            os.path.dirname(
+                urlparse(image_url).path
+            ).lstrip("/assest/")
         )
 
-        if table_name == "crafting_materials":
-            folder = os.path.join(
-                SAVE_DIR,
-                "items"
+
+
+        # if table_name == "crafting_materials":
+        #     folder = os.path.join(
+        #         SAVE_DIR,
+        #         "items"
+        #     )
+
+        try:
+            os.makedirs(
+                folder,
+                exist_ok=True
+            )
+        except Exception as e:
+            print(
+                f"[ERROR CREATE FOLDER] {folder}"
             )
 
-        os.makedirs(
-            folder,
-            exist_ok=True
-        )
+            print(e)
 
         # filename = f"{item_id}{ext}"
         # filename as is from url
