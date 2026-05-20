@@ -30,14 +30,14 @@ SAVE_DIR = os.getenv(
 )
 
 TABLES = [
-    # "cards",
-    # "equipments",
-    # "headwears",
-    "monsters"
-    # "mounts",
-    # "pets",
-    # "skills",
-    # "crafting_materials"
+    "cards",
+    "equipments",
+    "headwears",
+    "monsters",
+    "mounts",
+    "pets",
+    "skills",
+    "crafting_materials"
 ]
 
 HEADERS = {
