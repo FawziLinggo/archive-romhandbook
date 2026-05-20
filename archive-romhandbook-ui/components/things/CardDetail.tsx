@@ -1,3 +1,5 @@
+import RelationSection from "@/components/common/RelationSection"
+import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 
 import {
     Prism as SyntaxHighlighter
@@ -62,7 +64,9 @@ export default function CardDetail({
 
     return (
 
-        <div className="max-w-7xl mx-auto">
+        <div className="
+        max-w-7xl
+        mx-auto">
 
             {/* TOP */}
             <div
@@ -87,13 +91,17 @@ export default function CardDetail({
                     {/* CARD */}
                     <div
                         className="
-            rounded-3xl
-            overflow-hidden
-            border
-            border-zinc-800
-            bg-zinc-900
-            shadow-2xl
-        "
+    rounded-3xl
+    max-w-full
+    overflow-hidden
+    border
+    border-zinc-800
+    bg-gradient-to-b
+    from-zinc-900
+    to-zinc-950
+    shadow-xl
+    shadow-black/20
+"
                     >
 
                         {/* IMAGE */}
@@ -273,12 +281,15 @@ export default function CardDetail({
                 <div>
 
                     <div
-                        className="
-        rounded-2xl
+                        className="        rounded-3xl
         border
         border-zinc-800
-        bg-zinc-900
-        p-6
+        bg-gradient-to-b
+        from-zinc-900
+        to-zinc-950
+        p-7
+        shadow-2xl
+        shadow-black/30
     "
                     >
 
@@ -308,14 +319,29 @@ export default function CardDetail({
                                             <div
                                                 key={index}
                                                 className="
-                                flex
-                                gap-2
-                                text-zinc-300
-                            "
+        flex
+        items-start
+        gap-3
+        rounded-xl
+        bg-zinc-800/40
+        border
+        border-zinc-700/50
+        px-4
+        py-3
+        hover:border-violet-500/40
+        hover:bg-zinc-800/70
+        transition-all
+    "
                                             >
 
-                                                <span className="text-violet-400">
-                                                    •
+                                                <span className="
+        mt-1.5
+        w-2
+        h-2
+        rounded-full
+        bg-violet-400
+        shrink-0
+    ">
                                                 </span>
 
                                                 <span>
@@ -330,6 +356,33 @@ export default function CardDetail({
                                 </div>
 
                             </div>
+
+
+
+                            <RelationSection
+                                title="Craft Materials"
+                                items={card.craft_materials}
+                                type="material"
+                            />
+
+                            <RelationSection
+                                title="Skills"
+                                items={card.skills}
+                                type="skill"
+                            />
+
+                            <RelationSection
+                                title="Dropped By"
+                                items={card.dropped_by}
+                                type="monster"
+                            />
+
+                            <RelationSection
+                                title="Craftable"
+                                items={card.craftable}
+                                type="craftable"
+                            />
+
 
 
                         </div>
@@ -362,12 +415,15 @@ export default function CardDetail({
 
                                         <div
                                             key={index}
-                                            className="
-                                    rounded-2xl
-                                    border
-                                    border-zinc-800
-                                    bg-zinc-900
-                                    overflow-hidden
+                                            className="        rounded-3xl
+        border
+        border-zinc-800
+        bg-gradient-to-b
+        from-zinc-900
+        to-zinc-950
+        p-7
+        shadow-2xl
+        shadow-black/30
                                 "
                                         >
 
@@ -377,7 +433,8 @@ export default function CardDetail({
                                         py-3
                                         border-b
                                         border-zinc-800
-                                        bg-zinc-950
+                                        bg-zinc-900/80
+backdrop-blur
                                         text-sm
                                         text-zinc-400
                                     "
@@ -388,11 +445,21 @@ export default function CardDetail({
                                             <SyntaxHighlighter
                                                 language="json"
                                                 style={oneDark}
+                                                wrapLongLines={true}
+                                                PreTag="div"
+                                                codeTagProps={{
+                                                    style: {
+                                                        whiteSpace: "pre-wrap",
+                                                        wordBreak: "break-word"
+                                                    }
+                                                }}
                                                 customStyle={{
                                                     margin: 0,
                                                     background: "transparent",
-                                                    fontSize: "14px",
-                                                    padding: "20px"
+                                                    fontSize: "13px",
+                                                    padding: "24px",
+                                                    overflowX: "hidden",
+                                                    maxWidth: "100%"
                                                 }}
                                             >
 
@@ -414,6 +481,10 @@ export default function CardDetail({
                         </div>
 
                     )}
+
+                    <RomHtmlViewerToggle
+                        html={card.raw_html}
+                    />
 
                 </div>
 
