@@ -34,7 +34,7 @@ export default function Navbar() {
                         text-white
                     "
                 >
-                    ROM Handbook Archive
+                    <a href="/">ROM Handbook Archive</a>
                 </div>
 
                 {/* GITHUB */}

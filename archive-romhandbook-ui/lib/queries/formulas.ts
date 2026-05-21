@@ -111,3 +111,20 @@ export function getFormulaCount(
     return result.total || 0
 
 }
+
+
+export function getFeaturedFormula() {
+
+    return db
+        .prepare(`
+            SELECT
+                id,
+                name,
+                formula_code
+            FROM formulas_code
+            ORDER BY RANDOM()
+            LIMIT 1
+        `)
+        .get() as any
+
+}

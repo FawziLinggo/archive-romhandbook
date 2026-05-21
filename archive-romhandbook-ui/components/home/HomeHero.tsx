@@ -160,7 +160,7 @@ export default function HomeHero() {
                     "
                 >
 
-                    Preserving Ragnarok Online M:
+                    Preserving ROMHandbook's:
                     Classic data before shutdown.
 
                     Browse cards, monsters,
