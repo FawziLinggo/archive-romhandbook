@@ -99,7 +99,7 @@ export default function RelationSection({
                     return (
 
                         <Link
-                            key={`${title}-${name}`}
+                            key={`url-${item.id}`}
                             href={url || "#"}
                         >
 

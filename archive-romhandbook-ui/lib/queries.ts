@@ -3,8 +3,14 @@ import { db } from "./db";
 export function getCards(
     search?: string,
     type?: string,
-    quality?: string
+    quality?: string,
+    page: number = 1
 ) {
+
+    const limit = 30
+
+    const offset =
+        (page - 1) * limit
 
     let sql = `
         SELECT *
@@ -59,13 +65,19 @@ export function getCards(
     }
 
     // =====================
-    // ORDER + LIMIT
+    // ORDER + PAGINATION
     // =====================
 
     sql += `
         ORDER BY name ASC
-        LIMIT 30
+        LIMIT ?
+        OFFSET ?
     `
+
+    params.push(
+        limit,
+        offset
+    )
 
     return db
         .prepare(sql)

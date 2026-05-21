@@ -1,4 +1,5 @@
 import CardItem from "@/components/cards/CardItem"
+import Pagination from "@/components/common/Pagination"
 import { getCards } from "@/lib/queries"
 
 export default async function CardsPage({
@@ -8,6 +9,7 @@ export default async function CardsPage({
         q?: string
         type?: string
         quality?: string
+        page?: string
     }>
 }) {
 
@@ -21,11 +23,32 @@ export default async function CardsPage({
     const quality =
         params.quality || ""
 
+    const page = Number(
+        params.page || "1"
+    )
     const cards = getCards(
         query,
         type,
-        quality
+        quality,
+        page
     )
+
+    const prevUrl =
+        `/cards?${new URLSearchParams({
+            q: query,
+            type,
+            quality,
+            page: String(page - 1)
+
+        }).toString()}`
+
+    const nextUrl =
+        `/cards?${new URLSearchParams({
+            q: query,
+            type,
+            quality,
+            page: String(page + 1)
+        }).toString()}`
 
     return (
 
@@ -191,7 +214,16 @@ export default async function CardsPage({
 
             </div>
 
-        </div>
+            <Pagination
+                page={page}
+                hasNext={cards.length === 30}
+                basePath="/cards"
+                query={query}
+                type={type}
+                quality={quality}
+            />
+
+        </div >
 
     )
 }
