@@ -39,7 +39,7 @@ export default function Navbar() {
 
                 {/* GITHUB */}
                 <a
-                    href="https://github.com/FawziLinggo/archive-romhandbook"
+                    href="https://galauit.com"
                     target="_blank"
                     className="
                         text-sm
@@ -48,7 +48,7 @@ export default function Navbar() {
                         transition-colors
                     "
                 >
-                    GitHub
+                    Made with ❤️ by galauit
                 </a>
 
             </div>

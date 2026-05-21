@@ -1,6 +1,7 @@
 import "./globals.css"
 
 import Navbar from "@/components/layout/Navbar"
+
 import Sidebar from "@/components/layout/Sidebar"
 
 export default function RootLayout({
@@ -15,9 +16,9 @@ export default function RootLayout({
 
       <body
         className="
-                    bg-black
-                    text-white
-                "
+          bg-black
+          text-white
+        "
       >
 
         <Navbar />
@@ -26,7 +27,12 @@ export default function RootLayout({
 
           <Sidebar />
 
-          <main className="flex-1 p-6">
+          <main
+            className="
+              flex-1
+              p-6
+            "
+          >
             {children}
           </main>
 
@@ -37,4 +43,5 @@ export default function RootLayout({
     </html>
 
   )
+
 }

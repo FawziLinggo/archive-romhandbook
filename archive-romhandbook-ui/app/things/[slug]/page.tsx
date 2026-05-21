@@ -1,8 +1,10 @@
 import {
     getCardById,
     getCardFormulas,
+} from "@/lib/queries/cards"
+import {
     getThingTypeById
-} from "@/lib/queries"
+} from "@/lib/queries/things"
 
 import CardDetail from "@/components/things/CardDetail"
 
