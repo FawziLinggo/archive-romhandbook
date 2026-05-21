@@ -169,7 +169,7 @@ export default function FormulaPreview({
                         "
                     >
 
-                        Explore Database
+                        Explore
 
                         <ArrowRight size={18} />
 

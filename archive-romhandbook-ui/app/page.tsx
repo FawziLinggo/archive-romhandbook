@@ -4,6 +4,12 @@ import ArchiveStatsGrid from "@/components/home/ArchiveStatsGrid"
 
 import FormulaPreview from "@/components/home/FormulaPreview"
 
+import OriginalSnapshotCard from "@/components/home/OriginalSnapshotCard"
+
+import {
+  getRandomSnapshotCard as getRandomSnapshot
+} from "@/lib/queries/things"
+
 import {
   getSidebarCounts
 } from "@/lib/queries/sidebar"
@@ -20,32 +26,27 @@ export default function HomePage() {
   const formula =
     getFeaturedFormula()
 
+  const snapshot =
+    getRandomSnapshot()
+
   return (
 
     <div className="space-y-12">
 
       <HomeHero />
 
+      {/* FORMULA FEATURE */}
       <section
         className="
             grid
             grid-cols-1
-            xl:grid-cols-3
-            gap-8
+            xl:grid-cols-2
+            gap-10
             items-start
         "
       >
 
         {/* LEFT */}
-        <div className="xl:col-span-2">
-
-          <ArchiveStatsGrid
-            counts={counts}
-          />
-
-        </div>
-
-        {/* RIGHT */}
         <div>
 
           <FormulaPreview
@@ -54,7 +55,21 @@ export default function HomePage() {
 
         </div>
 
+        {/* RIGHT */}
+        <div>
+
+          <OriginalSnapshotCard
+            snapshot={snapshot}
+          />
+
+        </div>
+
       </section>
+
+      {/* ARCHIVE GRID */}
+      <ArchiveStatsGrid
+        counts={counts}
+      />
 
     </div>
 
