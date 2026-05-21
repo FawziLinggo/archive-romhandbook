@@ -1,6 +1,6 @@
 import CardItem from "@/components/cards/CardItem"
 import Pagination from "@/components/common/Pagination"
-import { getCards } from "@/lib/queries"
+import { getCards } from "@/lib/queries/cards"
 
 export default async function CardsPage({
     searchParams
