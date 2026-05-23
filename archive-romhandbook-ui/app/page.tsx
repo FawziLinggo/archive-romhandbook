@@ -6,6 +6,7 @@ import FormulaPreview from "@/components/home/FormulaPreview"
 
 import OriginalSnapshotCard from "@/components/home/OriginalSnapshotCard"
 
+
 import {
   getRandomSnapshotCard as getRandomSnapshot
 } from "@/lib/queries/things"
@@ -70,6 +71,8 @@ export default function HomePage() {
       <ArchiveStatsGrid
         counts={counts}
       />
+
+
 
     </div>
 

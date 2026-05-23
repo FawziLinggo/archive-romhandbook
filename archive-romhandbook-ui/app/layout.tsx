@@ -4,6 +4,9 @@ import Navbar from "@/components/layout/Navbar"
 
 import Sidebar from "@/components/layout/Sidebar"
 
+
+import AIAssistant from "@/components/ai-assistant/AIAssistant"
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,6 +41,7 @@ export default function RootLayout({
 
         </div>
 
+        <AIAssistant />
       </body>
 
     </html>
