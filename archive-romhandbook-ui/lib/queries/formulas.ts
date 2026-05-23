@@ -128,3 +128,30 @@ export function getFeaturedFormula() {
         .get() as any
 
 }
+
+type FormulaCode = {
+    id: number
+    detail_url: string
+    name: string
+    formula_code: string
+}
+
+
+export function getFormulaBySlug(
+    slug: string
+) {
+
+    return db
+        .prepare(`
+            SELECT
+                id,
+                detail_url,
+                name,
+                formula_code
+            FROM formulas_code
+             WHERE detail_url LIKE '%' || ? || '%'
+            LIMIT 1
+        `)
+        .get(slug) as FormulaCode | undefined
+
+}

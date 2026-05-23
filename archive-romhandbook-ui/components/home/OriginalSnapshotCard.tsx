@@ -17,6 +17,56 @@ type Props = {
     detail_url?: string
 }
 
+
+function getQualityColor(
+    quality?: string
+) {
+
+    switch (quality) {
+
+        case "Green":
+
+            return `
+                border-green-500/20
+                bg-green-500/10
+                text-green-300
+            `
+
+        case "Blue":
+
+            return `
+                border-blue-500/20
+                bg-blue-500/10
+                text-blue-300
+            `
+
+        case "Purple":
+
+            return `
+                border-violet-500/20
+                bg-violet-500/10
+                text-violet-300
+            `
+
+        case "White":
+
+            return `
+                border-zinc-500/20
+                bg-zinc-500/10
+                text-zinc-300
+            `
+
+        default:
+
+            return `
+                border-zinc-700
+                bg-zinc-900
+                text-zinc-300
+            `
+    }
+
+}
+
 export default function OriginalSnapshotCard({
     snapshot,
     detail_url
@@ -25,6 +75,11 @@ export default function OriginalSnapshotCard({
     // =====================
     // MOUNTED
     // =====================
+
+    const qualityColor =
+        getQualityColor(
+            snapshot?.quality
+        )
 
     const [mounted, setMounted] =
         useState(false)
@@ -353,30 +408,25 @@ export default function OriginalSnapshotCard({
                 text-zinc-300
             "
                                 >
-
                                     {snapshot?.card_type || "Card"}
 
                                 </div>
 
                                 <div
-                                    className="
-                rounded-full
+                                    className={`
+        rounded-full
 
-                border
-                border-violet-500/20
+        border
 
-                bg-violet-500/10
+        px-3
+        py-1
 
-                px-3
-                py-1
+        text-xs
 
-                text-xs
-                text-violet-300
-            "
+        ${qualityColor}
+    `}
                                 >
-
                                     {snapshot?.quality || "Rare"}
-
                                 </div>
 
                             </div>

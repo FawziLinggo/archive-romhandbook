@@ -154,7 +154,6 @@ export default async function CardsPage({
             py-2
         "
                 >
-
                     <option value="">
                         All Quality
                     </option>
