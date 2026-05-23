@@ -452,7 +452,7 @@ for row in materials:
 
     print(f"\nFetching: {detail_url}")
 
-    time.sleep(0.5)
+    time.sleep(1)
 
     try:
 

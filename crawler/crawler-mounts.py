@@ -494,7 +494,7 @@ def main():
 
                 conn.commit()
 
-                time.sleep(0.5)
+                time.sleep(1)
 
             except Exception as e:
 

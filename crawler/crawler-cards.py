@@ -944,7 +944,7 @@ def main():
                     f"[SAVED] {detail['name']}"
                 )
 
-                time.sleep(0.5)
+                time.sleep(1)
 
             except Exception as e:
 
