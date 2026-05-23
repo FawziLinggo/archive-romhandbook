@@ -478,6 +478,7 @@ def get_skill_detail(item):
 
                     aesir_items.append(text)
 
+    print("aesir_items", aesir_items)
     aesir_raw = json.dumps(
         aesir_items,
         ensure_ascii=False
@@ -720,7 +721,7 @@ while True:
 
             get_skill_detail(item)
 
-            time.sleep(0.5)
+            time.sleep(1)
 
         except Exception as e:
 
