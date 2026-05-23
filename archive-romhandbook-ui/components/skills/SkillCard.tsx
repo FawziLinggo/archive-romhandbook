@@ -214,9 +214,16 @@ export default function SkillCard({
                         src={skill.image}
                         alt={skill.name}
                         fill
+
+                        sizes="
+        (max-width: 768px) 100vw,
+        (max-width: 1280px) 50vw,
+        33vw
+    "
+
                         className="
-                            object-cover
-                        "
+        object-cover
+    "
                     />
 
                 </div>
@@ -345,7 +352,6 @@ export default function SkillCard({
                 {skill.description}
 
             </p>
-
             {/* STATS */}
             <div
                 className="
@@ -439,49 +445,7 @@ export default function SkillCard({
 
             </div>
 
-            {/* FOOTER */}
-            <div
-                className="
-                    relative
 
-                    mt-8
-
-                    flex
-                    items-center
-                    justify-between
-                "
-            >
-
-                <span
-                    className="
-                        text-sm
-                        text-zinc-500
-                    "
-                >
-
-                    View Skill
-
-                </span>
-
-                <div
-                    className="
-                        flex
-                        items-center
-                        gap-2
-
-                        text-violet-400
-
-                        transition-transform
-
-                        group-hover:translate-x-1
-                    "
-                >
-
-                    →
-
-                </div>
-
-            </div>
 
         </Link>
 

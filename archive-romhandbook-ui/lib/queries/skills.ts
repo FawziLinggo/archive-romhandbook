@@ -130,3 +130,123 @@ export function getSkills(
     }
 
 }
+
+
+
+
+
+export type SkillLevel = {
+
+    level: number
+
+    description: string
+
+    raw_tags: string | null
+
+
+}
+
+export type SkillDetail = {
+
+    id: string
+
+    detail_url: string
+
+    image: string
+
+    name: string
+
+    max_level: number
+
+    skill_type: string
+
+    damage_type: string
+
+    cooldown: string
+
+    range_value: string
+
+    cast_time: string
+
+    fixed_cast_time: string
+
+    description: string
+
+    formula_raw: string | null
+
+    aesir_raw: string | null
+
+    levels: SkillLevel[]
+
+}
+
+export function getSkillBySlug(
+    slug: string
+): SkillDetail | null {
+
+    // =====================
+    // SKILL
+    // =====================
+
+    const skill = db
+        .prepare(`
+            SELECT
+                id,
+                detail_url,
+                image,
+                name,
+                max_level,
+                skill_type,
+                damage_type,
+                cooldown,
+                range_value,
+                cast_time,
+                fixed_cast_time,
+                description,
+                formula_raw,
+                aesir_raw
+            FROM skills
+            WHERE detail_url = ?
+            LIMIT 1
+        `)
+        .get(slug) as SkillDetail | undefined
+
+    // =====================
+    // NOT FOUND
+    // =====================
+
+    if (!skill) {
+
+        return null
+
+    }
+
+    // =====================
+    // LEVELS
+    // =====================
+
+    const levels = db
+        .prepare(`
+            SELECT
+                level,
+                description,
+                raw_tags
+            FROM skill_levels
+            WHERE skill_id = ?
+            ORDER BY level DESC
+        `)
+        .all(skill.id) as SkillLevel[]
+
+    // =====================
+    // RETURN
+    // =====================
+
+    return {
+
+        ...skill,
+
+        levels
+
+    }
+
+}

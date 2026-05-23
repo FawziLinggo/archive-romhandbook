@@ -82,32 +82,6 @@ export default async function SkillsPage({
 
                     {/* LEFT */}
                     <div>
-
-                        <div
-                            className="
-                    inline-flex
-                    items-center
-                    gap-2
-
-                    rounded-full
-
-                    border
-                    border-violet-500/20
-
-                    bg-violet-500/10
-
-                    px-4
-                    py-2
-
-                    text-sm
-                    text-violet-300
-                "
-                        >
-
-                            ✨ Skill Explorer
-
-                        </div>
-
                         <h1
                             className="
                     mt-5
