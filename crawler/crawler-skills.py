@@ -441,7 +441,47 @@ def get_skill_detail(item):
             elif not damage_type:
 
                 damage_type = tag
+    
+    # =====================================
+    # AESIR
+    # =====================================
 
+    aesir_items = []
+
+    aesir_title = soup.find(
+        "p",
+        string=lambda t:
+        t and t.strip() == "Aesir"
+    )
+
+    if aesir_title:
+
+        aesir_container = aesir_title.find_parent(
+            "div",
+            class_="mt-2 grid grid-cols-1 py-3 px-3 border rounded border-slate-700"
+        )
+
+        if aesir_container:
+
+            aesir_divs = aesir_container.select(
+                "div.text-sm.text-white.font-xs"
+            )
+
+            for item_div in aesir_divs:
+
+                text = item_div.get_text(
+                    " ",
+                    strip=True
+                )
+
+                if text:
+
+                    aesir_items.append(text)
+
+    aesir_raw = json.dumps(
+        aesir_items,
+        ensure_ascii=False
+    )
     # =====================================
     # FORMULA
     # =====================================
@@ -509,7 +549,7 @@ def get_skill_detail(item):
         raw_tags,
 
         description,
-
+        aesir_raw,
         formula_type,
         formula_raw,
 
@@ -523,6 +563,7 @@ def get_skill_detail(item):
         ?, ?,
         ?, ?,
         ?, ?,
+        ?, 
         ?
     )
     """, (
@@ -550,7 +591,7 @@ def get_skill_detail(item):
         ),
 
         description,
-
+        aesir_raw,
         formula_type,
         formula_raw,
 
