@@ -478,7 +478,7 @@ def get_skill_detail(item):
 
                     aesir_items.append(text)
 
-    print("aesir_items", aesir_items)
+    print("aesir_items", aesir_items, "with id", item["id"], "\n")
     aesir_raw = json.dumps(
         aesir_items,
         ensure_ascii=False
