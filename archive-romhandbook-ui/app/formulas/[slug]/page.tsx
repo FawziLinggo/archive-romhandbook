@@ -4,7 +4,7 @@ import {
     getFormulaBySlug
 } from "@/lib/queries/formulas"
 
-import FormulaCodeViewer from "@/components/formulas/FormulaCodeViewer"
+import FormulaCodeViewer from "@/components/formulas/code-viewer"
 
 type PageProps = {
 
