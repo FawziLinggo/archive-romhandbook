@@ -366,7 +366,7 @@ export default function FormulaCodeViewer({
                     `}
                                 >
 
-                                    ASK RUNE
+                                    AI RUNE
 
                                 </h3>
 

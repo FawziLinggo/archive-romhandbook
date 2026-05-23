@@ -1,10 +1,10 @@
 import {
-    Bot,
     Check,
     Copy,
     Maximize2,
     Minimize2,
     Moon,
+    Sparkles,
     Sun,
     WrapText
 } from "lucide-react"
@@ -182,51 +182,65 @@ export default function FormulaActions({
                 onClick={onToggleAI}
 
                 className={`
-                    relative
+    relative
 
-                    flex
-                    items-center
-                    gap-2
+    flex
+    items-center
+    gap-2
 
-                    overflow-hidden
+    overflow-hidden
 
-                    rounded-xl
+    rounded-xl
 
-                    px-4
-                    py-2
+    px-4
+    py-2
 
-                    text-sm
-                    font-medium
-                    text-white
+    text-sm
+    font-medium
 
-                    transition-all
+    transition-all
 
-                    ${aiOpen
+    ${aiOpen
 
                         ? `
-                            bg-gradient-to-r
-                            from-violet-500
-                            to-fuchsia-500
+            bg-gradient-to-r
+            from-violet-500
+            to-fuchsia-500
 
-                            shadow-lg
-                            shadow-violet-500/20
-                        `
+            text-white
+
+            shadow-lg
+            shadow-violet-500/20
+        `
 
                         : `
-                            border
-                            border-violet-500/30
+            border
+            border-violet-500/30
 
-                            bg-violet-500/10
+            ${isLight
 
-                            hover:bg-violet-500/20
-                        `
+                            ? `
+                    bg-violet-50
+                    text-violet-700
+
+                    hover:bg-violet-100
+                `
+
+                            : `
+                    bg-violet-500/10
+                    text-violet-300
+
+                    hover:bg-violet-500/20
+                `
+                        }
+        `
                     }
-                `}
+`}
             >
 
-                <Bot size={16} />
+                <Sparkles size={16} />
 
-                ASK RUNE
+                AI RUNE
 
                 {/* <span
                     className="

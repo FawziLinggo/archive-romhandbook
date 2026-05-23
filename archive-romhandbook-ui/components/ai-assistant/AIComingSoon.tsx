@@ -124,7 +124,7 @@ export default function AIComingSoon({
                     `}
                 >
 
-                    Ask anything about ROM...
+                    Ask anything about Archive of the Rom handbook, and RUNE will try to help!
 
                 </div>
 

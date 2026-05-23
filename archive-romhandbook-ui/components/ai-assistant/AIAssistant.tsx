@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react"
 
+import { usePathname } from "next/navigation"
 import FloatingAIButton from "./FloatingAIButton"
 import FloatingAIPanel from "./FloatingAIPanel"
+
 
 export default function AIAssistant() {
 
@@ -74,12 +76,21 @@ export default function AIAssistant() {
     //     }
 
     // }, [open])
+    const pathname = usePathname()
+
+    if (pathname.startsWith("/formulas/")) {
+        return null
+    }
 
     // =====================
     // RENDER
     // =====================
 
+
+
     return (
+
+
 
         <>
 

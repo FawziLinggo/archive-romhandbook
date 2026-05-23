@@ -114,7 +114,7 @@ export default function FloatingAIPanel({
                                 text-zinc-500
                             "
                         >
-                            ROM archive assistant
+                            Archive assistant (Coming Soon)
                         </p>
 
                     </div>

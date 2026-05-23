@@ -13,7 +13,7 @@ export function getCards(
         (page - 1) * limit
 
     let sql = `
-        SELECT *
+        SELECT id, name, card_type, quality, image, detail_url
         FROM cards
         WHERE 1=1
     `
