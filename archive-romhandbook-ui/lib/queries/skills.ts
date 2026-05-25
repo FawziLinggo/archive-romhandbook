@@ -91,7 +91,14 @@ export function getSkills(
                 s.detail_url
 
             ORDER BY
-                s.name ASC
+
+            CASE
+                WHEN s.name GLOB '[A-Za-z]*'
+                THEN 0
+                ELSE 1
+            END,
+
+            s.name COLLATE NOCASE ASC
 
             LIMIT ?
             OFFSET ?
@@ -177,6 +184,7 @@ export type SkillDetail = {
     aesir_raw: string | null
 
     levels: SkillLevel[]
+    raw_html: string | null
 
 }
 
@@ -204,7 +212,8 @@ export function getSkillBySlug(
                 fixed_cast_time,
                 description,
                 formula_raw,
-                aesir_raw
+                aesir_raw,
+                raw_html
             FROM skills
             WHERE detail_url = ?
             LIMIT 1

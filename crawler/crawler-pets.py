@@ -493,7 +493,7 @@ def get_pet_detail(item):
                     if not href:
                         continue
 
-                    skill_url = BASE_URL + href
+                    skill_url = href
 
                     # name
                     name_tag = skill.select_one("p")

@@ -1,10 +1,23 @@
 import {
+    Prism as SyntaxHighlighter
+} from "react-syntax-highlighter"
+
+import {
+    oneDark
+} from "react-syntax-highlighter/dist/esm/styles/prism"
+
+
+
+
+import {
     notFound
 } from "next/navigation"
 
+import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 import {
     getSkillBySlug
 } from "@/lib/queries/skills"
+
 
 type Props = {
 
@@ -191,6 +204,8 @@ export default async function SkillDetailPage({
 
                         </div>
 
+
+
                         {/* DESCRIPTION */}
                         <p
                             className="
@@ -331,7 +346,74 @@ export default async function SkillDetailPage({
             </div>
 
 
+            {/* AESIR */}
+            {aesirs.length > 0 && (
 
+                <div
+                    className="
+                        mt-8
+
+                        rounded-3xl
+                        border
+                        border-violet-500/20
+
+                        bg-violet-500/5
+
+                        p-8
+                    "
+                >
+
+                    <h2
+                        className="
+                            text-2xl
+                            font-bold
+
+                            text-violet-300
+                        "
+                    >
+                        Aesir Effects
+                    </h2>
+
+                    <div
+                        className="
+                            mt-6
+                            space-y-4
+                        "
+                    >
+
+                        {aesirs.map((
+                            item,
+                            index
+                        ) => (
+
+                            <div
+                                key={index}
+                                className="
+                                    rounded-2xl
+
+                                    border
+                                    border-violet-500/10
+
+                                    bg-black/30
+
+                                    p-5
+
+                                    text-zinc-300
+                                    leading-7
+                                "
+                            >
+
+                                {item}
+
+                            </div>
+
+                        ))}
+
+                    </div>
+
+                </div>
+
+            )}
             {/* LEVELS */}
             {
                 skill.levels.length > 0 && (
@@ -535,70 +617,101 @@ export default async function SkillDetailPage({
                 )
             }
 
-            {/* AESIR */}
-            {aesirs.length > 0 && (
+
+
+
+            {/* FORMULA */}
+            {skill.formula_raw && (
 
                 <div
                     className="
-                        mt-8
+            mt-8
 
-                        rounded-3xl
-                        border
-                        border-violet-500/20
+            rounded-3xl
+            border
+            border-zinc-800
 
-                        bg-violet-500/5
+            bg-zinc-950/50
 
-                        p-8
-                    "
+            overflow-hidden
+        "
                 >
 
-                    <h2
-                        className="
-                            text-2xl
-                            font-bold
-
-                            text-violet-300
-                        "
-                    >
-                        Aesir Effects
-                    </h2>
-
+                    {/* HEADER */}
                     <div
                         className="
-                            mt-6
-                            space-y-4
-                        "
+                border-b
+                border-zinc-800
+
+                px-8
+                py-6
+            "
                     >
 
-                        {aesirs.map((
-                            item,
-                            index
-                        ) => (
+                        <h2
+                            className="
+                    text-2xl
+                    font-bold
 
-                            <div
-                                key={index}
-                                className="
-                                    rounded-2xl
+                    text-white
+                "
+                        >
+                            Formula
+                        </h2>
 
-                                    border
-                                    border-violet-500/10
+                        <p
+                            className="
+                    mt-2
 
-                                    bg-black/30
-
-                                    p-5
-
-                                    text-zinc-300
-                                    leading-7
-                                "
-                            >
-
-                                {item}
-
-                            </div>
-
-                        ))}
+                    text-sm
+                    text-zinc-500
+                "
+                        >
+                            Internal Ragnarok M formula source
+                        </p>
 
                     </div>
+
+                    {/* CODE */}
+                    <SyntaxHighlighter
+                        language="lua"
+                        style={oneDark}
+                        showLineNumbers
+                        wrapLongLines
+
+                        customStyle={{
+
+                            margin: 0,
+
+                            padding: "2rem",
+
+                            background: "#09090b",
+
+                            fontSize: "14px",
+
+                            lineHeight: "1.8",
+
+                            overflowX: "auto"
+                        }}
+                    >
+
+                        {skill.formula_raw}
+
+                    </SyntaxHighlighter>
+
+                </div>
+
+            )}
+
+
+            {/* SNAPSHOT */}
+            {skill.raw_html && (
+
+                <div className="mt-4">
+
+                    <RomHtmlViewerToggle
+                        html={skill.raw_html}
+                    />
 
                 </div>
 

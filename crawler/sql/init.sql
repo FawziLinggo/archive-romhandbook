@@ -242,3 +242,13 @@ CREATE TABLE IF NOT EXISTS crafting_material_dropped_by (
     monster_url TEXT,
     FOREIGN KEY(material_id) REFERENCES crafting_materials(id)
 );
+UPDATE skills
+SET detail_url = REPLACE(detail_url, '/skills/', '')
+WHERE detail_url LIKE '/skills/%';
+UPDATE pets
+SET skills = REPLACE(
+        skills,
+        'https://romhandbook.com/skills/',
+        '/skills/'
+    )
+WHERE skills LIKE '%https://romhandbook.com/skills/%';
