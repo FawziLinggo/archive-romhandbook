@@ -79,7 +79,7 @@ def parse_pet_egg(
 
     egg_id = (
         egg_url
-        .split("/")[-1]
+        .split("/")[-1].split("-")[-1]
     )
 
     # =========================
