@@ -24,3 +24,195 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+@keyframes float {
+
+  0% {
+
+    transform:
+      translateY(0px) rotate(0deg);
+
+  }
+
+  50% {
+
+    transform:
+      translateY(-16px) rotate(2deg);
+
+  }
+
+  100% {
+
+    transform:
+      translateY(0px) rotate(0deg);
+
+  }
+
+}
+
+@keyframes runeSpin {
+
+  from {
+
+    transform:
+      rotate(0deg);
+
+  }
+
+  to {
+
+    transform:
+      rotate(360deg);
+
+  }
+
+}
+
+@keyframes runeSpinReverse {
+
+  from {
+
+    transform:
+      rotate(360deg);
+
+  }
+
+  to {
+
+    transform:
+      rotate(0deg);
+
+  }
+
+}
+
+.animate-rune-spin {
+
+  animation:
+    runeSpin 30s linear infinite;
+
+}
+
+.animate-rune-spin-reverse {
+
+  animation:
+    runeSpinReverse 40s linear infinite;
+
+}
+
+@keyframes portalSpin {
+
+  from {
+
+    transform:
+      rotate(0deg);
+
+  }
+
+  to {
+
+    transform:
+      rotate(360deg);
+
+  }
+
+}
+
+.animate-portal-spin {
+
+  animation:
+    portalSpin 4s linear infinite;
+
+}
+
+@keyframes blackHole {
+
+  0% {
+
+    transform:
+      scale(0);
+
+    opacity: 0;
+
+  }
+
+  40% {
+
+    opacity: 1;
+
+  }
+
+  100% {
+
+    transform:
+      scale(40);
+
+    opacity: 1;
+
+  }
+
+}
+
+.animate-black-hole {
+
+  animation:
+    blackHole 1.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+
+}
+
+/* ====================== */
+
+@keyframes portalExpand {
+
+  0% {
+
+    transform:
+      scale(0) rotate(0deg);
+
+    opacity: 0;
+
+  }
+
+  100% {
+
+    transform:
+      scale(10) rotate(360deg);
+
+    opacity: 0;
+
+  }
+
+}
+
+.animate-portal-expand {
+
+  animation:
+    portalExpand 1.4s linear forwards;
+
+}
+
+/* ====================== */
+
+@keyframes warpFade {
+
+  from {
+
+    opacity: 0;
+
+  }
+
+  to {
+
+    opacity: 1;
+
+  }
+
+}
+
+.animate-warp-fade {
+
+  animation:
+    warpFade 0.2s ease-out forwards;
+
+}
