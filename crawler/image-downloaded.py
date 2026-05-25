@@ -37,7 +37,8 @@ TABLES = [
     "mounts",
     "pets",
     "skills",
-    "crafting_materials"
+    "crafting_materials",
+    "pet_eggs"
 ]
 
 HEADERS = {
@@ -111,11 +112,11 @@ def download_image(
 
 
 
-        # if table_name == "crafting_materials":
-        #     folder = os.path.join(
-        #         SAVE_DIR,
-        #         "items"
-        #     )
+        if table_name == "crafting_materials" or table_name == "pet_eggs":
+            folder = os.path.join(
+                SAVE_DIR,
+                "items"
+            )
 
         try:
             os.makedirs(
