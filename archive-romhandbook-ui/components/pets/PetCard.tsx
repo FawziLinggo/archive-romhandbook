@@ -71,7 +71,11 @@ export default function PetCard({
 
                 {/* IMAGE */}
                 <Link
-                    href={pet.detail_url}
+                    href={
+                        pet.detail_url.startsWith("/pets/")
+                            ? pet.detail_url
+                            : `/pets/${pet.detail_url}`
+                    }
                     className="
                         relative
 
@@ -107,7 +111,15 @@ export default function PetCard({
                 <div className="flex-1">
 
                     <Link
-                        href={pet.detail_url}
+                        href={
+                            pet.detail_url.startsWith("/pets/")
+                                ? pet.detail_url
+                                : `/pets/${pet.detail_url}`
+                        }
+                        className="
+        group
+        block
+    "
                     >
 
                         <h2

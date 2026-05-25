@@ -8,6 +8,12 @@ import {
 
 import CardDetail from "@/components/things/CardDetail"
 
+import {
+    getEggById
+} from "@/lib/queries/pet-eggs"
+
+import PetEggDetail from "@/components/things/PetEggDetail"
+
 // import EquipmentDetail from "@/components/things/EquipmentDetail"
 
 type Props = {
@@ -54,6 +60,31 @@ export default async function ThingPage({
                     card={card}
                     formulas={formulas}
                 />
+            )
+
+        }
+
+        case "pet_egg": {
+
+            const egg =
+                getEggById(id)
+
+            if (!egg) {
+
+                return (
+                    <div>
+                        Egg not found
+                    </div>
+                )
+
+            }
+
+            return (
+
+                <PetEggDetail
+                    egg={egg}
+                />
+
             )
 
         }

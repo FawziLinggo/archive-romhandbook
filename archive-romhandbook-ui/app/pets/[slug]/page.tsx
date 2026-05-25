@@ -8,6 +8,7 @@ import FormulaViewer from "@/components/common/FormulaViewer"
 
 import PetHeader from "@/components/pets/PetHeader"
 
+import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 import PetSkills from "@/components/pets/PetSkills"
 
 export default async function PetDetailPage({
@@ -105,6 +106,14 @@ export default async function PetDetailPage({
                     title="Formula"
                     code={pet.formulas_raw}
                     language="json"
+                />
+
+            )}
+
+
+            {pet.raw_html && (
+                <RomHtmlViewerToggle
+                    html={pet.raw_html}
                 />
 
             )}
