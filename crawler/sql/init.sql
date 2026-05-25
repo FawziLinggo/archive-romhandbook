@@ -264,3 +264,11 @@ SET skills = REPLACE(
         '/skills/'
     )
 WHERE skills LIKE '%https://romhandbook.com/skills/%';
+CREATE INDEX IF NOT EXISTS idx_pets_name ON pets(name);
+UPDATE pets
+SET detail_url = REPLACE(
+        detail_url,
+        '/pets/',
+        ''
+    )
+WHERE detail_url LIKE '/pets/%';

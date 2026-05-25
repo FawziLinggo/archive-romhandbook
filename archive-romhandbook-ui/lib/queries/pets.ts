@@ -48,13 +48,41 @@ export function getPets(
 
     query: string = ""
 
-) {
+): {
+
+    pets: Pet[]
+
+    hasNext: boolean
+
+    total: number
+
+} {
 
     const offset =
         (page - 1) * PAGE_SIZE
 
     const search =
         `%${query}%`
+
+    // =====================
+    // TOTAL
+    // =====================
+
+    const totalRow = db
+        .prepare(`
+            SELECT
+                COUNT(*) as total
+            FROM pets
+            WHERE
+                name LIKE ?
+        `)
+        .get(search) as {
+            total: number
+        }
+
+    // =====================
+    // ROWS
+    // =====================
 
     const rows = db
         .prepare(`
@@ -120,6 +148,67 @@ export function getPets(
             PAGE_SIZE
         ),
 
-        hasNext
+        hasNext,
+
+        total: totalRow.total
     }
+}
+
+export type PetDetail = {
+
+    id: string
+
+    detail_url: string
+
+    image: string
+
+    name: string
+
+    race: string
+
+    element: string
+
+    size: string
+
+    description: string
+
+    unlock_text: string | null
+
+    skills: string
+
+    formulas_raw: string | null
+
+    raw_html: string | null
+
+    egg_name: string | null
+    egg_image: string | null
+    egg_url: string | null
+}
+
+export function getPetBySlug(
+    slug: string
+): PetDetail | null {
+
+    return db
+        .prepare(`
+            SELECT
+
+                p.*,
+
+                pe.name as egg_name,
+                pe.image as egg_image,
+                pe.detail_url as egg_url,
+                pe.formulas_raw
+
+            FROM pets p
+
+            LEFT JOIN pet_eggs pe
+                ON pe.id = p.egg_id
+
+            WHERE
+                p.detail_url = ?
+
+            LIMIT 1
+        `)
+        .get(slug) as PetDetail | null
 }

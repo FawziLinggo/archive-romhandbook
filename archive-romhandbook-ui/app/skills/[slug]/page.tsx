@@ -659,16 +659,7 @@ export default async function SkillDetailPage({
                             Formula
                         </h2>
 
-                        <p
-                            className="
-                    mt-2
 
-                    text-sm
-                    text-zinc-500
-                "
-                        >
-                            Internal Ragnarok M formula source
-                        </p>
 
                     </div>
 
