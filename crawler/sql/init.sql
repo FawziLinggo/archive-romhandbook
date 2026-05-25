@@ -193,11 +193,23 @@ CREATE TABLE IF NOT EXISTS pets (
     size TEXT,
     description TEXT,
     unlock_text TEXT,
-    egg_name TEXT,
+    egg_id TEXT,
     egg_url TEXT,
-    egg_image TEXT,
     skills TEXT,
     formula_ids TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS pet_eggs (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    description TEXT,
+    effect_text TEXT,
+    unlock_text TEXT,
+    jobs_raw TEXT,
+    pet_url TEXT,
+    formulas_raw TEXT,
     raw_html TEXT
 );
 CREATE TABLE IF NOT EXISTS things (

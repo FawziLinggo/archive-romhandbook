@@ -1,75 +1,48 @@
-import re
 import json
 import time
-import sqlite3
-import requests
 
 from bs4 import BeautifulSoup
 
-# ENV
-import os
-from dotenv import load_dotenv
-
-load_dotenv(dotenv_path="../.env")
-
-BASE_URL = os.getenv(
-    "BASE_URL",
-    "https://romhandbook.com"
+from utils.db import (
+    conn,
+    cursor,
+    init_db
 )
 
-DB_FILE = os.getenv(
-    "DB_FILE",
-    "database.db"
+from utils.requests import (
+    BASE_URL,
+    session
 )
 
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) "
-        "Gecko/20100101 Firefox/150.0"
-    )
-}
+from utils.parser import (
+    clean_text
+)
 
-session = requests.Session()
+from utils.assets import (
+    normalize_local_url
+)
 
-# =====================================
-# SQLITE
-# =====================================
+from utils.html import (
+    get_clean_body_html
+)
 
-conn = sqlite3.connect(DB_FILE)
+from utils.formulas import (
+    extract_formulas
+)
 
-cursor = conn.cursor()
-
-with open(
-    "sql/init.sql",
-    "r",
-    encoding="utf-8"
-) as f:
-
-    sql_script = f.read()
-
-cursor.executescript(sql_script)
-
-conn.commit()
-
-# =====================================
-# HELPERS
-# =====================================
-
-def clean_text(text):
-
-    if not text:
-        return None
-
-    return re.sub(
-        r"\s+",
-        " ",
-        text
-    ).strip()
+normalize_asset_url = normalize_local_url
 
 
-# =====================================
-# LIST
-# =====================================
+# =========================================
+# INIT DB
+# =========================================
+
+init_db()
+
+
+# =========================================
+# PET LIST
+# =========================================
 
 def get_pet_list(page):
 
@@ -78,521 +51,475 @@ def get_pet_list(page):
     print(f"\n[PAGE] {page}")
     print(f"[URL] {url}")
 
-    response = session.get(
-        url,
-        headers=HEADERS
-    )
+    response = session.get(url)
 
     soup = BeautifulSoup(
         response.text,
         "lxml"
     )
 
-    cards = soup.select(
-        "#items > div"
+    links = soup.select(
+        'a[href^="/pets/"]'
     )
 
     results = []
 
     seen = set()
 
-    for card in cards:
-
-        link = card.select_one(
-            'a[href^="/pets/"]'
-        )
-
-        if not link:
-            continue
-
-        href = link.get("href")
-
-        if href in seen:
-            continue
-
-        seen.add(href)
-
-        detail_url = BASE_URL + href
-
-        pet_id = href.replace(
-            "/pets/",
-            ""
-        )
-
-        # image
-        img = link.select_one("img")
-
-        image = None
-
-        if img:
-            image = img.get("src")
-
-        # name
-        name_tag = link.select_one(
-            "p.text-emerald-200"
-        )
-
-        name = None
-
-        if name_tag:
-            name = clean_text(
-                name_tag.get_text()
-            )
-
-        # race/element/size
-        info_tag = link.select_one(
-            "p.text-white"
-        )
-
-        race = None
-        element = None
-        size = None
-
-        if info_tag:
-
-            info = clean_text(
-                info_tag.get_text()
-            )
-
-            parts = [
-                x.strip()
-                for x in info.split("/")
-            ]
-
-            if len(parts) >= 3:
-
-                race = parts[0]
-                element = parts[1]
-                size = parts[2]
-
-        results.append({
-            "id": pet_id,
-            "detail_url": detail_url,
-            "image": image,
-            "name": name,
-            "race": race,
-            "element": element,
-            "size": size
-        })
-
-    print(f"[FOUND] {len(results)} PETS")
-
-    return results
-
-
-# =========================================
-# REWRITE LOCAL ASSET PATHS
-# =========================================
-
-def rewrite_local_assets(body_tag):
-
-    # =========================
-    # IMG SRC
-    # =========================
-
-    for img in body_tag.find_all("img"):
-
-        src = img.get("src")
-
-        if not src:
-            continue
-
-        # only romhandbook assets
-        if "https://romhandbook.com/assets/" in src:
-
-            # remove domain
-            local_src = src.replace(
-                "https://romhandbook.com",
-                ""
-            )
-
-            # prepend local public path
-            # local_src = (
-            #     "/romhandbook"
-            #     + local_src
-            # )
-
-            img["src"] = local_src
-
-    # =========================
-    # LINK HREF
-    # =========================
-
-    for link in body_tag.find_all("link"):
+    for link in links:
 
         href = link.get("href")
 
         if not href:
             continue
 
-        if "https://romhandbook.com/assets/" in href:
+        if href in seen:
+            continue
 
-            local_href = href.replace(
-                "https://romhandbook.com",
-                ""
+        seen.add(href)
+
+        # =========================
+        # IMAGE
+        # =========================
+
+        image = None
+
+        img = link.select_one(
+            "img"
+        )
+
+        if img:
+
+            image = normalize_local_url(
+                img.get("src")
             )
 
-            # local_href = (
-            #     "/romhandbook"
-            #     + local_href
-            # )
+        # =========================
+        # NAME
+        # =========================
 
-            link["href"] = local_href
+        name = None
 
-    return body_tag
+        name_tag = link.select_one(
+            """
+            p.text-sm.font-semibold.leading-6.text-emerald-200
+            """
+        )
 
-# =========================================
-# CLEAN BODY HTML
-# =========================================
+        if name_tag:
 
-def get_clean_body_html(soup):
+            name = clean_text(
+                name_tag.get_text()
+            )
 
-    # =========================
-    # GET BODY
-    # =========================
+        if not name:
+            continue
 
-    body_tag = soup.select_one("body")
+        # =========================
+        # ID
+        # =========================
 
-    if not body_tag:
-        return ""
+        pet_id = href.split("-")[-1]
 
-    # =========================
-    # REMOVE HEADER
-    # =========================
+        results.append({
 
-    for el in body_tag.select(
-        "header, .sticky-top"
-    ):
-        el.decompose()
+            "id": pet_id,
 
-    # =========================
-    # REMOVE SIDEBAR
-    # =========================
+            "detail_url": normalize_local_url(
+                href
+            ),
 
-    for el in body_tag.select(
-        ".docs-sidebar"
-    ):
-        el.decompose()
+            "image": image,
 
-    # =========================
-    # REMOVE FOOTER
-    # =========================
+            "name": name
 
-    for el in body_tag.select(
-        "footer"
-    ):
-        el.decompose()
+        })
 
-    # =========================
-    # REMOVE SCRIPTS
-    # =========================
-
-    for el in body_tag.select(
-        "script"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE STYLE TAGS
-    # =========================
-
-    for el in body_tag.select(
-        "style"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE SHUTDOWN NOTICE
-    # =========================
-
-    for el in body_tag.find_all(
-        string=lambda t:
-        t and "will shut down" in t
-    ):
-
-        parent = el.find_parent("div")
-
-        if parent:
-            parent.decompose()
-
-    # =========================
-    # REWRITE LOCAL ASSETS
-    # =========================
-
-    body_tag = rewrite_local_assets(
-        body_tag
+    print(
+        f"[FOUND] {len(results)} PETS"
     )
 
+    return results
+
+
+# =========================================
+# EXTRACT SKILLS
+# =========================================
+
+def extract_skills(soup):
+
+    skills = []
+
     # =========================
-    # RETURN HTML
+    # FIND "Skills" LABEL
     # =========================
 
-    return str(body_tag)
+    labels = soup.find_all(
+        "p",
+        class_="text-sm font-medium leading-6 text-emerald-200"
+    )
 
-# =====================================
-# DETAIL
-# =====================================
+    skills_label = None
+
+    for label in labels:
+
+        if clean_text(label.get_text()) == "Skills":
+
+            skills_label = label
+            break
+
+    if not skills_label:
+
+        return skills
+
+    # =========================
+    # FIND CONTAINER
+    # =========================
+
+    container = (
+        skills_label
+        .parent
+        .find_next_sibling("div")
+    )
+
+    if not container:
+
+        return skills
+
+    # =========================
+    # PARSE LINKS
+    # =========================
+
+    links = container.find_all("a")
+
+    for link in links:
+
+        url = link.get("href")
+
+        if not url:
+
+            continue
+
+        name_tag = link.select_one(
+            "p.text-sm.leading-6.text-white"
+        )
+
+        img_tag = link.select_one("img")
+
+        skills.append({
+
+            "name": clean_text(
+                name_tag.get_text()
+            ) if name_tag else None,
+
+            "url": url,
+
+            "image": normalize_asset_url(
+                img_tag.get("src")
+            ) if img_tag else None
+        })
+
+    return skills
+
+
+# =========================================
+# EXTRACT SIMPLE TEXT
+# =========================================
+
+def extract_simple_text(
+    soup,
+    label
+):
+
+    rows = soup.select(
+        "div.grid.grid-cols-12"
+    )
+
+    for row in rows:
+
+        cols = row.select(
+            "div"
+        )
+
+        if len(cols) < 2:
+            continue
+
+        label_tag = cols[0].select_one(
+            "p"
+        )
+
+        if not label_tag:
+            continue
+
+        current_label = clean_text(
+            label_tag.get_text()
+        )
+
+        if current_label != label:
+            continue
+
+        value = clean_text(
+            cols[1].get_text(
+                " ",
+                strip=True
+            )
+        )
+
+        return value
+
+    return None
+# =========================================
+# EXTRACT EGG
+# =========================================
+
+def extract_egg(soup):
+
+    result = {
+
+        "egg_id": None,
+
+        "egg_url": None
+
+    }
+
+    rows = soup.select(
+        "div.grid.grid-cols-12"
+    )
+
+    for row in rows:
+
+        cols = row.select("div")
+
+        if len(cols) < 2:
+            continue
+
+        label_tag = cols[0].select_one(
+            "p"
+        )
+
+        if not label_tag:
+            continue
+
+        current_label = clean_text(
+            label_tag.get_text()
+        )
+
+        if current_label != "Egg":
+            continue
+
+        egg_link = cols[1].select_one(
+            'a[href^="/things/"]'
+        )
+
+        if not egg_link:
+            continue
+
+        href = egg_link.get("href")
+
+        if not href:
+            continue
+
+        result["egg_url"] = normalize_local_url(
+            href
+        )
+
+        result["egg_id"] = href.split("-")[-1]
+
+        break
+
+    return result
+# =========================================
+# PET DETAIL
+# =========================================
 
 def get_pet_detail(item):
 
-    url = item["detail_url"]
+    url = BASE_URL + item["detail_url"]
 
-    # print(f"[DETAIL] {url}")
+    print(f"[DETAIL] {url}")
 
-    response = session.get(
-        url,
-        headers=HEADERS
-    )
+    response = session.get(url)
 
     soup = BeautifulSoup(
         response.text,
         "lxml"
     )
 
-    raw_html = response.text
+    # =========================
+    # RAW HTML
+    # =========================
 
     raw_html = get_clean_body_html(
         soup
     )
 
-    # description
+    # =========================
+    # DESCRIPTION
+    # =========================
+
     description = None
 
-    desc_tag = soup.select_one(
-        ".mt-1.grid.grid-cols-1 > div.border-t"
+    desc = soup.select_one(
+        "div.border-t.border-dashed p"
     )
 
-    if desc_tag:
+    if desc:
 
         description = clean_text(
-            desc_tag.get_text()
+            desc.get_text(
+                " ",
+                strip=True
+            )
         )
 
-    # unlock
-    unlock_text = None
+    # =========================
+    # BASIC INFO
+    # =========================
+    basic_info = soup.select_one(
+    "p.text.text-base"
+)
+    
+    race = None
+    element = None
+    size = None
 
-    unlock_label = soup.find(
-        string=lambda x:
-        x and "Unlock" in x
+    if basic_info:
+
+        parts = [
+            clean_text(x)
+            for x in basic_info.get_text().split("/")
+        ]
+
+        if len(parts) >= 3:
+
+            race = parts[0]
+            element = parts[1]
+            size = parts[2]
+    # =========================
+    # UNLOCK TEXT
+    # =========================
+
+    unlock_text = extract_simple_text(
+        soup,
+        "Unlock"
+    )
+    # =========================
+    # EGG
+    # =========================
+
+    egg = extract_egg(
+        soup
     )
 
-    if unlock_label:
+    # =========================
+    # SKILLS
+    # =========================
 
-        parent = unlock_label.find_parent(
-            "div",
-            class_="col-span-3"
-        )
-
-        if parent:
-
-            value_div = parent.find_next_sibling(
-                "div"
-            )
-
-            if value_div:
-
-                unlock_text = clean_text(
-                    value_div.get_text(
-                        " ",
-                        strip=True
-                    )
-                )
-
-    # egg
-    egg_name = None
-    egg_url = None
-    egg_image = None
-
-    egg_label = soup.find(
-        string=lambda x:
-        x and "Egg" in x
+    skills = extract_skills(
+        soup
     )
 
-    if egg_label:
+    # =========================
+    # FORMULAS
+    # =========================
 
-        parent = egg_label.find_parent(
-            "div",
-            class_="col-span-3"
-        )
-
-        if parent:
-
-            value_div = parent.find_next_sibling(
-                "div"
-            )
-
-            if value_div:
-
-                egg_link = value_div.select_one(
-                    'a[href^="/things/"]'
-                )
-
-                if egg_link:
-
-                    egg_url = (
-                        BASE_URL +
-                        egg_link.get("href")
-                    )
-
-                    egg_name_tag = egg_link.select_one(
-                        "p"
-                    )
-
-                    if egg_name_tag:
-
-                        egg_name = clean_text(
-                            egg_name_tag.get_text()
-                        )
-
-                    egg_img = egg_link.select_one(
-                        "img"
-                    )
-
-                    if egg_img:
-
-                        egg_image = egg_img.get(
-                            "src"
-                        )
-
-    # skills
-    # skills
-    skills = []
-
-    skill_header = soup.find(
-        "p",
-        string=lambda x:
-        x and x.strip() == "Skills"
+    formulas = extract_formulas(
+        soup
     )
 
-    if skill_header:
-
-        # ambil parent col-span-2
-        header_col = skill_header.find_parent(
-            "div",
-            class_=lambda c:
-            c and "col-span-2" in c
-        )
-
-        if header_col:
-
-            # value ada di sibling col-span-10
-            value_div = header_col.find_next_sibling(
-                "div"
-            )
-
-            if value_div:
-
-                skill_links = value_div.select(
-                    'a[href^="/skills/"]'
-                )
-
-                for skill in skill_links:
-
-                    href = skill.get("href")
-
-                    if not href:
-                        continue
-
-                    skill_url = href
-
-                    # name
-                    name_tag = skill.select_one("p")
-
-                    skill_name = None
-
-                    if name_tag:
-
-                        skill_name = clean_text(
-                            name_tag.get_text()
-                        )
-
-                    # image
-                    img = skill.select_one("img")
-
-                    skill_image = None
-
-                    if img:
-
-                        skill_image = img.get("src")
-
-                    skills.append({
-                        "name": skill_name,
-                        "url": skill_url,
-                        "image": skill_image
-                    })
-
-    # formulas
-    formula_ids = []
-
-    code_blocks = soup.select(
-        "pre code"
-    )
-
-    for block in code_blocks:
-
-        text = block.get_text()
-
-        match = re.search(
-            r'"id"\s*:\s*(\d+)',
-            text
-        )
-
-        if match:
-
-            formula_ids.append(
-                match.group(1)
-            )
+    
 
     return {
-        **item,
+
+        "id": item["id"],
+
+        "detail_url": item["detail_url"],
+
+        "image": item["image"],
+
+        "name": item["name"],
+
+        "race": race,
+
+        "element": element,
+
+        "size": size,
 
         "description": description,
 
         "unlock_text": unlock_text,
 
-        "egg_name": egg_name,
-        "egg_url": egg_url,
-        "egg_image": egg_image,
+        "egg_id": egg["egg_id"],
+
+        "egg_url": egg["egg_url"],
 
         "skills": skills,
 
-        "formula_ids": formula_ids,
+        "formula_ids": formulas,
 
         "raw_html": raw_html
     }
 
 
-# =====================================
-# SAVE
-# =====================================
+# =========================================
+# SAVE PET
+# =========================================
 
 def save_pet(data):
 
-
-    if data["detail_url"].startswith(BASE_URL):
-        data["detail_url"] = data["detail_url"][len(BASE_URL):]
-    if data["image"] and data["image"].startswith(BASE_URL):
-        data["image"] = data["image"][len(BASE_URL):]
-
     cursor.execute("""
-        INSERT OR REPLACE INTO pets (
-            id,
-            detail_url,
-            image,
-            name,
-            race,
-            element,
-            size,
-            description,
-            unlock_text,
-            egg_name,
-            egg_url,
-            egg_image,
-            skills,
-            formula_ids,
-            raw_html
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+    INSERT OR REPLACE INTO pets (
+
+        id,
+
+        detail_url,
+
+        image,
+
+        name,
+
+        race,
+
+        element,
+
+        size,
+
+        description,
+
+        unlock_text,
+
+        egg_id,
+
+        egg_url,
+
+        skills,
+
+        formula_ids,
+
+        raw_html
+
+    )
+
+    VALUES (
+
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+
+    )
+
     """, (
 
         data["id"],
@@ -604,16 +531,18 @@ def save_pet(data):
         data["name"],
 
         data["race"],
+
         data["element"],
+
         data["size"],
 
         data["description"],
 
         data["unlock_text"],
 
-        data["egg_name"],
+        data["egg_id"],
+
         data["egg_url"],
-        data["egg_image"],
 
         json.dumps(
             data["skills"],
@@ -626,14 +555,15 @@ def save_pet(data):
         ),
 
         data["raw_html"]
+
     ))
 
     conn.commit()
 
 
-# =====================================
+# =========================================
 # MAIN
-# =====================================
+# =========================================
 
 def main():
 
@@ -645,7 +575,10 @@ def main():
 
         if not pets:
 
-            print("\n[DONE]")
+            print(
+                "\n[INFO] NO MORE PETS"
+            )
+
             break
 
         for item in pets:
@@ -662,7 +595,7 @@ def main():
                     f"[SAVED] {detail['name']}"
                 )
 
-                time.sleep(0.5)
+                time.sleep(1)
 
             except Exception as e:
 
@@ -672,8 +605,13 @@ def main():
 
                 print(e)
 
+        conn.commit()
+
         page += 1
+
+    print("\n[DONE]")
 
 
 if __name__ == "__main__":
+
     main()
