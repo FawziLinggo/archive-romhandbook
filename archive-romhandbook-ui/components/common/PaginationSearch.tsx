@@ -50,7 +50,7 @@ export default function PaginationSearch({
         if (query) {
 
             params.set(
-                "q",
+                "query",
                 query
             )
 
@@ -62,10 +62,8 @@ export default function PaginationSearch({
             String(nextPage)
         )
 
-        return `
-            ${basePath}?
-            ${params.toString()}
-        `
+        return `${basePath}?${params.toString()}`
+
 
     }
 
@@ -121,16 +119,19 @@ export default function PaginationSearch({
 
                 )}
                 className={`
-                    h-12
-                    px-5
-                    rounded-2xl
-                    border
+        h-11
+px-5
 
-                    flex
-                    items-center
-                    justify-center
+rounded-xl
 
-                    transition-all
+text-sm
+        border
+
+        flex
+        items-center
+        justify-center
+
+        transition-all
 
                     ${page <= 1
 
@@ -149,7 +150,7 @@ export default function PaginationSearch({
                             hover:bg-violet-600
                         `
                     }
-                `}
+        `}
             >
 
                 ← Prev
@@ -163,16 +164,17 @@ export default function PaginationSearch({
                     key={p}
                     href={createUrl(p)}
                     className={`
-                        w-12
-                        h-12
-                        rounded-2xl
+            min-w-[48px]
+    h-11
+    px-4
 
-                        flex
-                        items-center
-                        justify-center
+    rounded-xl
 
-                        font-semibold
-                        transition-all
+    flex
+    items-center
+    justify-center
+
+    text-sm
 
                         ${p === page
 
@@ -193,7 +195,7 @@ export default function PaginationSearch({
                                 hover:bg-zinc-800
                             `
                         }
-                    `}
+        `}
                 >
 
                     {p}
@@ -213,16 +215,19 @@ export default function PaginationSearch({
 
                 )}
                 className={`
-                    h-12
-                    px-5
-                    rounded-2xl
-                    border
+        h-11
+px-5
 
-                    flex
-                    items-center
-                    justify-center
+rounded-xl
 
-                    transition-all
+text-sm
+        border
+
+        flex
+        items-center
+        justify-center
+
+        transition-all
 
                     ${page >= totalPages
 
@@ -241,7 +246,7 @@ export default function PaginationSearch({
                             hover:bg-violet-600
                         `
                     }
-                `}
+        `}
             >
 
                 Next →

@@ -272,3 +272,11 @@ SET detail_url = REPLACE(
         ''
     )
 WHERE detail_url LIKE '/pets/%';
+UPDATE buffs
+SET detail_url = REPLACE(
+        detail_url,
+        'https://romhandbook.com',
+        ''
+    );
+UPDATE buffs
+SET image = '/assets/skills/skill_current-ab5b7d2a91b320dffc765f060de413e0474bed69b44393a9a9699fc39a0620fe.png'

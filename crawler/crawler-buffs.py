@@ -5,6 +5,8 @@ import requests
 
 from bs4 import BeautifulSoup
 
+
+
 # ENV
 import os
 from dotenv import load_dotenv
@@ -273,6 +275,10 @@ def get_buff_detail(item):
 
     url = item["detail_url"]
 
+    
+    
+
+
     response = session.get(
         url,
         headers=HEADERS
@@ -286,20 +292,9 @@ def get_buff_detail(item):
     raw_html = response.text
 
     raw_html = get_clean_body_html(
-    soup)   
+        soup
+    )   
 
-    # =====================================
-    # IMAGE
-    # =====================================
-
-    image = None
-
-    image_tag = soup.select_one(
-        "img"
-    )
-
-    if image_tag:
-        image = image_tag.get("src")
 
     # =====================================
     # DESCRIPTION
@@ -307,16 +302,20 @@ def get_buff_detail(item):
 
     description = None
 
-    desc_tag = soup.select_one(
-        "p.text-white"
+    info_block = soup.select_one(
+        "div.min-w-0.flex-auto"
     )
 
-    if desc_tag:
+    if info_block:
 
-        description = desc_tag.get_text(
-            " ",
-            strip=True
-        )
+        paragraphs = info_block.select("p")
+
+        if len(paragraphs) >= 2:
+
+            description = paragraphs[1].get_text(
+                " ",
+                strip=True
+            )
 
     # =====================================
     # RAW JSON
@@ -348,12 +347,16 @@ def get_buff_detail(item):
 
         except:
             pass
+    # remove BASE_URL if exist, karena detail_url bisa sudah absolute atau relative
+    detail_url = item["detail_url"]
+    if detail_url.startswith(BASE_URL):
+        detail_url = detail_url[len(BASE_URL):]
 
     return {
         "id": item["id"],
         "name": item["name"],
-        "detail_url": item["detail_url"],
-        "image": image,
+        "detail_url": detail_url,
+        "image": '/assets/skills/skill_current-ab5b7d2a91b320dffc765f060de413e0474bed69b44393a9a9699fc39a0620fe.png',
         "description": description,
         "raw_json": raw_json,
         "raw_html": raw_html
@@ -364,14 +367,7 @@ def get_buff_detail(item):
 # =========================================
 
 def save_buff(data):
-
-
-    # update data detail_url & image remove BASE_URL if exist
-    if data["detail_url"].startswith(BASE_URL):
-        data["detail_url"] = data["detail_url"][len(BASE_URL):]
-    if data["image"] and data["image"].startswith(BASE_URL):
-        data["image"] = data["image"][len(BASE_URL):]
-
+        
     cursor.execute("""
         INSERT OR REPLACE INTO buffs (
             id,
