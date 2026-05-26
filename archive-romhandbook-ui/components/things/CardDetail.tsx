@@ -394,16 +394,6 @@ export default function CardDetail({
 
                         <div className="mt-10">
 
-                            <h2
-                                className="
-                        text-2xl
-                        font-bold
-                        mb-5
-                    "
-                            >
-                                Formulas
-                            </h2>
-
                             <div className="space-y-5">
 
                                 {formulas.map(

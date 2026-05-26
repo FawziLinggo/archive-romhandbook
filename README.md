@@ -28,7 +28,7 @@ In addition to structured data, the crawler also stores raw HTML snapshots for a
 
 The goal of this project is to ensure that the ROMC community (I don't play ROM by the way) can continue accessing this valuable knowledge even after the original website is no longer available.
 
-![ROM Handbook Shutdown Statement](assets/img/docs/statement.png)
+![ROM Handbook Shutdown Statement](/docs/img/statement.png)
 
 ---
 
