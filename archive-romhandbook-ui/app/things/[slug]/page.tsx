@@ -13,6 +13,11 @@ import {
 } from "@/lib/queries/pet-eggs"
 
 import PetEggDetail from "@/components/things/PetEggDetail"
+import {
+    getMountById
+} from "@/lib/queries/mounts"
+
+import MountDetail from "@/components/things/MountDetail"
 
 // import EquipmentDetail from "@/components/things/EquipmentDetail"
 
@@ -83,6 +88,31 @@ export default async function ThingPage({
 
                 <PetEggDetail
                     egg={egg}
+                />
+
+            )
+
+        }
+
+        case "mount": {
+
+            const mount =
+                getMountById(id)
+
+            if (!mount) {
+
+                return (
+                    <div>
+                        Mount not found
+                    </div>
+                )
+
+            }
+
+            return (
+
+                <MountDetail
+                    mount={mount}
                 />
 
             )

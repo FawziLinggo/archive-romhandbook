@@ -5,6 +5,12 @@ import requests
 
 from bs4 import BeautifulSoup
 
+
+from utils.html import (
+    get_clean_body_html
+)
+
+
 # ENV
 import os
 from dotenv import load_dotenv
@@ -291,7 +297,9 @@ def get_mount_detail(item):
         "lxml"
     )
 
-    raw_html = response.text
+    raw_html = get_clean_body_html(
+        soup
+    )
 
     # description
     description = None
