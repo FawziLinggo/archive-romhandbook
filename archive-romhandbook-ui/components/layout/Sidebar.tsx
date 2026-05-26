@@ -1,4 +1,4 @@
-import SidebarClient from "./SidebarClient"
+import SidebarClient from "../sidebar/SidebarClient"
 
 import {
     getSidebarCounts
@@ -11,8 +11,7 @@ export default function Sidebar() {
         getSidebarCounts()
 
     return (
-
-        <SidebarClient
+        < SidebarClient
             counts={counts}
         />
 

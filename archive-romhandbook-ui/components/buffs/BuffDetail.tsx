@@ -68,6 +68,7 @@ export default function BuffDetail({
                             }
                             alt={buff.name}
                             fill
+                            sizes="64px"
                             className="
                                 object-cover
                             "

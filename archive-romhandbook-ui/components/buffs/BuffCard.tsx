@@ -127,6 +127,7 @@ export default function BuffCard({
                                 src={buff.image}
                                 alt={buff.name}
                                 fill
+                                sizes="64px"
                                 className="
                                     object-cover
                                 "
