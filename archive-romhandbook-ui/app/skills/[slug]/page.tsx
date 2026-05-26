@@ -14,6 +14,7 @@ import {
 } from "next/navigation"
 
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
+import DetailContainer from "@/components/layout/DetailContainer"
 import {
     getSkillBySlug
 } from "@/lib/queries/skills"
@@ -76,15 +77,7 @@ export default async function SkillDetailPage({
 
     return (
 
-        <div
-            className="
-                mx-auto
-                max-w-7xl
-
-                px-6
-                py-10
-            "
-        >
+        <DetailContainer>
 
             {/* HERO */}
             <div
@@ -708,7 +701,7 @@ export default async function SkillDetailPage({
 
             )}
 
-        </div>
+        </DetailContainer>
 
     )
 

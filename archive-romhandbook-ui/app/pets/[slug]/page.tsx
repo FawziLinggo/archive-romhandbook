@@ -9,6 +9,7 @@ import FormulaViewer from "@/components/common/FormulaViewer"
 import PetHeader from "@/components/pets/PetHeader"
 
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
+import DetailContainer from "@/components/layout/DetailContainer"
 import PetSkills from "@/components/pets/PetSkills"
 
 export default async function PetDetailPage({
@@ -71,14 +72,7 @@ export default async function PetDetailPage({
 
     return (
 
-        <div
-            className="
-                mx-auto
-                max-w-7xl
-
-                space-y-8
-            "
-        >
+        <DetailContainer>
 
             {/* ===================== */}
             {/* HEADER */}
@@ -118,7 +112,7 @@ export default async function PetDetailPage({
 
             )}
 
-        </div>
+        </DetailContainer>
 
     )
 

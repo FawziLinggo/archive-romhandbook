@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import FormulaViewer from "@/components/common/FormulaViewer"
 import RomHtmlViewerToggle from "../common/RomHtmlViewerToggle"
+import DetailContainer from "../layout/DetailContainer"
 
 type Props = {
 
@@ -17,11 +18,7 @@ export default function PetEggDetail({
 
     return (
 
-        <div
-            className="
-                space-y-8
-            "
-        >
+        <DetailContainer>
 
             {/* HERO */}
             <div
@@ -425,7 +422,7 @@ export default function PetEggDetail({
                 html={egg.raw_html}
             />
 
-        </div>
+        </DetailContainer>
 
     )
 

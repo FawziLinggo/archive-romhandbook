@@ -90,3 +90,23 @@ export function getBuffs(
     }
 
 }
+
+export function getBuffBySlug(
+    slug: string
+) {
+
+    return db.prepare(`
+        SELECT
+            id,
+            name,
+            detail_url,
+            image,
+            description,
+            raw_json,
+            raw_html
+        FROM buffs
+        WHERE detail_url = ?
+        LIMIT 1
+    `).get(`/buffs/${slug}`)
+
+}

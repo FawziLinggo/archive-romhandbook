@@ -8,6 +8,7 @@ import {
 import {
     oneDark
 } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import DetailContainer from "../layout/DetailContainer"
 
 type Props = {
     card: any
@@ -64,9 +65,7 @@ export default function CardDetail({
 
     return (
 
-        <div className="
-        max-w-7xl
-        mx-auto">
+        <DetailContainer>
 
             {/* TOP */}
             <div
@@ -490,7 +489,7 @@ backdrop-blur
 
             </div>
 
-        </div>
+        </DetailContainer>
 
     )
 
