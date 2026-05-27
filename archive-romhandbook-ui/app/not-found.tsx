@@ -8,23 +8,24 @@ export default function NotFound() {
 
         <div
             className="
-                        fixed
-        inset-0
-        z-[9999]
+                fixed
+                inset-0
+                z-[9999]
 
-        flex
-        items-center
-        justify-center
+                flex
+                items-center
+                justify-center
 
-        overflow-hidden
+                overflow-hidden
 
-        bg-black
+                bg-black
             "
         >
+
             <FloatingPorings />
 
-
             {/* BG */}
+
             <div
                 className="
                     absolute
@@ -37,6 +38,7 @@ export default function NotFound() {
             />
 
             {/* GLOW */}
+
             <div
                 className="
                     absolute
@@ -44,8 +46,8 @@ export default function NotFound() {
                     left-1/2
                     top-1/2
 
-                    h-[500px]
-                    w-[500px]
+                    h-[280px]
+                    w-[280px]
 
                     -translate-x-1/2
                     -translate-y-1/2
@@ -55,19 +57,24 @@ export default function NotFound() {
                     bg-violet-500/10
 
                     blur-3xl
+
+                    md:h-[500px]
+                    md:w-[500px]
                 "
             />
 
             {/* CONTENT */}
+
             <div
                 className="
                     relative
                     z-10
 
-                    mx-auto
+                    mx-4
+                    w-full
                     max-w-2xl
 
-                    rounded-[32px]
+                    rounded-[28px]
 
                     border
                     border-violet-500/20
@@ -76,64 +83,80 @@ export default function NotFound() {
                     from-zinc-900
                     to-black
 
-                    px-10
-                    py-16
+                    px-6
+                    py-10
 
                     text-center
 
                     shadow-2xl
                     shadow-violet-950/30
+
+                    md:px-10
+                    md:py-16
                 "
             >
 
                 {/* ICON */}
+
                 <div
                     className="
                         mb-6
 
-                        text-7xl
+                        text-5xl
+
+                        md:text-7xl
                     "
                 >
                     ✦
                 </div>
 
                 {/* 404 */}
+
                 <h1
                     className="
-                        text-6xl
+                        text-5xl
                         font-black
                         tracking-tight
                         text-white
+
+                        md:text-6xl
                     "
                 >
                     404
                 </h1>
 
                 {/* TITLE */}
+
                 <h2
                     className="
                         mt-4
 
-                        text-3xl
+                        text-2xl
                         font-bold
 
                         text-violet-300
+
+                        md:text-3xl
                     "
                 >
                     Lost in Midgard
                 </h2>
 
                 {/* DESC */}
+
                 <p
                     className="
                         mx-auto
                         mt-6
                         max-w-xl
 
-                        text-lg
-                        leading-8
+                        text-base
+                        leading-7
 
                         text-zinc-400
+
+                        md:text-lg
+                        md:leading-8
                     "
                 >
                     The portal you entered does not exist anymore.
@@ -141,127 +164,146 @@ export default function NotFound() {
                 </p>
 
                 {/* BUTTON */}
+
                 <div
                     className="
-                        mt-10
+                        mt-8
+
+                        md:mt-10
                     "
                 >
 
-                    <WarpTransition href="/"
+                    <WarpTransition
+                        href="/"
                         className="
-        group
-        relative
+                            group
+                            relative
 
-        inline-flex
-        items-center
-        justify-center
+                            inline-flex
+                            w-full
+                            max-w-[280px]
 
-        overflow-hidden
+                            items-center
+                            justify-center
 
-        rounded-[28px]
+                            overflow-hidden
 
-        px-10
-        py-5
+                            rounded-[28px]
 
-        min-w-[260px]
+                            px-6
+                            py-4
 
-        font-bold
-        text-white
+                            text-sm
+                            font-bold
 
-        transition-all
-        duration-500
+                            text-white
 
-        hover:scale-105
-    "
+                            transition-all
+                            duration-500
+
+                            hover:scale-105
+
+                            md:min-w-[260px]
+
+                            md:px-10
+                            md:py-5
+
+                            md:text-base
+                        "
                     >
 
                         {/* PORTAL BG */}
+
                         <div
                             className="
-            absolute
-            inset-0
+                                absolute
+                                inset-0
 
-            rounded-2xl
+                                rounded-2xl
 
-            bg-gradient-to-r
-            from-violet-600
-            via-fuchsia-500
-            to-cyan-500
+                                bg-gradient-to-r
+                                from-violet-600
+                                via-fuchsia-500
+                                to-cyan-500
 
-            opacity-90
-        "
+                                opacity-90
+                            "
                         />
 
                         {/* SWIRL */}
+
                         <div
                             className="
-            absolute
+                                absolute
 
-            inset-[-120%]
+                                inset-[-120%]
 
-            animate-portal-spin
+                                animate-portal-spin
 
-            bg-[conic-gradient(from_0deg,transparent,rgba(255,255,255,0.35),transparent)]
+                                bg-[conic-gradient(from_0deg,transparent,rgba(255,255,255,0.35),transparent)]
 
-            opacity-70
+                                opacity-70
 
-            group-hover:opacity-100
-        "
+                                group-hover:opacity-100
+                            "
                         />
 
                         {/* INNER DARK */}
+
                         <div
                             className="
-            absolute
-            inset-[2px]
+                                absolute
+                                inset-[2px]
 
-            rounded-2xl
+                                rounded-2xl
 
-            bg-black/70
-            backdrop-blur-xl
-        "
+                                bg-black/70
+                                backdrop-blur-xl
+                            "
                         />
 
                         {/* GLOW */}
+
                         <div
                             className="
-            absolute
-            inset-0
+                                absolute
+                                inset-0
 
-            rounded-2xl
+                                rounded-2xl
 
-            bg-violet-500/20
+                                bg-violet-500/20
 
-            blur-xl
+                                blur-xl
 
-            transition-all
-            duration-500
+                                transition-all
+                                duration-500
 
-            group-hover:bg-cyan-500/30
-        "
+                                group-hover:bg-cyan-500/30
+                            "
                         />
 
                         {/* TEXT */}
+
                         <span
                             className="
-            relative
-            z-10
+                                relative
+                                z-10
 
-            tracking-wide
-        "
+                                tracking-wide
+                            "
                         >
                             Return to Home
                         </span>
 
                     </WarpTransition>
+
                     <RuneCircle />
+
                 </div>
 
             </div>
 
         </div>
-
-
 
     )
 

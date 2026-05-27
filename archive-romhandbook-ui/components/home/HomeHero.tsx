@@ -13,7 +13,7 @@ export default function HomeHero() {
                 relative
                 overflow-hidden
 
-                rounded-[32px]
+                rounded-[28px]
 
                 border
                 border-zinc-800
@@ -22,32 +22,41 @@ export default function HomeHero() {
                 from-zinc-950
                 to-black
 
-                px-8
-                py-24
+                px-5
+                py-14
 
                 text-center
+
+                md:rounded-[32px]
+                md:px-8
+                md:py-24
             "
         >
 
             {/* GLOW */}
+
             <div
                 className="
+                    pointer-events-none
+
                     absolute
                     inset-0
+
                     overflow-hidden
-                    pointer-events-none
                 "
             >
 
                 <div
                     className="
                         absolute
-                        top-[-120px]
-                        left-1/2
-                        -translate-x-1/2
 
-                        h-[320px]
-                        w-[320px]
+                        left-1/2
+                        top-[-80px]
+
+                        h-[220px]
+                        w-[220px]
+
+                        -translate-x-1/2
 
                         rounded-full
 
@@ -56,41 +65,57 @@ export default function HomeHero() {
                         blur-3xl
 
                         animate-pulse
+
+                        md:top-[-120px]
+
+                        md:h-[320px]
+                        md:w-[320px]
                     "
                 />
 
                 <div
                     className="
                         absolute
-                        bottom-[-100px]
-                        right-[10%]
 
-                        h-[240px]
-                        w-[240px]
+                        bottom-[-80px]
+                        right-[5%]
+
+                        h-[180px]
+                        w-[180px]
 
                         rounded-full
 
                         bg-emerald-500/10
 
                         blur-3xl
+
+                        md:bottom-[-100px]
+
+                        md:h-[240px]
+                        md:w-[240px]
                     "
                 />
 
             </div>
 
             {/* CONTENT */}
+
             <div
                 className="
                     relative
                     z-10
-                    max-w-4xl
+
                     mx-auto
+                    max-w-4xl
                 "
             >
 
                 {/* BADGE */}
+
                 <div
                     className="
+                        mb-5
+
                         inline-flex
                         items-center
                         gap-2
@@ -105,10 +130,11 @@ export default function HomeHero() {
                         px-4
                         py-2
 
-                        text-sm
+                        text-xs
                         text-violet-300
 
-                        mb-6
+                        md:mb-6
+                        md:text-sm
                     "
                 >
 
@@ -117,20 +143,25 @@ export default function HomeHero() {
                 </div>
 
                 {/* TITLE */}
+
                 <h1
                     className="
                         text-5xl
-                        md:text-7xl
-
                         font-black
 
+                        leading-none
                         tracking-tight
 
                         text-white
+
+                        md:text-7xl
                     "
                 >
 
-                    ROM Handbook
+                    ROM
+                    <br />
+
+                    Handbook
                     <br />
 
                     <span
@@ -144,19 +175,25 @@ export default function HomeHero() {
                 </h1>
 
                 {/* DESCRIPTION */}
+
                 <p
                     className="
+                        mx-auto
                         mt-6
 
-                        text-lg
-                        md:text-xl
+                        max-w-xl
+
+                        text-base
+                        leading-9
 
                         text-zinc-400
 
-                        max-w-2xl
-                        mx-auto
+                        md:mt-6
 
-                        leading-relaxed
+                        md:max-w-2xl
+
+                        md:text-xl
+                        md:leading-relaxed
                     "
                 >
 
@@ -170,12 +207,15 @@ export default function HomeHero() {
                 </p>
 
                 {/* SEARCH */}
+
                 <div
                     className="
-                        mt-10
+                        mx-auto
+                        mt-8
 
                         max-w-2xl
-                        mx-auto
+
+                        md:mt-10
                     "
                 >
 
@@ -187,14 +227,19 @@ export default function HomeHero() {
                     >
 
                         <Search
-                            size={22}
+                            size={18}
                             className="
                                 absolute
-                                left-5
+
+                                left-4
                                 top-1/2
+
                                 -translate-y-1/2
 
                                 text-zinc-500
+
+                                md:left-5
+                                md:size-[22px]
                             "
                         />
 
@@ -207,27 +252,33 @@ Search cards, monsters, skills...
                             className="
                                 w-full
 
-                                rounded-3xl
+                                rounded-2xl
 
                                 border
                                 border-zinc-700
 
                                 bg-zinc-900/80
-                                backdrop-blur
 
-                                px-14
-                                py-5
+                                px-12
+                                py-4
 
-                                text-lg
+                                text-base
                                 text-white
 
                                 outline-none
+
+                                transition-all
 
                                 focus:border-violet-500
                                 focus:ring-4
                                 focus:ring-violet-500/20
 
-                                transition-all
+                                md:rounded-3xl
+
+                                md:px-14
+                                md:py-5
+
+                                md:text-lg
                             "
                         />
 
@@ -236,19 +287,27 @@ Search cards, monsters, skills...
                 </div>
 
                 {/* STATS */}
+
                 <div
                     className="
-                        mt-10
+                        mt-8
 
                         flex
+                        flex-col
                         items-center
                         justify-center
-                        gap-8
 
-                        flex-wrap
+                        gap-2
 
-                        text-sm
+                        text-xs
                         text-zinc-500
+
+                        md:mt-10
+
+                        md:flex-row
+                        md:gap-8
+
+                        md:text-sm
                     "
                 >
 
