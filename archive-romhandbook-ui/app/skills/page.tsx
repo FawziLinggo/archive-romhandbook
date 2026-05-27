@@ -1,10 +1,9 @@
-
-
-
 import SkillSearchClient from "@/components/skills/SkillSearchClient"
+
 import {
-    getSkills
-} from "@/lib/queries/skills"
+    apiFetch
+} from "@/lib/api"
+
 type Props = {
 
     searchParams: Promise<{
@@ -14,14 +13,11 @@ type Props = {
         q?: string
 
     }>
-
 }
 
 export default async function SkillsPage({
 
     searchParams
-
-
 
 }: Props) {
 
@@ -35,20 +31,25 @@ export default async function SkillsPage({
         params.q || ""
 
     // =====================
-    // DATA
+    // FETCH API
     // =====================
 
-    const {
-        skills,
-        hasNext
-    } = getSkills(
-        page,
-        query
-    )
+    const response =
+        await apiFetch<any>(
+
+            `/api/v1/skills?page=${page}&limit=24&query=${query}`
+
+        )
 
     // =====================
-    // PAGE
+    // API DATA
     // =====================
+
+    const skills =
+        response.data
+
+    const meta =
+        response.meta
 
     return (
 
@@ -62,35 +63,33 @@ export default async function SkillsPage({
             "
         >
 
-            {/* HEADER */}
             <section>
 
-                {/* TOP */}
                 <div
                     className="
-            flex
-            flex-col
-            gap-6
+                        flex
+                        flex-col
+                        gap-6
 
-            lg:flex-row
-            lg:items-end
-            lg:justify-between
-        "
+                        lg:flex-row
+                        lg:items-end
+                        lg:justify-between
+                    "
                 >
 
-                    {/* LEFT */}
                     <div>
+
                         <h1
                             className="
-                    mt-5
+                                mt-5
 
-                    text-5xl
-                    font-black
+                                text-5xl
+                                font-black
 
-                    tracking-tight
+                                tracking-tight
 
-                    text-white
-                "
+                                text-white
+                            "
                         >
 
                             Skills
@@ -99,15 +98,15 @@ export default async function SkillsPage({
 
                         <p
                             className="
-                    mt-4
+                                mt-4
 
-                    max-w-2xl
+                                max-w-2xl
 
-                    text-lg
-                    leading-8
+                                text-lg
+                                leading-8
 
-                    text-zinc-400
-                "
+                                text-zinc-400
+                            "
                         >
 
                             Explore Ragnarok M skills,
@@ -123,7 +122,7 @@ export default async function SkillsPage({
                 <SkillSearchClient
                     initialSkills={skills}
                     page={page}
-                    hasNext={hasNext}
+                    hasNext={meta.has_next}
                 />
 
             </section>
@@ -131,5 +130,4 @@ export default async function SkillsPage({
         </main>
 
     )
-
 }

@@ -1,325 +1,325 @@
-import { db } from "@/lib/db"
+// import { db } from "@/lib/db"
 
-export type Skill = {
+// export type Skill = {
 
-    id: string
+//     id: string
 
-    detail_url: string
+//     detail_url: string
 
-    image: string
+//     image: string
 
-    name: string
+//     name: string
 
-    max_level: number
+//     max_level: number
 
-    skill_type: string
+//     skill_type: string
 
-    damage_type: string
+//     damage_type: string
 
-    cooldown: string
+//     cooldown: string
 
-    range_value: string
+//     range_value: string
 
-    cast_time: string
+//     cast_time: string
 
-    description: string
+//     description: string
 
-}
+// }
 
-const PAGE_SIZE = 24
+// const PAGE_SIZE = 24
 
-export function getSkills(
+// export function getSkills(
 
-    page: number = 1,
+//     page: number = 1,
 
-    query: string = ""
+//     query: string = ""
 
-): {
+// ): {
 
-    skills: Skill[]
+//     skills: Skill[]
 
-    hasNext: boolean
+//     hasNext: boolean
 
-} {
+// } {
 
-    // =====================
-    // OFFSET
-    // =====================
+//     // =====================
+//     // OFFSET
+//     // =====================
 
-    const offset =
-        (page - 1) * PAGE_SIZE
+//     const offset =
+//         (page - 1) * PAGE_SIZE
 
-    // =====================
-    // SEARCH
-    // =====================
+//     // =====================
+//     // SEARCH
+//     // =====================
 
-    const search =
-        `%${query}%`
+//     const search =
+//         `%${query}%`
 
-    // =====================
-    // QUERY
-    // =====================
+//     // =====================
+//     // QUERY
+//     // =====================
 
-    const rows = db
-        .prepare(`
-            SELECT
+//     const rows = db
+//         .prepare(`
+//             SELECT
 
-                s.id,
-                s.detail_url,
-                s.image,
-                s.name,
+//                 s.id,
+//                 s.detail_url,
+//                 s.image,
+//                 s.name,
 
-                MAX(s.max_level) as max_level,
+//                 MAX(s.max_level) as max_level,
 
-                s.skill_type,
-                s.damage_type,
+//                 s.skill_type,
+//                 s.damage_type,
 
-                s.cooldown,
-                s.range_value,
-                s.cast_time,
+//                 s.cooldown,
+//                 s.range_value,
+//                 s.cast_time,
 
-                s.description
+//                 s.description
 
-            FROM skills s
+//             FROM skills s
 
-            WHERE
-                s.name LIKE ?
-                OR
-                s.description LIKE ?
+//             WHERE
+//                 s.name LIKE ?
+//                 OR
+//                 s.description LIKE ?
 
-            GROUP BY
-                s.detail_url
+//             GROUP BY
+//                 s.detail_url
 
-            ORDER BY
+//             ORDER BY
 
-            CASE
-                WHEN s.name GLOB '[A-Za-z]*'
-                THEN 0
-                ELSE 1
-            END,
+//             CASE
+//                 WHEN s.name GLOB '[A-Za-z]*'
+//                 THEN 0
+//                 ELSE 1
+//             END,
 
-            s.name COLLATE NOCASE ASC
+//             s.name COLLATE NOCASE ASC
 
-            LIMIT ?
-            OFFSET ?
-        `)
-        .all(
-            search,
-            search,
-            PAGE_SIZE + 1,
-            offset
-        ) as Skill[]
+//             LIMIT ?
+//             OFFSET ?
+//         `)
+//         .all(
+//             search,
+//             search,
+//             PAGE_SIZE + 1,
+//             offset
+//         ) as Skill[]
 
-    // =====================
-    // HAS NEXT
-    // =====================
+//     // =====================
+//     // HAS NEXT
+//     // =====================
 
-    const hasNext =
-        rows.length > PAGE_SIZE
+//     const hasNext =
+//         rows.length > PAGE_SIZE
 
-    // =====================
-    // REMOVE EXTRA
-    // =====================
+//     // =====================
+//     // REMOVE EXTRA
+//     // =====================
 
-    const skills =
-        rows.slice(0, PAGE_SIZE)
+//     const skills =
+//         rows.slice(0, PAGE_SIZE)
 
-    // =====================
-    // RETURN
-    // =====================
+//     // =====================
+//     // RETURN
+//     // =====================
 
-    return {
+//     return {
 
-        skills,
+//         skills,
 
-        hasNext
+//         hasNext
 
-    }
+//     }
 
-}
+// }
 
 
 
 
 
-export type SkillLevel = {
+// export type SkillLevel = {
 
-    level: number
+//     level: number
 
-    description: string
+//     description: string
 
-    raw_tags: string | null
+//     raw_tags: string | null
 
 
-}
+// }
 
-export type SkillDetail = {
+// export type SkillDetail = {
 
-    id: string
+//     id: string
 
-    detail_url: string
+//     detail_url: string
 
-    image: string
+//     image: string
 
-    name: string
+//     name: string
 
-    max_level: number
+//     max_level: number
 
-    skill_type: string
+//     skill_type: string
 
-    damage_type: string
+//     damage_type: string
 
-    cooldown: string
+//     cooldown: string
 
-    range_value: string
+//     range_value: string
 
-    cast_time: string
+//     cast_time: string
 
-    fixed_cast_time: string
+//     fixed_cast_time: string
 
-    description: string
+//     description: string
 
-    formula_raw: string | null
+//     formula_raw: string | null
 
-    aesir_raw: string | null
+//     aesir_raw: string | null
 
-    levels: SkillLevel[]
-    raw_html: string | null
+//     levels: SkillLevel[]
+//     raw_html: string | null
 
-}
+// }
 
-export function getSkillBySlug(
-    slug: string
-): SkillDetail | null {
+// export function getSkillBySlug(
+//     slug: string
+// ): SkillDetail | null {
 
-    // =====================
-    // SKILL
-    // =====================
+//     // =====================
+//     // SKILL
+//     // =====================
 
-    const skill = db
-        .prepare(`
-            SELECT
-                id,
-                detail_url,
-                image,
-                name,
-                max_level,
-                skill_type,
-                damage_type,
-                cooldown,
-                range_value,
-                cast_time,
-                fixed_cast_time,
-                description,
-                formula_raw,
-                aesir_raw,
-                raw_html
-            FROM skills
-            WHERE detail_url = ?
-            LIMIT 1
-        `)
-        .get(slug) as SkillDetail | undefined
+//     const skill = db
+//         .prepare(`
+//             SELECT
+//                 id,
+//                 detail_url,
+//                 image,
+//                 name,
+//                 max_level,
+//                 skill_type,
+//                 damage_type,
+//                 cooldown,
+//                 range_value,
+//                 cast_time,
+//                 fixed_cast_time,
+//                 description,
+//                 formula_raw,
+//                 aesir_raw,
+//                 raw_html
+//             FROM skills
+//             WHERE detail_url = ?
+//             LIMIT 1
+//         `)
+//         .get(slug) as SkillDetail | undefined
 
-    // =====================
-    // NOT FOUND
-    // =====================
+//     // =====================
+//     // NOT FOUND
+//     // =====================
 
-    if (!skill) {
+//     if (!skill) {
 
-        return null
+//         return null
 
-    }
+//     }
 
-    // =====================
-    // LEVELS
-    // =====================
+//     // =====================
+//     // LEVELS
+//     // =====================
 
-    const levels = db
-        .prepare(`
-            SELECT
-                level,
-                description,
-                raw_tags
-            FROM skill_levels
-            WHERE skill_id = ?
-            ORDER BY level DESC
-        `)
-        .all(skill.id) as SkillLevel[]
+//     const levels = db
+//         .prepare(`
+//             SELECT
+//                 level,
+//                 description,
+//                 raw_tags
+//             FROM skill_levels
+//             WHERE skill_id = ?
+//             ORDER BY level DESC
+//         `)
+//         .all(skill.id) as SkillLevel[]
 
-    // =====================
-    // RETURN
-    // =====================
+//     // =====================
+//     // RETURN
+//     // =====================
 
-    return {
+//     return {
 
-        ...skill,
+//         ...skill,
 
-        levels
+//         levels
 
-    }
+//     }
 
-}
+// }
 
 
-export function searchSkills(
-    query: string
-) {
+// export function searchSkills(
+//     query: string
+// ) {
 
-    if (query.length < 4) {
+//     if (query.length < 4) {
 
-        return []
+//         return []
 
-    }
+//     }
 
-    return db.prepare(`
+//     return db.prepare(`
 
-        SELECT
+//         SELECT
 
-            s.id,
-            s.detail_url,
-            s.image,
-            s.name,
+//             s.id,
+//             s.detail_url,
+//             s.image,
+//             s.name,
 
-            MAX(s.max_level) as max_level,
+//             MAX(s.max_level) as max_level,
 
-            s.skill_type,
-            s.damage_type,
+//             s.skill_type,
+//             s.damage_type,
 
-            s.cooldown,
-            s.range_value,
-            s.cast_time,
+//             s.cooldown,
+//             s.range_value,
+//             s.cast_time,
 
-            s.description
+//             s.description
 
-        FROM skills s
+//         FROM skills s
 
-        WHERE
-            LOWER(s.name)
-            LIKE LOWER(?)
+//         WHERE
+//             LOWER(s.name)
+//             LIKE LOWER(?)
 
-            OR
+//             OR
 
-            LOWER(s.description)
-            LIKE LOWER(?)
+//             LOWER(s.description)
+//             LIKE LOWER(?)
 
-        GROUP BY
-            s.detail_url
+//         GROUP BY
+//             s.detail_url
 
-        ORDER BY
+//         ORDER BY
 
-            CASE
-                WHEN s.name GLOB '[A-Za-z]*'
-                THEN 0
-                ELSE 1
-            END,
+//             CASE
+//                 WHEN s.name GLOB '[A-Za-z]*'
+//                 THEN 0
+//                 ELSE 1
+//             END,
 
-            s.name COLLATE NOCASE ASC
+//             s.name COLLATE NOCASE ASC
 
-    `).all(
+//     `).all(
 
-        `%${query}%`,
-        `%${query}%`
+//         `%${query}%`,
+//         `%${query}%`
 
-    ) as Skill[]
+//     ) as Skill[]
 
-}
+// }

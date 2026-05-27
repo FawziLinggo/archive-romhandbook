@@ -16,8 +16,11 @@ import {
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 import DetailContainer from "@/components/layout/DetailContainer"
 import {
-    getSkillBySlug
-} from "@/lib/queries/skills"
+    apiFetch
+} from "@/lib/api"
+import type {
+    SkillLevel
+} from "@/lib/types/Skills"
 
 
 type Props = {
@@ -48,8 +51,24 @@ export default async function SkillDetailPage({
     // GET SKILL
     // =====================
 
-    const skill =
-        getSkillBySlug(slug)
+    let skill = null
+
+    try {
+
+        const response =
+            await apiFetch<any>(
+
+                `/api/v1/skills/${slug}`
+
+            )
+
+        skill =
+            response.data
+
+    } catch {
+
+        notFound()
+    }
 
     // =====================
     // NOT FOUND
@@ -445,7 +464,7 @@ export default async function SkillDetailPage({
 
 
 
-                            {skill.levels.map((level) => {
+                            {skill.levels.map((level: SkillLevel) => {
 
                                 const tags: string[] =
                                     level.raw_tags

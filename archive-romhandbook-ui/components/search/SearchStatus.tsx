@@ -63,7 +63,14 @@ export default function SearchStatus({
                     text-zinc-500
                 "
             >
-                {count} result found
+
+
+                {count === 0
+                    ? "No results found"
+                    : count >= 24
+                        ? "24+ results found, go to next page"
+                        : `${count} result${count > 1 ? "s" : ""} found`
+                }
             </div>
 
         )
