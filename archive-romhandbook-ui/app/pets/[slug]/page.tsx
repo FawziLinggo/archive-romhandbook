@@ -1,15 +1,17 @@
 import { notFound } from "next/navigation"
 
-import {
-    getPetBySlug
-} from "@/lib/queries/pets"
+import type {
+    PetDetail
+} from "@/lib/types/Pets"
 
 import FormulaViewer from "@/components/common/FormulaViewer"
 
 import PetHeader from "@/components/pets/PetHeader"
 
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
+
 import DetailContainer from "@/components/layout/DetailContainer"
+
 import PetSkills from "@/components/pets/PetSkills"
 
 export default async function PetDetailPage({
@@ -28,25 +30,48 @@ export default async function PetDetailPage({
     // PARAMS
     // =====================
 
-    const { slug } =
-        await params
+    const {
+        slug
+    } = await params
 
     // =====================
-    // GET PET
+    // API
     // =====================
 
-    const pet =
-        getPetBySlug(slug)
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL
+
+    // =====================
+    // FETCH
+    // =====================
+
+    const res =
+        await fetch(
+
+            `${API_URL}/api/v1/pets/${slug}`,
+
+            {
+                next: {
+
+                    revalidate: 60
+                }
+            }
+        )
 
     // =====================
     // NOT FOUND
     // =====================
 
-    if (!pet) {
+    if (!res.ok) {
 
         notFound()
-
     }
+
+    const response =
+        await res.json()
+
+    const pet =
+        response.data as PetDetail
 
     // =====================
     // PARSE SKILLS
@@ -63,7 +88,6 @@ export default async function PetDetailPage({
     } catch {
 
         skills = []
-
     }
 
     // =====================
@@ -74,25 +98,19 @@ export default async function PetDetailPage({
 
         <DetailContainer>
 
-            {/* ===================== */}
             {/* HEADER */}
-            {/* ===================== */}
 
             <PetHeader
                 pet={pet}
             />
 
-            {/* ===================== */}
             {/* SKILLS */}
-            {/* ===================== */}
 
             <PetSkills
                 skills={skills}
             />
 
-            {/* ===================== */}
             {/* FORMULA */}
-            {/* ===================== */}
 
             {pet.formulas_raw && (
 
@@ -104,8 +122,10 @@ export default async function PetDetailPage({
 
             )}
 
+            {/* RAW HTML */}
 
             {pet.raw_html && (
+
                 <RomHtmlViewerToggle
                     html={pet.raw_html}
                 />

@@ -1,268 +1,268 @@
-import { db } from "@/lib/db"
+// import { db } from "@/lib/db"
 
-export type PetSkill = {
+// export type PetSkill = {
 
-    name: string
+//     name: string
 
-    url: string
+//     url: string
 
-    image: string
-}
+//     image: string
+// }
 
-export type Pet = {
+// export type Pet = {
 
-    id: string
+//     id: string
 
-    detail_url: string
+//     detail_url: string
 
-    image: string
+//     image: string
 
-    name: string
+//     name: string
 
-    race: string
+//     race: string
 
-    element: string
+//     element: string
 
-    size: string
+//     size: string
 
-    description: string
+//     description: string
 
-    unlock_text: string | null
+//     unlock_text: string | null
 
-    egg_id: string | null
+//     egg_id: string | null
 
-    egg_url: string | null
+//     egg_url: string | null
 
-    egg_name: string | null
+//     egg_name: string | null
 
-    egg_image: string | null
+//     egg_image: string | null
 
-    skills: string
-}
+//     skills: string
+// }
 
-const PAGE_SIZE = 24
+// const PAGE_SIZE = 24
 
-export function getPets(
+// export function getPets(
 
-    page: number = 1,
+//     page: number = 1,
 
-    query: string = ""
+//     query: string = ""
 
-): {
+// ): {
 
-    pets: Pet[]
+//     pets: Pet[]
 
-    hasNext: boolean
+//     hasNext: boolean
 
-    total: number
+//     total: number
 
-} {
+// } {
 
-    const offset =
-        (page - 1) * PAGE_SIZE
+//     const offset =
+//         (page - 1) * PAGE_SIZE
 
-    const search =
-        `%${query}%`
+//     const search =
+//         `%${query}%`
 
-    // =====================
-    // TOTAL
-    // =====================
+//     // =====================
+//     // TOTAL
+//     // =====================
 
-    const totalRow = db
-        .prepare(`
-            SELECT
-                COUNT(*) as total
-            FROM pets
-            WHERE
-                name LIKE ?
-        `)
-        .get(search) as {
-            total: number
-        }
+//     const totalRow = db
+//         .prepare(`
+//             SELECT
+//                 COUNT(*) as total
+//             FROM pets
+//             WHERE
+//                 name LIKE ?
+//         `)
+//         .get(search) as {
+//             total: number
+//         }
 
-    // =====================
-    // ROWS
-    // =====================
+//     // =====================
+//     // ROWS
+//     // =====================
 
-    const rows = db
-        .prepare(`
-            SELECT
+//     const rows = db
+//         .prepare(`
+//             SELECT
 
-                p.id,
-                p.detail_url,
-                p.image,
-                p.name,
+//                 p.id,
+//                 p.detail_url,
+//                 p.image,
+//                 p.name,
 
-                p.race,
-                p.element,
-                p.size,
+//                 p.race,
+//                 p.element,
+//                 p.size,
 
-                p.description,
-                p.unlock_text,
+//                 p.description,
+//                 p.unlock_text,
 
-                p.egg_id,
-                p.egg_url,
+//                 p.egg_id,
+//                 p.egg_url,
 
-                pe.name as egg_name,
-                pe.image as egg_image,
+//                 pe.name as egg_name,
+//                 pe.image as egg_image,
 
-                COALESCE(
-                    p.skills,
-                    '[]'
-                ) as skills
+//                 COALESCE(
+//                     p.skills,
+//                     '[]'
+//                 ) as skills
 
-            FROM pets p
+//             FROM pets p
 
-            LEFT JOIN pet_eggs pe
-                ON pe.id = p.egg_id
+//             LEFT JOIN pet_eggs pe
+//                 ON pe.id = p.egg_id
 
-            WHERE
-                p.name LIKE ?
+//             WHERE
+//                 p.name LIKE ?
 
-            ORDER BY
+//             ORDER BY
 
-                CASE
-                    WHEN p.name GLOB '[A-Za-z]*'
-                    THEN 0
-                    ELSE 1
-                END,
+//                 CASE
+//                     WHEN p.name GLOB '[A-Za-z]*'
+//                     THEN 0
+//                     ELSE 1
+//                 END,
 
-                LOWER(p.name) ASC
+//                 LOWER(p.name) ASC
 
-            LIMIT ?
-            OFFSET ?
-        `)
-        .all(
-            search,
-            PAGE_SIZE + 1,
-            offset
-        ) as Pet[]
+//             LIMIT ?
+//             OFFSET ?
+//         `)
+//         .all(
+//             search,
+//             PAGE_SIZE + 1,
+//             offset
+//         ) as Pet[]
 
-    const hasNext =
-        rows.length > PAGE_SIZE
+//     const hasNext =
+//         rows.length > PAGE_SIZE
 
-    return {
+//     return {
 
-        pets: rows.slice(
-            0,
-            PAGE_SIZE
-        ),
+//         pets: rows.slice(
+//             0,
+//             PAGE_SIZE
+//         ),
 
-        hasNext,
+//         hasNext,
 
-        total: totalRow.total
-    }
-}
+//         total: totalRow.total
+//     }
+// }
 
-export type PetDetail = {
+// export type PetDetail = {
 
-    id: string
+//     id: string
 
-    detail_url: string
+//     detail_url: string
 
-    image: string
+//     image: string
 
-    name: string
+//     name: string
 
-    race: string
+//     race: string
 
-    element: string
+//     element: string
 
-    size: string
+//     size: string
 
-    description: string
+//     description: string
 
-    unlock_text: string | null
+//     unlock_text: string | null
 
-    skills: string
+//     skills: string
 
-    formulas_raw: string | null
+//     formulas_raw: string | null
 
-    raw_html: string | null
+//     raw_html: string | null
 
-    egg_name: string | null
-    egg_image: string | null
-    egg_url: string | null
-}
+//     egg_name: string | null
+//     egg_image: string | null
+//     egg_url: string | null
+// }
 
-export function getPetBySlug(
-    slug: string
-): PetDetail | null {
+// export function getPetBySlug(
+//     slug: string
+// ): PetDetail | null {
 
-    return db
-        .prepare(`
-            SELECT
+//     return db
+//         .prepare(`
+//             SELECT
 
-                p.*,
+//                 p.*,
 
-                pe.name as egg_name,
-                pe.image as egg_image,
-                pe.detail_url as egg_url,
-                pe.formulas_raw
+//                 pe.name as egg_name,
+//                 pe.image as egg_image,
+//                 pe.detail_url as egg_url,
+//                 pe.formulas_raw
 
-            FROM pets p
+//             FROM pets p
 
-            LEFT JOIN pet_eggs pe
-                ON pe.id = p.egg_id
+//             LEFT JOIN pet_eggs pe
+//                 ON pe.id = p.egg_id
 
-            WHERE
-                p.detail_url = ?
+//             WHERE
+//                 p.detail_url = ?
 
-            LIMIT 1
-        `)
-        .get(slug) as PetDetail | null
-}
+//             LIMIT 1
+//         `)
+//         .get(slug) as PetDetail | null
+// }
 
 
-export function searchPets(
-    query: string
-) {
+// export function searchPets(
+//     query: string
+// ) {
 
-    if (query.length < 4) {
+//     if (query.length < 4) {
 
-        return []
+//         return []
 
-    }
+//     }
 
-    return db.prepare(`
+//     return db.prepare(`
 
-        SELECT
+//         SELECT
 
-            p.id,
-            p.detail_url,
-            p.image,
-            p.name,
+//             p.id,
+//             p.detail_url,
+//             p.image,
+//             p.name,
 
-            p.race,
-            p.element,
-            p.size,
+//             p.race,
+//             p.element,
+//             p.size,
 
-            p.description,
-            p.unlock_text,
+//             p.description,
+//             p.unlock_text,
 
-            p.egg_id,
-            p.egg_url,
+//             p.egg_id,
+//             p.egg_url,
 
-            pe.name as egg_name,
-            pe.image as egg_image,
+//             pe.name as egg_name,
+//             pe.image as egg_image,
 
-            COALESCE(
-                p.skills,
-                '[]'
-            ) as skills
+//             COALESCE(
+//                 p.skills,
+//                 '[]'
+//             ) as skills
 
-        FROM pets p
+//         FROM pets p
 
-        LEFT JOIN pet_eggs pe
-            ON pe.id = p.egg_id
+//         LEFT JOIN pet_eggs pe
+//             ON pe.id = p.egg_id
 
-        WHERE
-            LOWER(p.name)
-            LIKE LOWER(?)
+//         WHERE
+//             LOWER(p.name)
+//             LIKE LOWER(?)
 
-        ORDER BY
-            LOWER(p.name) ASC
+//         ORDER BY
+//             LOWER(p.name) ASC
 
-    `).all(`%${query}%`) as Pet[]
+//     `).all(`%${query}%`) as Pet[]
 
-}
+// }

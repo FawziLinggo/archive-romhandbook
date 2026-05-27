@@ -21,6 +21,12 @@ func SetupRoutes(
 			DB: db,
 		}
 
+	petHandler :=
+		handlers.PetHandler{
+
+			DB: db,
+		}
+
 	api := router.Group("/api/v1")
 
 	{
@@ -35,5 +41,20 @@ func SetupRoutes(
 		"/api/v1/skills/:slug",
 
 		skillHandler.GetSkillBySlug,
+	)
+
+	router.GET(
+		"/api/v1/pets",
+		petHandler.GetPets,
+	)
+
+	router.GET(
+		"/api/v1/pets/search",
+		petHandler.SearchPets,
+	)
+
+	router.GET(
+		"/api/v1/pets/:slug",
+		petHandler.GetPetBySlug,
 	)
 }

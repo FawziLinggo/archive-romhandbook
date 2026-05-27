@@ -9,13 +9,13 @@ type PetHeaderProps = {
 
         name: string
 
-        race: string
+        race: string | null
 
-        element: string
+        element: string | null
 
-        size: string
+        size: string | null
 
-        description: string
+        description: string | null
 
         unlock_text: string | null
 
@@ -58,9 +58,7 @@ export default function PetHeader({
 }: PetHeaderProps) {
 
     const glow =
-        elementColors[pet.element]
-        ||
-        "from-zinc-500/10 to-zinc-950/5 border-white/10"
+        pet.element ? elementColors[pet.element] : "from-zinc-500/10 to-zinc-950/5 border-white/10"
 
     return (
 

@@ -7,7 +7,7 @@ import {
 
 import type {
     Pet
-} from "@/lib/queries/pets"
+} from "@/lib/types/Pets"
 
 import PaginationSearch from "../common/PaginationSearch"
 
@@ -25,7 +25,6 @@ type Props = {
     total: number
 
     page: number
-
 }
 
 export default function PetSearchClient({
@@ -59,7 +58,7 @@ export default function PetSearchClient({
         pets,
         setPets
 
-    ] = useState(initialPets)
+    ] = useState<Pet[]>(initialPets)
 
     // =====================
     // DEBOUNCE
@@ -80,7 +79,6 @@ export default function PetSearchClient({
             setPets(initialPets)
 
             return
-
         }
 
         setLoading(true)
@@ -89,17 +87,29 @@ export default function PetSearchClient({
 
             try {
 
+                const API_URL =
+                    process.env.NEXT_PUBLIC_API_URL
+
                 const res =
                     await fetch(
 
-                        `/api/pets/search?query=${encodeURIComponent(debouncedQuery)}`
+                        `${API_URL}/api/v1/pets/search?query=${encodeURIComponent(debouncedQuery)}`
 
                     )
+
+                if (!res.ok) {
+
+                    throw new Error(
+                        "Failed to fetch pets"
+                    )
+                }
 
                 const data =
                     await res.json()
 
-                setPets(data)
+                setPets(
+                    data.data
+                )
 
             } catch (err) {
 
@@ -108,9 +118,7 @@ export default function PetSearchClient({
             } finally {
 
                 setLoading(false)
-
             }
-
         }
 
         fetchPets()

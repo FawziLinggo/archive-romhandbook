@@ -1,7 +1,9 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { Pet } from "@/lib/queries/pets"
+import type {
+    Pet
+} from "@/lib/types/Pets"
 
 type PetSkill = {
 

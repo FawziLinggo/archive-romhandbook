@@ -12,7 +12,7 @@ echo =====================
 echo TEST PAGINATION
 echo =====================
 
-curl "http://127.0.0.1:8080/api/v1/skills?page=1&limit=5"
+@REM curl "http://127.0.0.1:8080/api/v1/skills?page=1&limit=5"
 
 echo.
 echo.
@@ -20,7 +20,7 @@ echo =====================
 echo TEST SEARCH
 echo =====================
 
-curl "http://127.0.0.1:8080/api/v1/skills?page=1&limit=5&query=fire"
+@REM curl "http://127.0.0.1:8080/api/v1/skills?page=1&limit=5&query=fire"
 
 echo.
 echo.
@@ -31,6 +31,33 @@ echo.
 echo =====================
 echo TEST GET SKILL SLUG
 echo =====================
-curl "http://127.0.0.1:8080/api/v1/skills/dragon-king-shield-1827008"
+@REM curl "http://127.0.0.1:8080/api/v1/skills/dragon-king-shield-1827008"
+echo.
+echo.
+
+
+
+echo =====================
+echo TEST GET PETS
+echo =====================
+curl "http://127.0.0.1:8080/api/v1/pets?page=1&limit=24"
+
+echo.
+echo.
+
+
+echo =====================
+echo TEST GET PETS WITH QUERY
+echo =====================
+curl "http://127.0.0.1:8080/api/v1/pets/search?query=lunatic"
+
+echo.
+echo.
+
+echo =====================
+echo TEST GET PETS WITH SLUG
+echo =====================
+curl "http://127.0.0.1:8080/api/v1/pets/angry-dreamer-zephyr"
+
 echo.
 echo.
