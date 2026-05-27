@@ -1,13 +1,33 @@
 export type Formula = {
 
-    id: string
-
-    name: string
+    id: number
 
     detail_url: string
 
+    name: string
+
     formula_code: string
+}
 
-    raw_html?: string
+export type ApiResponse<T> = {
 
+    success: boolean
+
+    data: T
+
+    meta: unknown
+}
+
+export type PaginatedApiResponse<T> = {
+
+    success: boolean
+
+    data: T[]
+
+    meta: {
+        page: number
+        limit: number
+        total: number
+        has_next: boolean
+    }
 }

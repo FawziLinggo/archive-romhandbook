@@ -118,4 +118,29 @@ func SetupRoutes(
 		"/api/v1/buffs/:slug",
 		buffHandler.GetBuffBySlug,
 	)
+
+	formulaHandler :=
+		handlers.FormulaHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/formulas",
+		formulaHandler.GetFormulas,
+	)
+
+	router.GET(
+		"/api/v1/formulas/search",
+		formulaHandler.SearchFormulas,
+	)
+
+	router.GET(
+		"/api/v1/formulas/featured",
+		formulaHandler.GetFeaturedFormula,
+	)
+
+	router.GET(
+		"/api/v1/formulas/:slug",
+		formulaHandler.GetFormulaBySlug,
+	)
 }

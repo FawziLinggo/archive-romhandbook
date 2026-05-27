@@ -1,10 +1,8 @@
 import HomeHero from "@/components/home/HomeHero"
 
-
 import FormulaPreview from "@/components/home/FormulaPreview"
 
 import OriginalSnapshotCard from "@/components/home/OriginalSnapshotCard"
-
 
 import {
   getRandomSnapshotCard as getRandomSnapshot
@@ -14,17 +12,35 @@ import {
   getSidebarCounts
 } from "@/lib/queries/sidebar"
 
-import {
-  getFeaturedFormula
-} from "@/lib/queries/formulas"
+import type {
+  ApiResponse,
+  Formula
+} from "@/lib/types/Formula"
 
-export default function HomePage() {
+export default async function HomePage() {
 
   const counts =
     getSidebarCounts()
 
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL
+
+  const formulaRes =
+    await fetch(
+      `${API_URL}/api/v1/formulas/featured`,
+      {
+        next: {
+          revalidate: 60
+        }
+      }
+    )
+
   const formula =
-    getFeaturedFormula()
+    formulaRes.ok
+      ? (
+        await formulaRes.json() as ApiResponse<Formula>
+      ).data
+      : null
 
   const snapshot =
     getRandomSnapshot()
@@ -71,10 +87,6 @@ export default function HomePage() {
         counts={counts}
       /> */}
 
-
-
     </div>
-
   )
-
 }

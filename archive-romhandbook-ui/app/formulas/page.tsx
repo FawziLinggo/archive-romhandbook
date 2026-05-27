@@ -1,12 +1,11 @@
 import FormulaExplorer from "@/components/formulas/FormulaExplorer"
 
 
-import {
-    getFormulaCount,
-    getFormulas
-} from "@/lib/queries/formulas"
+import type {
+    Formula,
+    PaginatedApiResponse
+} from "@/lib/types/Formula"
 
-import PaginationSearch from "@/components/common/PaginationSearch"
 export default async function FormulasPage({
     searchParams
 }: {
@@ -27,30 +26,39 @@ export default async function FormulasPage({
             params.page || 1
         )
 
-    // =====================
-    // DATA
-    // =====================
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL
+
+    const res =
+        await fetch(
+            `${API_URL}/api/v1/formulas?page=${page}&limit=20&query=${encodeURIComponent(query)}`,
+            {
+                next: {
+                    revalidate: 60
+                }
+            }
+        )
+
+    if (!res.ok) {
+
+        throw new Error(
+            "Failed to fetch formulas"
+        )
+    }
+
+    const response =
+        await res.json() as PaginatedApiResponse<Formula>
 
     const formulas =
-        getFormulas(
-            query,
-            page
-        )
-
-    // =====================
-    // TOTAL
-    // =====================
+        response.data
 
     const total =
-        getFormulaCount(
-            query
-        )
+        response.meta.total
 
     return (
 
         <div>
 
-            {/* HEADER */}
             <div className="mb-10">
 
                 <h1
@@ -75,63 +83,12 @@ export default async function FormulasPage({
 
             </div>
 
-            {/* SEARCH */}
-            <form
-                action="/formulas"
-                className="mb-8"
-            >
-
-                <input
-                    type="text"
-                    name="q"
-                    defaultValue={query}
-                    placeholder="
-                        Search formulas...
-                    "
-                    className="
-                        w-full
-                        rounded-2xl
-                        border
-                        border-zinc-800
-                        bg-zinc-950
-                        px-5
-                        py-4
-                        outline-none
-                    "
-                />
-
-            </form>
-
-            {/* TOTAL */}
-            <div
-                className="
-                    mb-6
-                    text-sm
-                    text-zinc-500
-                "
-            >
-
-                {total}
-                {" "}
-                formulas found
-
-            </div>
-
-            {/* GRID */}
             <FormulaExplorer
-                formulas={formulas}
-            />
-
-            {/* PAGINATION */}
-            <PaginationSearch
-                page={page}
+                initialFormulas={formulas}
                 total={total}
-                basePath="/formulas"
-                query={query}
+                page={page}
             />
 
         </div>
-
     )
-
 }

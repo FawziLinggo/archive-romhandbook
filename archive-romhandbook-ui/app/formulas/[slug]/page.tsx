@@ -1,17 +1,17 @@
 import { notFound } from "next/navigation"
 
-import {
-    getFormulaBySlug
-} from "@/lib/queries/formulas"
-
 import FormulaCodeViewer from "@/components/formulas/code-viewer"
+
+import type {
+    ApiResponse,
+    Formula
+} from "@/lib/types/Formula"
 
 type PageProps = {
 
     params: Promise<{
         slug: string
     }>
-
 }
 
 export default async function FormulaDetailPage(
@@ -20,12 +20,35 @@ export default async function FormulaDetailPage(
     }: PageProps
 ) {
 
-    const { slug } = await params
+    const { slug } =
+        await params
+
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL
+
+    const res =
+        await fetch(
+            `${API_URL}/api/v1/formulas/${slug}`,
+            {
+                next: {
+                    revalidate: 60
+                }
+            }
+        )
+
+    if (!res.ok) {
+
+        notFound()
+    }
+
+    const response =
+        await res.json() as ApiResponse<Formula>
 
     const formula =
-        getFormulaBySlug(slug)
+        response.data
 
     if (!formula) {
+
         notFound()
     }
 
@@ -40,7 +63,6 @@ export default async function FormulaDetailPage(
             "
         >
 
-            {/* HEADER */}
             <div className="mb-8">
 
                 <p
@@ -67,13 +89,10 @@ export default async function FormulaDetailPage(
 
             </div>
 
-            {/* CODE */}
             <FormulaCodeViewer
                 code={formula.formula_code}
             />
 
         </main>
-
     )
-
 }

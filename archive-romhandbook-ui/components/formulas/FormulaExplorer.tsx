@@ -1,14 +1,49 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import {
+    useEffect,
+    useState
+} from "react"
 
 import Link from "next/link"
 
-import { Formula } from "@/lib/types/Formula"
+import PaginationSearch from "@/components/common/PaginationSearch"
+
+import SearchInput from "@/components/search/SearchInput"
+import SearchStatus from "@/components/search/SearchStatus"
+import useDebounce from "@/components/search/useDebounce"
+
+import type {
+    ApiResponse,
+    Formula
+} from "@/lib/types/Formula"
 
 type Props = {
-    formulas: Formula[]
+
+    initialFormulas: Formula[]
+
+    total: number
+
+    page: number
 }
+
+type SearchMeta = {
+
+    page: number
+
+    limit: number
+
+    total: number
+
+    has_next: boolean
+}
+
+type SearchResponse = ApiResponse<Formula[]> & {
+
+    meta: SearchMeta
+}
+
+const LIMIT = 20
 
 function getPreview(
     code: string
@@ -18,7 +53,6 @@ function getPreview(
         .split("\n")
         .slice(0, 5)
         .join("\n")
-
 }
 
 function getLineCount(
@@ -28,105 +62,176 @@ function getLineCount(
     return code
         .split("\n")
         .length
-
 }
 
 export default function FormulaExplorer({
-    formulas
+
+    initialFormulas,
+    total,
+    page
+
 }: Props) {
 
-    const [search, setSearch] =
-        useState("")
+    const [
+        query,
+        setQuery
+    ] = useState("")
 
-    // =====================
-    // FILTER
-    // =====================
+    const [
+        loading,
+        setLoading
+    ] = useState(false)
 
-    const filtered =
-        useMemo(() => {
+    const [
+        formulas,
+        setFormulas
+    ] = useState(initialFormulas)
 
-            if (!search)
-                return formulas
+    const [
+        currentPage,
+        setCurrentPage
+    ] = useState(1)
 
-            return formulas.filter(
-                (formula) => {
+    const [
+        searchHasNext,
+        setSearchHasNext
+    ] = useState(false)
 
-                    const q =
-                        search.toLowerCase()
+    const debouncedQuery =
+        useDebounce(query, 300)
 
-                    return (
+    useEffect(() => {
 
-                        formula.name
-                            .toLowerCase()
-                            .includes(q)
+        setCurrentPage(1)
 
-                        ||
+    }, [
+        debouncedQuery
+    ])
 
-                        formula.formula_code
-                            .toLowerCase()
-                            .includes(q)
+    useEffect(() => {
 
+        if (debouncedQuery.length < 3) {
+
+            setFormulas(initialFormulas)
+
+            setSearchHasNext(false)
+
+            return
+        }
+
+        setLoading(true)
+
+        async function fetchFormulas() {
+
+            try {
+
+                const API_URL =
+                    process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080"
+
+                const res =
+                    await fetch(
+                        `${API_URL}/api/v1/formulas/search?query=${encodeURIComponent(debouncedQuery)}&page=${currentPage}&limit=${LIMIT}`
                     )
 
+                if (!res.ok) {
+
+                    throw new Error(
+                        "Failed to search formulas"
+                    )
                 }
-            )
 
-        }, [
+                const response =
+                    await res.json() as SearchResponse
 
-            formulas,
-            search
+                setFormulas(response.data)
 
-        ])
+                setSearchHasNext(response.meta.has_next)
+
+            } catch (err) {
+
+                console.error(err)
+
+            } finally {
+
+                setLoading(false)
+            }
+        }
+
+        fetchFormulas()
+
+    }, [
+        debouncedQuery,
+        currentPage,
+        initialFormulas
+    ])
+
+    function nextPage() {
+
+        if (!searchHasNext) {
+
+            return
+        }
+
+        setCurrentPage((prev) => prev + 1)
+    }
+
+    function prevPage() {
+
+        if (currentPage <= 1) {
+
+            return
+        }
+
+        setCurrentPage((prev) => prev - 1)
+    }
 
     return (
 
-        <div>
+        <div className="space-y-8">
 
-            {/* SEARCH */}
-            <div
-                className="
-                    sticky
-                    top-0
-                    z-20
-                    bg-black/80
-                    backdrop-blur-xl
-                    pb-6
-                "
-            >
+            <div className="space-y-3">
 
-                <div
-                    className="
-                        rounded-2xl
-                        border
-                        border-zinc-800
-                        bg-zinc-950
-                        overflow-hidden
-                    "
-                >
+                <SearchInput
+                    value={query}
+                    onChange={setQuery}
+                    placeholder="Search formulas..."
+                />
 
+                <SearchStatus
+                    query={query}
+                    loading={loading}
+                    count={formulas.length}
+                />
 
-                </div>
+                {query.length < 3 && (
 
+                    <div
+                        className="
+                            text-sm
+                            text-zinc-500
+                        "
+                    >
+                        {total.toLocaleString()} formulas archived
+                    </div>
+                )}
 
             </div>
 
-            {/* GRID */}
             <div
                 className="
                     grid
                     grid-cols-1
                     xl:grid-cols-2
                     gap-6
-                    mt-6
                 "
             >
 
-                {filtered.map(
+                {formulas.map(
                     (formula) => (
 
                         <Link
                             key={formula.id}
-                            href={`/formulas/${formula.id}`}
+                            href={formula.detail_url}
                         >
 
                             <div
@@ -149,7 +254,6 @@ export default function FormulaExplorer({
                                 "
                             >
 
-                                {/* HEADER */}
                                 <div
                                     className="
                                         p-5
@@ -182,7 +286,6 @@ export default function FormulaExplorer({
 
                                         </div>
 
-                                        {/* BADGE */}
                                         <div
                                             className="
                                                 shrink-0
@@ -201,7 +304,6 @@ export default function FormulaExplorer({
 
                                 </div>
 
-                                {/* PREVIEW */}
                                 <div className="p-5">
 
                                     <pre
@@ -222,7 +324,6 @@ export default function FormulaExplorer({
 
                                 </div>
 
-                                {/* FOOTER */}
                                 <div
                                     className="
                                         px-5
@@ -236,30 +337,18 @@ export default function FormulaExplorer({
                                     "
                                 >
 
-                                    <div
+                                    <span
                                         className="
-                                            flex
-                                            items-center
-                                            gap-3
+                                            text-xs
+                                            text-zinc-500
                                         "
                                     >
-
-                                        <span
-                                            className="
-                                                text-xs
-                                                text-zinc-500
-                                            "
-                                        >
-                                            {
-                                                getLineCount(
-                                                    formula.formula_code
-                                                )
-                                            }
-                                            {" "}
-                                            lines
-                                        </span>
-
-                                    </div>
+                                        {getLineCount(
+                                            formula.formula_code
+                                        )}
+                                        {" "}
+                                        lines
+                                    </span>
 
                                     <span
                                         className="
@@ -267,7 +356,7 @@ export default function FormulaExplorer({
                                             text-sm
                                         "
                                     >
-                                        View Formula →
+                                        View Formula
                                     </span>
 
                                 </div>
@@ -275,14 +364,83 @@ export default function FormulaExplorer({
                             </div>
 
                         </Link>
-
                     )
                 )}
 
             </div>
 
+            {query.length < 3 && (
+
+                <PaginationSearch
+                    page={page}
+                    total={total}
+                    basePath="/formulas"
+                />
+            )}
+
+            {query.length >= 3 && (
+
+                <div
+                    className="
+                        flex
+                        items-center
+                        justify-center
+                        gap-4
+                    "
+                >
+
+                    <button
+                        onClick={prevPage}
+                        disabled={currentPage <= 1}
+                        className="
+                            h-12
+                            px-5
+                            rounded-xl
+                            border
+                            border-zinc-800
+                            bg-zinc-900
+                            text-white
+                            transition-all
+                            disabled:pointer-events-none
+                            disabled:opacity-40
+                            hover:bg-zinc-800
+                        "
+                    >
+                        Prev
+                    </button>
+
+                    <div
+                        className="
+                            text-sm
+                            text-zinc-400
+                        "
+                    >
+                        Page {currentPage}
+                    </div>
+
+                    <button
+                        onClick={nextPage}
+                        disabled={!searchHasNext}
+                        className="
+                            h-12
+                            px-5
+                            rounded-xl
+                            border
+                            border-zinc-800
+                            bg-zinc-900
+                            text-white
+                            transition-all
+                            disabled:pointer-events-none
+                            disabled:opacity-40
+                            hover:bg-zinc-800
+                        "
+                    >
+                        Next
+                    </button>
+
+                </div>
+            )}
+
         </div>
-
     )
-
 }
