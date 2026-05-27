@@ -172,19 +172,44 @@ func GetPets(
 }
 
 func SearchPets(
-
 	db *sql.DB,
 	query string,
-
+	page int,
+	limit int,
 ) (
-
 	[]models.Pet,
+	int,
+	bool,
 	error,
-
 ) {
+	if len(query) < 4 {
+		return []models.Pet{}, 0, false, nil
+	}
+
+	offset :=
+		(page - 1) * limit
 
 	search :=
 		"%" + query + "%"
+
+	var total int
+
+	err := db.QueryRow(`
+
+		SELECT
+			COUNT(*)
+
+		FROM pets p
+
+		WHERE
+			LOWER(p.name)
+			LIKE LOWER(?)
+
+	`, search).Scan(&total)
+
+	if err != nil {
+		return nil, 0, false, err
+	}
 
 	rows, err := db.Query(`
 
@@ -225,25 +250,24 @@ func SearchPets(
 		ORDER BY
 			LOWER(p.name) ASC
 
-		LIMIT 24
+		LIMIT ?
+		OFFSET ?
 
-	`, search)
+	`, search, limit+1, offset)
 
 	if err != nil {
-
-		return nil, err
+		return nil, 0, false, err
 	}
 
 	defer rows.Close()
 
-	pets := []models.Pet{}
+	pets :=
+		[]models.Pet{}
 
 	for rows.Next() {
-
 		var pet models.Pet
 
 		err := rows.Scan(
-
 			&pet.ID,
 			&pet.DetailURL,
 			&pet.Image,
@@ -266,17 +290,20 @@ func SearchPets(
 		)
 
 		if err != nil {
-
-			return nil, err
+			return nil, 0, false, err
 		}
 
-		pets = append(
-			pets,
-			pet,
-		)
+		pets = append(pets, pet)
 	}
 
-	return pets, nil
+	hasNext :=
+		len(pets) > limit
+
+	if hasNext {
+		pets = pets[:limit]
+	}
+
+	return pets, total, hasNext, nil
 }
 
 func GetPetBySlug(

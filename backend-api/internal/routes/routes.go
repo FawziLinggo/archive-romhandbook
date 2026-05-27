@@ -98,4 +98,24 @@ func SetupRoutes(
 		"/api/v1/mounts/:id",
 		mountHandler.GetMountByID,
 	)
+
+	buffHandler :=
+		handlers.BuffHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/buffs",
+		buffHandler.GetBuffs,
+	)
+
+	router.GET(
+		"/api/v1/buffs/search",
+		buffHandler.SearchBuffs,
+	)
+
+	router.GET(
+		"/api/v1/buffs/:slug",
+		buffHandler.GetBuffBySlug,
+	)
 }

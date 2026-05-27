@@ -6,13 +6,13 @@ import (
 	"backend-api/internal/models"
 )
 
-func GetMounts(
+func GetBuffs(
 	db *sql.DB,
 	page int,
 	limit int,
 	query string,
 ) (
-	[]models.Mount,
+	[]models.Buff,
 	int,
 	bool,
 	error,
@@ -30,11 +30,12 @@ func GetMounts(
 		SELECT
 			COUNT(*)
 
-		FROM mounts
+		FROM buffs
 
 		WHERE
-			LOWER(name)
-			LIKE LOWER(?)
+			name LIKE ?
+			AND name IS NOT NULL
+			AND name != ''
 
 	`, search).Scan(&total)
 
@@ -50,18 +51,22 @@ func GetMounts(
 			detail_url,
 			image,
 			description,
-			quality,
-			effect_text,
-			unlock_text,
-			jobs
+			raw_json
 
-		FROM mounts
+		FROM buffs
 
 		WHERE
-			LOWER(name)
-			LIKE LOWER(?)
+			name LIKE ?
+			AND name IS NOT NULL
+			AND name != ''
 
 		ORDER BY
+			CASE
+				WHEN name GLOB '[A-Za-z]*'
+				THEN 0
+				ELSE 1
+			END,
+
 			LOWER(name) ASC
 
 		LIMIT ?
@@ -75,54 +80,51 @@ func GetMounts(
 
 	defer rows.Close()
 
-	mounts :=
-		[]models.Mount{}
+	buffs :=
+		[]models.Buff{}
 
 	for rows.Next() {
-		var mount models.Mount
+		var buff models.Buff
 
 		err := rows.Scan(
-			&mount.ID,
-			&mount.Name,
-			&mount.DetailURL,
-			&mount.Image,
-			&mount.Description,
-			&mount.Quality,
-			&mount.EffectText,
-			&mount.UnlockText,
-			&mount.Jobs,
+			&buff.ID,
+			&buff.Name,
+			&buff.DetailURL,
+			&buff.Image,
+			&buff.Description,
+			&buff.RawJSON,
 		)
 
 		if err != nil {
 			return nil, 0, false, err
 		}
 
-		mounts = append(mounts, mount)
+		buffs = append(buffs, buff)
 	}
 
 	hasNext :=
-		len(mounts) > limit
+		len(buffs) > limit
 
 	if hasNext {
-		mounts = mounts[:limit]
+		buffs = buffs[:limit]
 	}
 
-	return mounts, total, hasNext, nil
+	return buffs, total, hasNext, nil
 }
 
-func SearchMounts(
+func SearchBuffs(
 	db *sql.DB,
 	query string,
 	page int,
 	limit int,
 ) (
-	[]models.Mount,
+	[]models.Buff,
 	int,
 	bool,
 	error,
 ) {
-	if len(query) < 4 {
-		return []models.Mount{}, 0, false, nil
+	if len(query) < 3 {
+		return []models.Buff{}, 0, false, nil
 	}
 
 	offset :=
@@ -138,11 +140,12 @@ func SearchMounts(
 		SELECT
 			COUNT(*)
 
-		FROM mounts
+		FROM buffs
 
 		WHERE
-			LOWER(name)
-			LIKE LOWER(?)
+			name LIKE ?
+			AND name IS NOT NULL
+			AND name != ''
 
 	`, search).Scan(&total)
 
@@ -158,18 +161,22 @@ func SearchMounts(
 			detail_url,
 			image,
 			description,
-			quality,
-			effect_text,
-			unlock_text,
-			jobs
+			raw_json
 
-		FROM mounts
+		FROM buffs
 
 		WHERE
-			LOWER(name)
-			LIKE LOWER(?)
+			name LIKE ?
+			AND name IS NOT NULL
+			AND name != ''
 
 		ORDER BY
+			CASE
+				WHEN name GLOB '[A-Za-z]*'
+				THEN 0
+				ELSE 1
+			END,
+
 			LOWER(name) ASC
 
 		LIMIT ?
@@ -183,83 +190,75 @@ func SearchMounts(
 
 	defer rows.Close()
 
-	mounts :=
-		[]models.Mount{}
+	buffs :=
+		[]models.Buff{}
 
 	for rows.Next() {
-		var mount models.Mount
+		var buff models.Buff
 
 		err := rows.Scan(
-			&mount.ID,
-			&mount.Name,
-			&mount.DetailURL,
-			&mount.Image,
-			&mount.Description,
-			&mount.Quality,
-			&mount.EffectText,
-			&mount.UnlockText,
-			&mount.Jobs,
+			&buff.ID,
+			&buff.Name,
+			&buff.DetailURL,
+			&buff.Image,
+			&buff.Description,
+			&buff.RawJSON,
 		)
 
 		if err != nil {
 			return nil, 0, false, err
 		}
 
-		mounts = append(mounts, mount)
+		buffs = append(buffs, buff)
 	}
 
 	hasNext :=
-		len(mounts) > limit
+		len(buffs) > limit
 
 	if hasNext {
-		mounts = mounts[:limit]
+		buffs = buffs[:limit]
 	}
 
-	return mounts, total, hasNext, nil
+	return buffs, total, hasNext, nil
 }
 
-func GetMountByID(
+func GetBuffBySlug(
 	db *sql.DB,
-	id string,
+	slug string,
 ) (
-	*models.MountDetail,
+	*models.BuffDetail,
 	error,
 ) {
-	var mount models.MountDetail
+	var buff models.BuffDetail
+
+	detailURL :=
+		"/buffs/" + slug
 
 	err := db.QueryRow(`
 
 		SELECT
 			id,
+			name,
 			detail_url,
 			image,
-			name,
-			mount_type,
 			description,
-			quality,
-			effect_text,
-			unlock_text,
-			jobs,
+			raw_json,
 			raw_html
 
-		FROM mounts
+		FROM buffs
 
-		WHERE id = ?
+		WHERE detail_url = ?
 
 		LIMIT 1
 
-	`, id).Scan(
-		&mount.ID,
-		&mount.DetailURL,
-		&mount.Image,
-		&mount.Name,
-		&mount.MountType,
-		&mount.Description,
-		&mount.Quality,
-		&mount.EffectText,
-		&mount.UnlockText,
-		&mount.Jobs,
-		&mount.RawHTML,
+	`, detailURL).Scan(
+		&buff.ID,
+		&buff.Name,
+		&buff.DetailURL,
+		&buff.Image,
+		&buff.Description,
+		&buff.RawJSON,
+		&buff.RawHTML,
 	)
 
 	if err != nil {
@@ -270,5 +269,5 @@ func GetMountByID(
 		return nil, err
 	}
 
-	return &mount, nil
+	return &buff, nil
 }

@@ -1,8 +1,9 @@
 import BuffSearchClient from "@/components/buffs/BuffSearchClient"
 
-import {
-    getBuffs
-} from "@/lib/queries/buffs"
+import type {
+    Buff,
+    PaginatedApiResponse
+} from "@/lib/types/Buff"
 
 export default async function BuffsPage({
 
@@ -14,9 +15,7 @@ export default async function BuffsPage({
         query?: string
         page?: string
     }>
-
 }) {
-
     // =====================
     // SEARCH PARAMS
     // =====================
@@ -31,18 +30,37 @@ export default async function BuffsPage({
         Number(params.page || "1")
 
     // =====================
-    // DATA
+    // API
     // =====================
 
-    const {
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL
 
-        buffs,
-        total
+    const res =
+        await fetch(
+            `${API_URL}/api/v1/buffs?page=${page}&limit=24&query=${encodeURIComponent(query)}`,
+            {
+                next: {
+                    revalidate: 60
+                }
+            }
+        )
 
-    } = getBuffs(
-        page,
-        query
-    )
+    if (!res.ok) {
+
+        throw new Error(
+            "Failed to fetch buffs"
+        )
+    }
+
+    const response =
+        await res.json() as PaginatedApiResponse<Buff>
+
+    const buffs =
+        response.data
+
+    const total =
+        response.meta.total
 
     return (
 
@@ -93,7 +111,5 @@ export default async function BuffsPage({
             />
 
         </div>
-
     )
-
 }

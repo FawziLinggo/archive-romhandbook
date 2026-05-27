@@ -68,14 +68,24 @@ echo TEST GET PET EGG BY ID
 echo =====================
 @REM curl "http://127.0.0.1:8080/api/v1/things/900297" | jq
 
-echo TEST GET MOUNTS
-curl "http://127.0.0.1:8080/api/v1/mounts?page=1&limit=24&query=" | jq
+@REM echo TEST GET MOUNTS
+@REM curl "http://127.0.0.1:8080/api/v1/mounts?page=1&limit=24&query=" | jq
 
-echo TEST GET MOUNTS WITH QUERY
-curl "http://127.0.0.1:8080/api/v1/mounts/search?query=dragon" | jq
+@REM echo TEST GET MOUNTS WITH QUERY
+@REM curl "http://127.0.0.1:8080/api/v1/mounts/search?query=dragon" | jq
 
-echo TEST GET MOUNT WITH SLUG
-curl "http://127.0.0.1:8080/api/v1/mounts/3011823" | jq
+@REM echo TEST GET MOUNT WITH SLUG
+@REM curl "http://127.0.0.1:8080/api/v1/mounts/3011823" | jq
 
-echo TEST GET MOUNT WITH ID
-curl "http://127.0.0.1:8080/api/v1/things/3011823" | jq
+@REM echo TEST GET MOUNT WITH ID
+@REM curl "http://127.0.0.1:8080/api/v1/things/3011823" | jq
+
+
+echo TEST GET BUFFS
+curl "http://127.0.0.1:8080/api/v1/buffs?page=1&limit=24&query=" | jq
+
+echo TEST GET BUFFS WITH QUERY
+curl "http://127.0.0.1:8080/api/v1/buffs/search?query=atk" | jq
+
+echo TEST GET BUFF WITH SLUG
+curl "http://127.0.0.1:8080/api/v1/buffs/NAMA-SLUG" | jq

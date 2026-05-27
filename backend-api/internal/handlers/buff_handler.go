@@ -10,11 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MountHandler struct {
+type BuffHandler struct {
 	DB *sql.DB
 }
 
-func (h *MountHandler) GetMounts(
+func (h *BuffHandler) GetBuffs(
 	c *gin.Context,
 ) {
 	page, _ :=
@@ -38,8 +38,8 @@ func (h *MountHandler) GetMounts(
 		limit = 24
 	}
 
-	mounts, total, hasNext, err :=
-		repositories.GetMounts(
+	buffs, total, hasNext, err :=
+		repositories.GetBuffs(
 			h.DB,
 			page,
 			limit,
@@ -54,7 +54,7 @@ func (h *MountHandler) GetMounts(
 	utils.Success(
 		c,
 		200,
-		mounts,
+		buffs,
 		gin.H{
 			"page":     page,
 			"limit":    limit,
@@ -64,7 +64,7 @@ func (h *MountHandler) GetMounts(
 	)
 }
 
-func (h *MountHandler) SearchMounts(
+func (h *BuffHandler) SearchBuffs(
 	c *gin.Context,
 ) {
 	query :=
@@ -81,10 +81,13 @@ func (h *MountHandler) SearchMounts(
 		)
 
 	page, limit =
-		utils.NormalizePagination(page, limit)
+		utils.NormalizePagination(
+			page,
+			limit,
+		)
 
-	mounts, total, hasNext, err :=
-		repositories.SearchMounts(
+	buffs, total, hasNext, err :=
+		repositories.SearchBuffs(
 			h.DB,
 			query,
 			page,
@@ -99,7 +102,7 @@ func (h *MountHandler) SearchMounts(
 	utils.Success(
 		c,
 		200,
-		mounts,
+		buffs,
 		gin.H{
 			"page":     page,
 			"limit":    limit,
@@ -109,16 +112,16 @@ func (h *MountHandler) SearchMounts(
 	)
 }
 
-func (h *MountHandler) GetMountByID(
+func (h *BuffHandler) GetBuffBySlug(
 	c *gin.Context,
 ) {
-	id :=
-		c.Param("id")
+	slug :=
+		c.Param("slug")
 
-	mount, err :=
-		repositories.GetMountByID(
+	buff, err :=
+		repositories.GetBuffBySlug(
 			h.DB,
-			id,
+			slug,
 		)
 
 	if err != nil {
@@ -126,10 +129,10 @@ func (h *MountHandler) GetMountByID(
 		return
 	}
 
-	if mount == nil {
-		utils.Error(c, 404, "Mount not found")
+	if buff == nil {
+		utils.Error(c, 404, "Buff not found")
 		return
 	}
 
-	utils.Success(c, 200, mount, nil)
+	utils.Success(c, 200, buff, nil)
 }

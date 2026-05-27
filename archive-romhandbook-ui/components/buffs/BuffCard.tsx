@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { Buff } from "@/lib/queries/buffs"
+import { Buff } from "@/lib/types/Buff"
 
 type Props = {
 

@@ -152,23 +152,38 @@ func (h *PetHandler) GetPetBySlug(
 }
 
 func (h *PetHandler) SearchPets(
-
 	c *gin.Context,
-
 ) {
-
 	query :=
 		c.Query("query")
 
-	pets, err :=
-		repositories.SearchPets(
+	page, _ :=
+		strconv.Atoi(
+			c.DefaultQuery("page", "1"),
+		)
 
+	limit, _ :=
+		strconv.Atoi(
+			c.DefaultQuery("limit", "24"),
+		)
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 || limit > 24 {
+		limit = 24
+	}
+
+	pets, total, hasNext, err :=
+		repositories.SearchPets(
 			h.DB,
 			query,
+			page,
+			limit,
 		)
 
 	if err != nil {
-
 		utils.Error(
 			c,
 			500,
@@ -182,6 +197,11 @@ func (h *PetHandler) SearchPets(
 		c,
 		200,
 		pets,
-		nil,
+		gin.H{
+			"page":     page,
+			"limit":    limit,
+			"total":    total,
+			"has_next": hasNext,
+		},
 	)
 }
