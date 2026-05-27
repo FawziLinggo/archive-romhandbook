@@ -212,3 +212,57 @@ export function getPetBySlug(
         `)
         .get(slug) as PetDetail | null
 }
+
+
+export function searchPets(
+    query: string
+) {
+
+    if (query.length < 4) {
+
+        return []
+
+    }
+
+    return db.prepare(`
+
+        SELECT
+
+            p.id,
+            p.detail_url,
+            p.image,
+            p.name,
+
+            p.race,
+            p.element,
+            p.size,
+
+            p.description,
+            p.unlock_text,
+
+            p.egg_id,
+            p.egg_url,
+
+            pe.name as egg_name,
+            pe.image as egg_image,
+
+            COALESCE(
+                p.skills,
+                '[]'
+            ) as skills
+
+        FROM pets p
+
+        LEFT JOIN pet_eggs pe
+            ON pe.id = p.egg_id
+
+        WHERE
+            LOWER(p.name)
+            LIKE LOWER(?)
+
+        ORDER BY
+            LOWER(p.name) ASC
+
+    `).all(`%${query}%`) as Pet[]
+
+}

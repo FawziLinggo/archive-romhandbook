@@ -55,7 +55,7 @@ export default async function MountsPage({
                         text-white
                     "
                 >
-                    Mount Archive
+                    Mount
                 </h1>
 
                 <p

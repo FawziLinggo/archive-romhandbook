@@ -52,17 +52,14 @@ export default function PetCard({
                 border
                 border-white/10
 
-                bg-gradient-to-b
-                from-[#111827]
-                to-[#0b1020]
-
+                bg-zinc-950/90
                 p-5
 
                 transition-all
                 duration-300
 
                 hover:border-violet-500/50
-                hover:shadow-[0_0_40px_rgba(139,92,246,0.18)]
+                hover:border-violet-500/30
             "
         >
 
@@ -89,7 +86,7 @@ export default function PetCard({
                         border
                         border-white/10
 
-                        bg-black/40
+                        bg-zinc-900
                     "
                 >
 
@@ -413,7 +410,7 @@ export default function PetCard({
                                         border
                                         border-white/10
 
-                                        bg-white/5
+                                        bg-zinc-900
 
                                         px-2
                                         py-1.5
