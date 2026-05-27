@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"backend-api/internal/repositories"
+	"backend-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -149,4 +150,40 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 	}
+}
+
+func (h *ThingHandler) GetRandomSnapshotCard(
+	c *gin.Context,
+) {
+	card, err :=
+		repositories.GetRandomSnapshotCard(
+			h.DB,
+		)
+
+	if err != nil {
+		utils.Error(
+			c,
+			500,
+			err.Error(),
+		)
+
+		return
+	}
+
+	if card == nil {
+		utils.Error(
+			c,
+			404,
+			"Snapshot card not found",
+		)
+
+		return
+	}
+
+	utils.Success(
+		c,
+		200,
+		card,
+		nil,
+	)
 }

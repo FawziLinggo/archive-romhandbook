@@ -4,23 +4,16 @@ import FormulaPreview from "@/components/home/FormulaPreview"
 
 import OriginalSnapshotCard from "@/components/home/OriginalSnapshotCard"
 
-import {
-  getRandomSnapshotCard as getRandomSnapshot
-} from "@/lib/queries/things"
-
-import {
-  getSidebarCounts
-} from "@/lib/queries/sidebar"
-
 import type {
   ApiResponse,
   Formula
 } from "@/lib/types/Formula"
 
-export default async function HomePage() {
+import type {
+  RandomSnapshotCard
+} from "@/lib/types/Thing"
 
-  const counts =
-    getSidebarCounts()
+export default async function HomePage() {
 
   const API_URL =
     process.env.NEXT_PUBLIC_API_URL
@@ -42,8 +35,22 @@ export default async function HomePage() {
       ).data
       : null
 
+  const snapshotRes =
+    await fetch(
+      `${API_URL}/api/v1/things/random-snapshot-card`,
+      {
+        next: {
+          revalidate: 60
+        }
+      }
+    )
+
   const snapshot =
-    getRandomSnapshot()
+    snapshotRes.ok
+      ? (
+        await snapshotRes.json() as ApiResponse<RandomSnapshotCard>
+      ).data
+      : null
 
   return (
 
@@ -51,7 +58,6 @@ export default async function HomePage() {
 
       <HomeHero />
 
-      {/* FORMULA FEATURE */}
       <section
         className="
             grid
@@ -62,30 +68,31 @@ export default async function HomePage() {
         "
       >
 
-        {/* LEFT */}
         <div>
 
-          <FormulaPreview
-            formula={formula}
-          />
+          {formula && (
+
+            <FormulaPreview
+              formula={formula}
+            />
+
+          )}
 
         </div>
 
-        {/* RIGHT */}
         <div>
 
-          <OriginalSnapshotCard
-            snapshot={snapshot}
-          />
+          {snapshot && (
+
+            <OriginalSnapshotCard
+              snapshot={snapshot}
+            />
+
+          )}
 
         </div>
 
       </section>
-
-      {/* ARCHIVE GRID */}
-      {/* <ArchiveStatsGrid
-        counts={counts}
-      /> */}
 
     </div>
   )

@@ -65,6 +65,11 @@ func SetupRoutes(
 	)
 
 	router.GET(
+		"/api/v1/things/random-snapshot-card",
+		thingHandler.GetRandomSnapshotCard,
+	)
+
+	router.GET(
 		"/api/v1/things/:id",
 		thingHandler.GetThingByID,
 	)
