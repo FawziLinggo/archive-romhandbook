@@ -1,5 +1,27 @@
 import { db } from "@/lib/db"
 
+export type Mount = {
+
+    id: string
+
+    name: string
+
+    detail_url: string
+
+    image: string | null
+
+    description: string | null
+
+    quality: string | null
+
+    effect_text: string | null
+
+    unlock_text: string | null
+
+    jobs: string | null
+
+}
+
 type GetMountsProps = {
 
     search?: string
@@ -31,6 +53,7 @@ export function getMounts({
             effect_text,
             unlock_text,
             jobs
+
         FROM mounts
 
         WHERE
@@ -49,7 +72,7 @@ export function getMounts({
         limit,
         offset
 
-    )
+    ) as Mount[]
 
 }
 
@@ -104,5 +127,42 @@ export function getMountById(
         LIMIT 1
 
     `).get(id)
+
+}
+
+
+export function searchMounts(
+    query: string
+) {
+
+    if (query.length < 4) {
+
+        return []
+
+    }
+
+    return db.prepare(`
+
+        SELECT
+            id,
+            name,
+            detail_url,
+            image,
+            description,
+            quality,
+            effect_text,
+            unlock_text,
+            jobs
+
+        FROM mounts
+
+        WHERE
+            LOWER(name)
+            LIKE LOWER(?)
+
+        ORDER BY
+            LOWER(name) ASC
+
+    `).all(`%${query}%`) as Mount[]
 
 }

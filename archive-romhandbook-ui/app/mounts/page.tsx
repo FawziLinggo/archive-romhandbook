@@ -1,10 +1,8 @@
+import MountSearchClient from "@/components/mounts/MountSearchClient"
 import {
     getMounts,
     getMountsCount
 } from "@/lib/queries/mounts"
-
-import PaginationSearch from "@/components/common/PaginationSearch"
-import MountGrid from "@/components/mounts/MountGrid"
 
 type Props = {
 
@@ -73,79 +71,10 @@ export default async function MountsPage({
                 </p>
 
             </div>
-
-            <form
-                action="/mounts"
-                className="
-        flex
-        flex-col
-        gap-4
-
-        md:flex-row
-    "
-            >
-
-                <input
-                    type="text"
-                    name="search"
-                    defaultValue={search}
-                    placeholder="Search mounts..."
-                    className="
-            h-14
-            flex-1
-            rounded-2xl
-            border
-            border-zinc-800
-            bg-zinc-950
-            px-5
-            text-white
-            outline-none
-
-            transition-colors
-
-            focus:border-violet-500/50
-        "
-                />
-
-                <button
-                    type="submit"
-                    className="
-            h-14
-            rounded-2xl
-            bg-violet-600
-            px-8
-            font-semibold
-            text-white
-
-            transition-all
-
-            hover:bg-violet-500
-        "
-                >
-                    Search
-                </button>
-
-            </form>
-
-            {/* STATS */}
-
-            <p
-                className="
-                    text-sm
-                    text-zinc-500
-                "
-            >
-                {total.toLocaleString()} mounts archived
-            </p>
-
-
-            <MountGrid mounts={mounts} />
-
-            <PaginationSearch
-                page={page}
+            <MountSearchClient
+                initialMounts={mounts}
                 total={total}
-                basePath="/mounts"
-                query={search}
+                page={page}
             />
 
         </div>
