@@ -5,9 +5,13 @@ import FormulaViewer from "@/components/common/FormulaViewer"
 import RomHtmlViewerToggle from "../common/RomHtmlViewerToggle"
 import DetailContainer from "../layout/DetailContainer"
 
+import type {
+    PetEgg
+} from "@/lib/types/Pets"
+
 type Props = {
 
-    egg: any
+    egg: PetEgg
 }
 
 export default function PetEggDetail({
@@ -76,6 +80,7 @@ export default function PetEggDetail({
                             src={egg.image}
                             alt={egg.name}
                             fill
+                            sizes="56px"
                             className="
                                 object-cover
                             "
@@ -352,8 +357,9 @@ export default function PetEggDetail({
 
                                             <Image
                                                 src={egg.pet_image}
-                                                alt={egg.pet_name}
+                                                alt={egg.pet_name || egg.name}
                                                 fill
+                                                sizes="56px"
                                                 className="
                                                     object-cover
                                                 "
@@ -418,9 +424,13 @@ export default function PetEggDetail({
 
             )}
 
-            <RomHtmlViewerToggle
-                html={egg.raw_html}
-            />
+            {egg.raw_html && (
+
+                <RomHtmlViewerToggle
+                    html={egg.raw_html}
+                />
+
+            )}
 
         </DetailContainer>
 

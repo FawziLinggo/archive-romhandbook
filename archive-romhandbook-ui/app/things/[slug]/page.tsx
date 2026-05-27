@@ -2,22 +2,31 @@ import {
     getCardById,
     getCardFormulas,
 } from "@/lib/queries/cards"
-import {
-    getThingTypeById
-} from "@/lib/queries/things"
 
 import CardDetail from "@/components/things/CardDetail"
 
-import {
-    getEggById
-} from "@/lib/queries/pet-eggs"
-
 import PetEggDetail from "@/components/things/PetEggDetail"
+
 import {
     getMountById
 } from "@/lib/queries/mounts"
 
 import MountDetail from "@/components/things/MountDetail"
+
+import type {
+    PetEgg
+} from "@/lib/types/Pets"
+
+type ThingResponse<T> = {
+
+    success: boolean
+
+    type: string
+
+    data: T
+
+    meta: unknown
+}
 
 // import EquipmentDetail from "@/components/things/EquipmentDetail"
 
@@ -37,20 +46,32 @@ export default async function ThingPage({
     const id =
         slug.split("-").pop() || ""
 
-    const thing: any =
-        getThingTypeById(id)
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL
 
-    if (!thing) {
+    const thingRes =
+        await fetch(
+            `${API_URL}/api/v1/things/${id}`,
+            {
+                next: {
+                    revalidate: 60
+                }
+            }
+        )
+
+    if (!thingRes.ok) {
 
         return (
             <div>
                 Not Found
             </div>
         )
-
     }
 
-    switch (thing.type) {
+    const thingResponse =
+        await thingRes.json() as ThingResponse<unknown>
+
+    switch (thingResponse.type) {
 
         case "card": {
 
@@ -66,13 +87,12 @@ export default async function ThingPage({
                     formulas={formulas}
                 />
             )
-
         }
 
         case "pet_egg": {
 
             const egg =
-                getEggById(id)
+                thingResponse.data as PetEgg | undefined
 
             if (!egg) {
 
@@ -81,17 +101,13 @@ export default async function ThingPage({
                         Egg not found
                     </div>
                 )
-
             }
 
             return (
-
                 <PetEggDetail
                     egg={egg}
                 />
-
             )
-
         }
 
         case "mount": {
@@ -106,31 +122,14 @@ export default async function ThingPage({
                         Mount not found
                     </div>
                 )
-
             }
 
             return (
-
                 <MountDetail
                     mount={mount}
                 />
-
             )
-
         }
-
-        // case "equipment": {
-
-        //     const equipment =
-        //         getEquipmentById(id)
-
-        //     return (
-        //         <EquipmentDetail
-        //             equipment={equipment}
-        //         />
-        //     )
-
-        // }
 
         default:
 
@@ -139,7 +138,5 @@ export default async function ThingPage({
                     Unknown type
                 </div>
             )
-
     }
-
 }
