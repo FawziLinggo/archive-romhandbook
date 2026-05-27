@@ -1,10 +1,12 @@
+import type {
+    Mount
+} from "@/lib/types/Mount"
 import Image from "next/image"
 import Link from "next/link"
 
 type Props = {
 
-    mount: any
-
+    mount: Mount
 }
 
 const qualityStyles: Record<
@@ -87,7 +89,7 @@ export default function MountCard({
                 hover:shadow-2xl
                 hover:shadow-violet-500/10
 
-                ${qualityStyles[mount.quality] || "border-zinc-800"}
+                ${mount.quality ? qualityStyles[mount.quality] || "border-zinc-800" : "border-zinc-800"}
             `}
         >
 
@@ -148,13 +150,14 @@ export default function MountCard({
                             }
                             alt={mount.name}
                             fill
+                            sizes="96px"
                             className="
-                                object-cover
-                                transition-transform
-                                duration-500
+        object-cover
+        transition-transform
+        duration-500
 
-                                group-hover:scale-110
-                            "
+        group-hover:scale-110
+    "
                         />
 
                     </div>

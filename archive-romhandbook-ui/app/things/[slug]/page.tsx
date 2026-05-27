@@ -7,11 +7,11 @@ import CardDetail from "@/components/things/CardDetail"
 
 import PetEggDetail from "@/components/things/PetEggDetail"
 
-import {
-    getMountById
-} from "@/lib/queries/mounts"
-
 import MountDetail from "@/components/things/MountDetail"
+
+import type {
+    MountDetail as MountDetailType
+} from "@/lib/types/Mount"
 
 import type {
     PetEgg
@@ -113,7 +113,7 @@ export default async function ThingPage({
         case "mount": {
 
             const mount =
-                getMountById(id)
+                thingResponse.data as MountDetailType | undefined
 
             if (!mount) {
 

@@ -3,10 +3,13 @@ import Image from "next/image"
 import RomHtmlViewerToggle from "../common/RomHtmlViewerToggle"
 import DetailContainer from "../layout/DetailContainer"
 
+import type {
+    MountDetail
+} from "@/lib/types/Mount"
+
 type Props = {
 
-    mount: any
-
+    mount: MountDetail
 }
 
 export default function MountDetail({
@@ -126,13 +129,17 @@ export default function MountDetail({
                     >
 
                         <Image
-                            src={mount.image}
+                            src={
+                                mount.image ||
+                                "/placeholder.png"
+                            }
                             alt={mount.name}
                             fill
+                            sizes="128px"
                             className="
-                                object-contain
-                                p-3
-                            "
+        object-contain
+        p-3
+    "
                         />
 
                     </div>

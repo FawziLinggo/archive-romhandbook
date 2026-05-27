@@ -6,8 +6,9 @@ import {
 } from "react"
 
 import type {
+    ApiResponse,
     Mount
-} from "@/lib/queries/mounts"
+} from "@/lib/types/Mount"
 
 import PaginationSearch from "../common/PaginationSearch"
 
@@ -92,14 +93,14 @@ export default function MountSearchClient({
                 const res =
                     await fetch(
 
-                        `/api/mounts/search?query=${encodeURIComponent(debouncedQuery)}`
+                        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/mounts/search?query=${encodeURIComponent(debouncedQuery)}`
 
                     )
 
-                const data =
-                    await res.json()
+                const response =
+                    await res.json() as ApiResponse<Mount[]>
 
-                setMounts(data)
+                setMounts(response.data)
 
             } catch (err) {
 

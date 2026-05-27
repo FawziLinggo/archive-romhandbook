@@ -1,9 +1,12 @@
+import type {
+    Mount
+} from "@/lib/types/Mount"
+
 import MountCard from "./MountCard"
 
 type Props = {
 
-    mounts: any[]
-
+    mounts: Mount[]
 }
 
 export default function MountGrid({

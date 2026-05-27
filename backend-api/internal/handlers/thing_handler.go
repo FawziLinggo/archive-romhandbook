@@ -94,6 +94,49 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 
+	case "mount":
+		mount, err :=
+			repositories.GetMountByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{
+					"success": false,
+					"message": err.Error(),
+				},
+			)
+
+			return
+		}
+
+		if mount == nil {
+			c.JSON(
+				http.StatusNotFound,
+				gin.H{
+					"success": false,
+					"message": "Mount not found",
+				},
+			)
+
+			return
+		}
+
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    mount,
+				"meta":    nil,
+			},
+		)
+
+		return
+
 	default:
 		c.JSON(
 			http.StatusNotImplemented,

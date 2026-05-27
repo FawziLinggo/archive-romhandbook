@@ -1,8 +1,9 @@
 import MountSearchClient from "@/components/mounts/MountSearchClient"
-import {
-    getMounts,
-    getMountsCount
-} from "@/lib/queries/mounts"
+
+import type {
+    Mount,
+    PaginatedApiResponse
+} from "@/lib/types/Mount"
 
 type Props = {
 
@@ -10,14 +11,11 @@ type Props = {
         search?: string
         page?: string
     }>
-
 }
 
 export default async function MountsPage({
     searchParams
 }: Props) {
-    const limit = 24
-
 
     const params =
         await searchParams
@@ -28,25 +26,36 @@ export default async function MountsPage({
     const page =
         Number(params.page || "1")
 
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL
+
+    const res =
+        await fetch(
+            `${API_URL}/api/v1/mounts?page=${page}&limit=24&query=${encodeURIComponent(search)}`,
+            {
+                next: {
+                    revalidate: 60
+                }
+            }
+        )
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch mounts")
+    }
+
+    const response =
+        await res.json() as PaginatedApiResponse<Mount>
+
     const mounts =
-        getMounts({
-            search,
-            page
-        })
+        response.data
 
     const total =
-        getMountsCount(search)
-
-
+        response.meta.total
 
     return (
-
         <div className="space-y-8">
 
-            {/* HERO */}
-
             <div>
-
                 <h1
                     className="
                         text-5xl
@@ -69,8 +78,8 @@ export default async function MountsPage({
                     rare mounts, and legendary rides
                     from Ragnarok Mobile.
                 </p>
-
             </div>
+
             <MountSearchClient
                 initialMounts={mounts}
                 total={total}
@@ -78,9 +87,5 @@ export default async function MountsPage({
             />
 
         </div>
-
-
-
     )
-
 }

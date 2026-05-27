@@ -66,4 +66,16 @@
 echo =====================
 echo TEST GET PET EGG BY ID
 echo =====================
-curl "http://127.0.0.1:8080/api/v1/things/900297" | jq
+@REM curl "http://127.0.0.1:8080/api/v1/things/900297" | jq
+
+echo TEST GET MOUNTS
+curl "http://127.0.0.1:8080/api/v1/mounts?page=1&limit=24&query=" | jq
+
+echo TEST GET MOUNTS WITH QUERY
+curl "http://127.0.0.1:8080/api/v1/mounts/search?query=dragon" | jq
+
+echo TEST GET MOUNT WITH SLUG
+curl "http://127.0.0.1:8080/api/v1/mounts/3011823" | jq
+
+echo TEST GET MOUNT WITH ID
+curl "http://127.0.0.1:8080/api/v1/things/3011823" | jq

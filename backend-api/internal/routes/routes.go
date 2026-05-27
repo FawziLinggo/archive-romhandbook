@@ -78,4 +78,24 @@ func SetupRoutes(
 
 		petEggHandler.GetEggByID,
 	)
+
+	mountHandler :=
+		handlers.MountHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/mounts",
+		mountHandler.GetMounts,
+	)
+
+	router.GET(
+		"/api/v1/mounts/search",
+		mountHandler.SearchMounts,
+	)
+
+	router.GET(
+		"/api/v1/mounts/:id",
+		mountHandler.GetMountByID,
+	)
 }
