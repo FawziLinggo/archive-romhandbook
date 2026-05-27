@@ -1,92 +1,139 @@
 "use client"
 
-
-import { usePathname } from "next/navigation"
-
-import {
-    useState
-} from "react"
-
 import SidebarAccountCard from "./SidebarAccountCard"
 import SidebarMenu from "./SidebarMenu"
 import SidebarToggle from "./SidebarToggle"
 
+import {
+    useSidebar
+} from "@/contexts/SidebarContext"
+
 type Props = {
     counts: any
 }
-
 
 export default function SidebarClient({
     counts
 }: Props) {
 
     // =====================
-    // CURRENT PATH
+    // GLOBAL SIDEBAR STATE
     // =====================
 
-    const pathname =
-        usePathname()
+    const {
 
-    const [collapsed, setCollapsed] =
-        useState(false)
+        collapsed,
+        setCollapsed,
+
+        mobileOpen,
+        setMobileOpen
+
+    } = useSidebar()
 
     return (
 
-        <aside
-            className={`
-        sticky
-        top-16
+        <>
 
-        h-[calc(100vh-4rem)]
+            {/* MOBILE OVERLAY */}
 
-        border-r
-        border-zinc-800
+            {mobileOpen && (
 
-        bg-zinc-950
+                <button
+                    onClick={() =>
 
-        flex
-        flex-col
+                        setMobileOpen(false)
 
-        transition-all
-        duration-300
+                    }
+                    className="
+                        fixed
+                        inset-0
 
-        ${collapsed
-                    ? "w-24"
-                    : "w-64"
-                }
-    `}
-        >
+                        z-40
 
+                        bg-black/70
+                        backdrop-blur-sm
 
+                        md:hidden
+                    "
+                />
 
-            {/* CENTER TOGGLE */}
+            )}
 
-            <SidebarToggle
-                collapsed={collapsed}
-                onToggle={() =>
+            {/* SIDEBAR */}
 
-                    setCollapsed(
-                        !collapsed
-                    )
+            <aside
+                className={`
+                    fixed
+                    left-0
+                    top-16
 
-                }
-            />
+                    z-50
 
-            {/* MENU */}
-            <SidebarMenu
-                collapsed={collapsed}
-                counts={counts}
-            />
+                    h-[calc(100vh-4rem)]
 
+                    border-r
+                    border-zinc-800
 
-            {/* ACCOUNT CARD */}
+                    bg-zinc-950
 
-            <SidebarAccountCard
-                collapsed={collapsed}
-            />
+                    flex
+                    flex-col
 
+                    transition-all
+                    duration-300
 
-        </aside>
+                    md:sticky
+
+                    ${collapsed
+
+                        ? "w-24"
+
+                        : "w-64"
+                    }
+
+                    ${mobileOpen
+
+                        ? `
+                            translate-x-0
+                        `
+
+                        : `
+                            -translate-x-full
+                            md:translate-x-0
+                        `
+                    }
+                `}
+            >
+
+                {/* DESKTOP TOGGLE */}
+
+                <SidebarToggle
+                    collapsed={collapsed}
+                    onToggle={() =>
+
+                        setCollapsed(
+                            !collapsed
+                        )
+
+                    }
+                />
+
+                {/* MENU */}
+
+                <SidebarMenu
+                    collapsed={collapsed}
+                    counts={counts}
+                />
+
+                {/* ACCOUNT */}
+
+                <SidebarAccountCard
+                    collapsed={collapsed}
+                />
+
+            </aside>
+
+        </>
 
     )
 

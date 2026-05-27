@@ -8,6 +8,8 @@ import Sidebar from "@/components/layout/Sidebar"
 
 import AIAssistant from "@/components/ai-assistant/AIAssistant"
 
+import { SidebarProvider } from "@/contexts/SidebarContext"
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,25 +27,28 @@ export default function RootLayout({
         "
       >
 
-        <Navbar />
+        <SidebarProvider>
 
-        <div className="flex">
+          <Navbar />
 
-          <Sidebar />
+          <div className="flex">
 
-          <main
-            className="
+            <Sidebar />
+
+            <main
+              className="
               flex-1
               p-6
             "
-          >
-            {children}
-          </main>
+            >
+              {children}
+            </main>
 
-        </div>
+          </div>
 
-        <AIAssistant />
-        <MagicCursorTrail />
+          <AIAssistant />
+          <MagicCursorTrail />
+        </SidebarProvider>
       </body>
 
     </html>

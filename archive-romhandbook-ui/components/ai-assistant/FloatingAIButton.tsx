@@ -21,13 +21,18 @@ export default function FloatingAIButton({
             onClick={onClick}
             className="
                 fixed
-                bottom-6
-                right-6
+
+                bottom-4
+                right-4
+
                 z-[9999]
 
                 flex
                 items-center
+                justify-center
                 gap-3
+
+                overflow-hidden
 
                 rounded-2xl
 
@@ -37,9 +42,6 @@ export default function FloatingAIButton({
                 bg-gradient-to-r
                 from-violet-500
                 to-fuchsia-500
-
-                px-5
-                py-4
 
                 text-white
 
@@ -51,61 +53,105 @@ export default function FloatingAIButton({
 
                 hover:scale-[1.03]
                 hover:shadow-violet-500/40
+
+                h-14
+                w-14
+
+                md:h-16
+                md:w-auto
+
+                md:px-6
+                md:py-4
+
+                md:bottom-6
+                md:right-6
+
+                before:absolute
+                before:inset-0
+
+                before:rounded-2xl
+
+                before:bg-white/10
+
+                before:opacity-0
+
+                before:transition-opacity
+
+                hover:before:opacity-100
             "
         >
 
-            {/* ICON */}
-            <Sparkles size={18} />
+            {/* CONTENT */}
 
-            {/* TEXT */}
             <div
                 className="
+                    relative
+                    z-10
+
                     flex
-                    flex-col
-                    items-start
+                    items-center
+                    gap-3
                 "
             >
 
-                <span
+                {/* ICON */}
+
+                <Sparkles
+                    size={20}
                     className="
-                        text-sm
-                        font-semibold
-                        leading-none
+                        md:size-6
+                    "
+                />
+
+                {/* DESKTOP TEXT */}
+
+                <div
+                    className="
+                        hidden
+
+                        md:flex
+                        md:flex-col
+                        md:items-start
                     "
                 >
-                    AI Rune
-                </span>
 
-                {/* <span
-                    className="
-                        mt-1
+                    <span
+                        className="
+                            text-base
+                            font-semibold
+                            leading-none
+                        "
+                    >
+                        AI Rune
+                    </span>
 
-                        text-[11px]
-                        text-white/70
-                    "
-                >
-                    Coming Soon
-                </span> */}
+                </div>
+
+                {/* STATUS DOT */}
+
+                <div
+                    className={`
+                        hidden
+
+                        md:block
+
+                        h-2.5
+                        w-2.5
+
+                        rounded-full
+
+                        bg-white/80
+
+                        transition-all
+
+                        ${open
+                            ? "scale-125"
+                            : "animate-pulse"
+                        }
+                    `}
+                />
 
             </div>
-
-            {/* STATUS DOT */}
-            <div
-                className={`
-                    h-2
-                    w-2
-                    rounded-full
-
-                    bg-white/80
-
-                    transition-all
-
-                    ${open
-                        ? "scale-125"
-                        : "animate-pulse"
-                    }
-                `}
-            />
 
         </button>
 

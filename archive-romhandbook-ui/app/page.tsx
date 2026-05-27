@@ -1,6 +1,5 @@
 import HomeHero from "@/components/home/HomeHero"
 
-import ArchiveStatsGrid from "@/components/home/ArchiveStatsGrid"
 
 import FormulaPreview from "@/components/home/FormulaPreview"
 
@@ -68,9 +67,9 @@ export default function HomePage() {
       </section>
 
       {/* ARCHIVE GRID */}
-      <ArchiveStatsGrid
+      {/* <ArchiveStatsGrid
         counts={counts}
-      />
+      /> */}
 
 
 
