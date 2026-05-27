@@ -1,20 +1,44 @@
+import type { ApiResponse, ArchiveCounts } from "@/lib/types/Archive"
 import SidebarClient from "../sidebar/SidebarClient"
 
-import {
-    getSidebarCounts
-} from "@/lib/queries/sidebar"
 
-export default function Sidebar() {
+export default async function Sidebar() {
 
-    // SERVER SIDE
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL
+
+    const res =
+        await fetch(
+            `${API_URL}/api/v1/archive/counts`,
+            {
+                next: {
+                    revalidate: 60
+                }
+            }
+        )
+
     const counts =
-        getSidebarCounts()
+        res.ok
+            ? (
+                await res.json() as ApiResponse<ArchiveCounts>
+            ).data
+            : {
+                cards: { total: 0 },
+                equipments: { total: 0 },
+                headwears: { total: 0 },
+                monsters: { total: 0 },
+                mounts: { total: 0 },
+                pets: { total: 0 },
+                skills: { total: 0 },
+                buffs: { total: 0 },
+                formulas: { total: 0 },
+            }
 
     return (
-        < SidebarClient
+
+        <SidebarClient
             counts={counts}
         />
 
     )
-
 }

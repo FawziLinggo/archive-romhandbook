@@ -148,4 +148,14 @@ func SetupRoutes(
 		"/api/v1/formulas/:slug",
 		formulaHandler.GetFormulaBySlug,
 	)
+
+	archiveHandler :=
+		handlers.ArchiveHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/archive/counts",
+		archiveHandler.GetArchiveCounts,
+	)
 }
