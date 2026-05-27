@@ -110,3 +110,44 @@ export function getBuffBySlug(
     `).get(`/buffs/${slug}`)
 
 }
+
+
+export function searchBuffs(
+    query: string
+) {
+
+    if (query.length < 3) {
+
+        return []
+
+    }
+
+    return db.prepare(`
+
+        SELECT
+            id,
+            name,
+            detail_url,
+            image,
+            description
+
+        FROM buffs
+
+        WHERE
+            name LIKE ?
+            AND name IS NOT NULL
+            AND name != ''
+
+        ORDER BY
+
+            CASE
+                WHEN name GLOB '[A-Za-z]*'
+                THEN 0
+                ELSE 1
+            END,
+
+            LOWER(name) ASC
+
+    `).all(`%${query}%`)
+
+}

@@ -10,6 +10,8 @@ type Props = {
 
     query?: string
 
+    hidden?: boolean
+
 }
 
 const PAGE_SIZE = 20
@@ -19,9 +21,18 @@ export default function PaginationSearch({
     page,
     total,
     basePath,
-    query = ""
+    query = "",
+    hidden = false
 
 }: Props) {
+
+
+    // Return null if hidden (search activated)
+    if (hidden) {
+
+        return null
+
+    }
 
     // =====================
     // TOTAL PAGES
