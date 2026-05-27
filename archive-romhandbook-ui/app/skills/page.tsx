@@ -1,12 +1,10 @@
 
-import SkillGrid from "@/components/skills/SkillGrid"
 
-import Pagination from "@/components/common/Pagination"
 
+import SkillSearchClient from "@/components/skills/SkillSearchClient"
 import {
     getSkills
 } from "@/lib/queries/skills"
-
 type Props = {
 
     searchParams: Promise<{
@@ -122,105 +120,10 @@ export default async function SkillsPage({
 
                 </div>
 
-                {/* SEARCH */}
-                <form
-                    action="/skills"
-                    method="GET"
-                    className="
-        mt-10
-    "
-                >
-
-                    <div
-                        className="
-            relative
-        "
-                    >
-
-                        {/* ICON */}
-                        <div
-                            className="
-                pointer-events-none
-
-                absolute
-                left-5
-                top-1/2
-
-                -translate-y-1/2
-
-                text-zinc-500
-            "
-                        >
-
-                            🔍
-
-                        </div>
-
-                        {/* INPUT */}
-                        <input
-                            type="text"
-
-                            name="q"
-
-                            defaultValue={query}
-
-                            placeholder="
-                Search skills, formulas, mechanics...
-            "
-
-                            className="
-                w-full
-
-                rounded-3xl
-
-                border
-                border-zinc-800
-
-                bg-zinc-950
-
-                px-14
-                py-5
-
-                text-lg
-                text-white
-
-                outline-none
-
-                transition-all
-
-                placeholder:text-zinc-600
-
-                focus:border-violet-500/50
-                focus:ring-4
-                focus:ring-violet-500/10
-            "
-                        />
-
-                    </div>
-
-                </form>
-
-            </section>
-
-
-            {/* SKILLS */}
-            <section
-                className="
-                    mt-12
-                "
-            >
-
-
-                {/* GRID */}
-                <SkillGrid
-                    skills={skills}
-                />
-
-                <Pagination
+                <SkillSearchClient
+                    initialSkills={skills}
                     page={page}
                     hasNext={hasNext}
-                    query={query}
-                    basePath="/skills"
                 />
 
             </section>

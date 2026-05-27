@@ -259,3 +259,67 @@ export function getSkillBySlug(
     }
 
 }
+
+
+export function searchSkills(
+    query: string
+) {
+
+    if (query.length < 4) {
+
+        return []
+
+    }
+
+    return db.prepare(`
+
+        SELECT
+
+            s.id,
+            s.detail_url,
+            s.image,
+            s.name,
+
+            MAX(s.max_level) as max_level,
+
+            s.skill_type,
+            s.damage_type,
+
+            s.cooldown,
+            s.range_value,
+            s.cast_time,
+
+            s.description
+
+        FROM skills s
+
+        WHERE
+            LOWER(s.name)
+            LIKE LOWER(?)
+
+            OR
+
+            LOWER(s.description)
+            LIKE LOWER(?)
+
+        GROUP BY
+            s.detail_url
+
+        ORDER BY
+
+            CASE
+                WHEN s.name GLOB '[A-Za-z]*'
+                THEN 0
+                ELSE 1
+            END,
+
+            s.name COLLATE NOCASE ASC
+
+    `).all(
+
+        `%${query}%`,
+        `%${query}%`
+
+    ) as Skill[]
+
+}
