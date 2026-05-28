@@ -356,4 +356,57 @@ CREATE TABLE IF NOT EXISTS headwear_formulas (
     headwear_id TEXT,
     formula_index INTEGER,
     formula_json TEXT
-)
+);
+CREATE TABLE IF NOT EXISTS jobs (
+    id TEXT PRIMARY KEY,
+    slug TEXT UNIQUE,
+    detail_url TEXT,
+    image TEXT,
+    name TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS job_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id TEXT NOT NULL,
+    related_job_id TEXT,
+    related_slug TEXT,
+    related_name TEXT,
+    relation_type TEXT NOT NULL,
+    relation_index INTEGER DEFAULT 0,
+    UNIQUE(job_id, relation_type, related_slug)
+);
+CREATE TABLE IF NOT EXISTS job_skills (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id TEXT NOT NULL,
+    skill_slug TEXT,
+    skill_name TEXT,
+    skill_image TEXT,
+    skill_url TEXT,
+    section TEXT,
+    max_level TEXT,
+    tags_raw TEXT,
+    description TEXT,
+    aesir_raw TEXT,
+    raw_html TEXT,
+    skill_index INTEGER DEFAULT 0,
+    UNIQUE(job_id, skill_slug, section)
+);
+CREATE TABLE IF NOT EXISTS job_runes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id TEXT NOT NULL,
+    rune_slug TEXT,
+    rune_name TEXT,
+    rune_image TEXT,
+    rune_url TEXT,
+    tags_raw TEXT,
+    effects_raw TEXT,
+    raw_html TEXT,
+    rune_index INTEGER DEFAULT 0,
+    UNIQUE(job_id, rune_slug)
+);
+CREATE INDEX IF NOT EXISTS idx_jobs_name ON jobs(name);
+CREATE INDEX IF NOT EXISTS idx_jobs_slug ON jobs(slug);
+CREATE INDEX IF NOT EXISTS idx_job_relations_job_id ON job_relations(job_id);
+CREATE INDEX IF NOT EXISTS idx_job_relations_type ON job_relations(relation_type);
+CREATE INDEX IF NOT EXISTS idx_job_skills_job_id ON job_skills(job_id);
+CREATE INDEX IF NOT EXISTS idx_job_runes_job_id ON job_runes(job_id);
