@@ -196,6 +196,35 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 
+	case "equipment":
+		equipment, err :=
+			repositories.GetEquipmentByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if equipment == nil {
+			utils.Error(c, 404, "Equipment not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    equipment,
+				"meta":    nil,
+			},
+		)
+
+		return
+
 	default:
 		c.JSON(
 			http.StatusNotImplemented,

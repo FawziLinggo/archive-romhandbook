@@ -7,9 +7,15 @@ import MountDetail from "@/components/things/MountDetail"
 
 import HeadwearDetail from "@/components/things/HeadwearDetail"
 
+import EquipmentDetail from "@/components/things/EquipmentDetail"
+
 import type {
     HeadwearDetail as HeadwearDetailType
 } from "@/lib/types/Headwear"
+
+import type {
+    EquipmentDetail as EquipmentDetailType
+} from "@/lib/types/Equipment"
 
 import type {
     CardDetail as CardDetailType
@@ -33,8 +39,6 @@ type ThingResponse<T> = {
 
     meta: unknown
 }
-
-// import EquipmentDetail from "@/components/things/EquipmentDetail"
 
 type Props = {
     params: Promise<{
@@ -160,6 +164,27 @@ export default async function ThingPage({
             return (
                 <HeadwearDetail
                     headwear={headwear}
+                />
+            )
+        }
+
+        case "equipment": {
+
+            const equipment =
+                thingResponse.data as EquipmentDetailType | undefined
+
+            if (!equipment) {
+
+                return (
+                    <div>
+                        Equipment not found
+                    </div>
+                )
+            }
+
+            return (
+                <EquipmentDetail
+                    equipment={equipment}
                 />
             )
         }

@@ -228,4 +228,29 @@ func SetupRoutes(
 		"/api/v1/headwears/:id",
 		headwearHandler.GetHeadwearByID,
 	)
+
+	equipmentHandler :=
+		handlers.EquipmentHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/equipments",
+		equipmentHandler.GetEquipments,
+	)
+
+	router.GET(
+		"/api/v1/equipments/search",
+		equipmentHandler.SearchEquipments,
+	)
+
+	router.GET(
+		"/api/v1/equipments/:id/formulas",
+		equipmentHandler.GetEquipmentFormulas,
+	)
+
+	router.GET(
+		"/api/v1/equipments/:id",
+		equipmentHandler.GetEquipmentByID,
+	)
 }
