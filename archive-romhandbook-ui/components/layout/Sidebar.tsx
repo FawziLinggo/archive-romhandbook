@@ -36,6 +36,7 @@ export default async function Sidebar() {
                 skills: { total: 0 },
                 buffs: { total: 0 },
                 formulas: { total: 0 },
+                jobs: { total: 0 }
             }
 
     return (

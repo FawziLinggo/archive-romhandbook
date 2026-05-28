@@ -1,4 +1,5 @@
 import {
+    BriefcaseBusiness,
     Code2,
     Crown,
     Layers,
@@ -38,6 +39,13 @@ export const menus = [
         href: "/monsters",
         icon: Skull,
         countKey: "monsters"
+    },
+
+    {
+        label: "Jobs",
+        href: "/jobs",
+        icon: BriefcaseBusiness,
+        countKey: "jobs"
     },
 
     {

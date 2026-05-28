@@ -13,6 +13,8 @@ export type ArchiveCounts = {
 
     monsters: CountTotal
 
+    jobs: CountTotal
+
     mounts: CountTotal
 
     pets: CountTotal
