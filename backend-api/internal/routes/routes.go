@@ -274,4 +274,15 @@ func SetupRoutes(
 		"/api/v1/jobs/:slug",
 		jobHandler.GetJobBySlug,
 	)
+
+	searchHandler :=
+		handlers.SearchHandler{
+
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/search",
+		searchHandler.GlobalSearch,
+	)
 }

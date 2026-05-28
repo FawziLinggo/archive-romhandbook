@@ -64,8 +64,8 @@ function CompactStat({
                 min-w-[68px]
                 rounded-xl
                 border
-                border-white/10
-                bg-black/20
+                border-zinc-800
+                bg-black
                 px-3
                 py-2
             "
@@ -135,38 +135,21 @@ export default function MonsterCard({
                 overflow-hidden
                 rounded-2xl
                 border
-                border-white/10
-                bg-gradient-to-br
-                from-zinc-950
-                via-zinc-900
-                to-black
+                border-zinc-800
+                bg-zinc-950
                 p-4
                 transition-all
+
                 hover:-translate-y-0.5
                 hover:border-violet-500/40
-                hover:shadow-xl
-                hover:shadow-violet-500/10
+                hover:bg-zinc-900/70
             "
         >
-
             <div
                 className="
-                    pointer-events-none
-                    absolute
-                    inset-0
-                    opacity-0
-                    transition-opacity
-                    group-hover:opacity-100
-                    bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.18),transparent_42%)]
-                "
-            />
-
-            <div
-                className="
-                    relative
-                    z-10
                     grid
                     gap-4
+
                     lg:grid-cols-[minmax(0,1fr)_auto]
                     lg:items-center
                 "
@@ -189,8 +172,8 @@ export default function MonsterCard({
                             overflow-hidden
                             rounded-2xl
                             border
-                            border-white/10
-                            bg-black/40
+                            border-zinc-800
+                            bg-black
                         "
                     >
                         <Image
@@ -202,6 +185,7 @@ export default function MonsterCard({
                                 object-cover
                                 transition-transform
                                 duration-300
+
                                 group-hover:scale-110
                             "
                         />
@@ -214,7 +198,10 @@ export default function MonsterCard({
                                 line-clamp-1
                                 text-lg
                                 font-black
-                                text-violet-200
+                                text-zinc-100
+                                transition-colors
+
+                                group-hover:text-violet-200
                             "
                         >
                             {monster.name}
@@ -277,7 +264,9 @@ export default function MonsterCard({
                         grid
                         grid-cols-2
                         gap-2
+
                         sm:grid-cols-5
+
                         lg:flex
                         lg:justify-end
                     "
