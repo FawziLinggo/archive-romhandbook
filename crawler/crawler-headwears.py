@@ -2,11 +2,9 @@ import json
 import time
 import sqlite3
 import requests
+import os
 
 from bs4 import BeautifulSoup
-
-# ENV
-import os
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
@@ -30,12 +28,7 @@ HEADERS = {
 
 session = requests.Session()
 
-# =========================================
-# SQLITE
-# =========================================
-
 conn = sqlite3.connect(DB_FILE)
-
 cursor = conn.cursor()
 
 with open(
@@ -43,36 +36,140 @@ with open(
     "r",
     encoding="utf-8"
 ) as f:
-
-    sql_script = f.read()
-
-cursor.executescript(sql_script)
+    cursor.executescript(
+        f.read()
+    )
 
 conn.commit()
 
-# =========================================
-# LISTING
-# =========================================
 
-def get_listing_items(page):
+def normalize_url(
+    value
+):
+    if not value:
+        return value
 
+    return (
+        value
+        .replace("https://romhandbook.com", "")
+        .replace("http://romhandbook.com", "")
+    )
+
+
+def clean_lines(
+    text
+):
+    return [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip()
+    ]
+
+
+def extract_section_items(
+    content
+):
+    items = []
+
+    paragraphs = content.select("p")
+
+    if paragraphs:
+
+        for p in paragraphs:
+
+            text = p.get_text(
+                    "\n",
+                    strip=True
+                )
+
+            items.extend(
+                clean_lines(text)
+            )
+
+        return items
+
+    text = content.get_text(
+            "\n",
+            strip=True
+        )
+
+    return clean_lines(text)
+
+
+def extract_detail_sections(
+    soup
+):
+    sections = {}
+
+    grid = soup.select_one("div.grid.grid-cols-12")
+
+    if not grid:
+        return sections
+
+    children = [
+        child
+        for child in grid.find_all(
+            "div",
+            recursive=False
+        )
+    ]
+
+    i = 0
+
+    while i < len(children) - 1:
+
+        label_div = children[i]
+
+        content_div = children[i + 1]
+
+        label_span = label_div.select_one(
+            "span.text-sm.font-light.leading-6.text-emerald-200"
+        )
+
+        label_classes = label_div.get("class", [])
+
+        content_classes = content_div.get("class", [])
+
+        if (
+            not label_span
+            or "col-span-2" not in label_classes
+            or "col-span-10" not in content_classes
+        ):
+            i += 1
+            continue
+
+        label = label_span.get_text(
+                " ",
+                strip=True
+            )
+
+        sections[label] = content_div
+
+        i += 2
+
+    return sections
+
+
+def get_listing_items(
+    page
+):
     url = f"{BASE_URL}/headwears?page={page}"
 
     print(f"\n[INFO] LIST PAGE {page}")
 
     response = session.get(
-        url,
-        headers=HEADERS
-    )
+            url,
+            headers=HEADERS
+        )
 
     soup = BeautifulSoup(
-        response.text,
-        "lxml"
-    )
+            response.text,
+            "lxml"
+        )
 
     cards = soup.select(
-        'a[href^="/things/"]'
-    )
+            'a[href^="/things/"]'
+        )
 
     results = []
 
@@ -90,26 +187,22 @@ def get_listing_items(page):
         image_url = None
 
         if image:
-            image_url = image.get("src")
+            image_url = normalize_url(
+                image.get("src")
+            )
 
         results.append({
             "id": item_id,
-            "detail_url": BASE_URL + href,
+            "detail_url": normalize_url(href),
             "image": image_url,
         })
 
     return results
 
-# =========================================
-# REWRITE LOCAL ASSET PATHS
-# =========================================
 
-def rewrite_local_assets(body_tag):
-
-    # =========================
-    # IMG SRC
-    # =========================
-
+def rewrite_local_assets(
+    body_tag
+):
     for img in body_tag.find_all("img"):
 
         src = img.get("src")
@@ -117,26 +210,7 @@ def rewrite_local_assets(body_tag):
         if not src:
             continue
 
-        # only romhandbook assets
-        if "https://romhandbook.com/assets/" in src:
-
-            # remove domain
-            local_src = src.replace(
-                "https://romhandbook.com",
-                ""
-            )
-
-            # prepend local public path
-            # local_src = (
-            #     "/romhandbook"
-            #     + local_src
-            # )
-
-            img["src"] = local_src
-
-    # =========================
-    # LINK HREF
-    # =========================
+        img["src"] = normalize_url(src)
 
     for link in body_tag.find_all("link"):
 
@@ -145,143 +219,96 @@ def rewrite_local_assets(body_tag):
         if not href:
             continue
 
-        if "https://romhandbook.com/assets/" in href:
-
-            local_href = href.replace(
-                "https://romhandbook.com",
-                ""
-            )
-
-            # local_href = (
-            #     "/romhandbook"
-            #     + local_href
-            # )
-
-            link["href"] = local_href
+        link["href"] = normalize_url(href)
 
     return body_tag
 
-# =========================================
-# CLEAN BODY HTML
-# =========================================
 
-def get_clean_body_html(soup):
-
-    # =========================
-    # GET BODY
-    # =========================
-
+def get_clean_body_html(
+    soup
+):
     body_tag = soup.select_one("body")
 
     if not body_tag:
         return ""
 
-    # =========================
-    # REMOVE HEADER
-    # =========================
-
     for el in body_tag.select(
-        "header, .sticky-top"
+        "header, .sticky-top, .docs-sidebar, footer, script, style"
     ):
         el.decompose()
-
-    # =========================
-    # REMOVE SIDEBAR
-    # =========================
-
-    for el in body_tag.select(
-        ".docs-sidebar"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE FOOTER
-    # =========================
-
-    for el in body_tag.select(
-        "footer"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE SCRIPTS
-    # =========================
-
-    for el in body_tag.select(
-        "script"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE STYLE TAGS
-    # =========================
-
-    for el in body_tag.select(
-        "style"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE SHUTDOWN NOTICE
-    # =========================
 
     for el in body_tag.find_all(
         string=lambda t:
-        t and "will shut down" in t
+            t and "will shut down" in t
     ):
-
         parent = el.find_parent("div")
 
         if parent:
             parent.decompose()
 
-    # =========================
-    # REWRITE LOCAL ASSETS
-    # =========================
-
-    body_tag = rewrite_local_assets(
-        body_tag
-    )
-
-    # =========================
-    # RETURN HTML
-    # =========================
+    body_tag = rewrite_local_assets(body_tag)
 
     return str(body_tag)
-# =========================================
-# DETAIL
-# =========================================
 
-def get_item_detail(item):
+
+def save_formula(
+    headwear_id,
+    formula_index,
+    formula_json
+):
+    formula_id = str(
+        formula_json.get("id")
+    )
+
+    cursor.execute("""
+        INSERT OR REPLACE INTO headwear_formulas (
+            id,
+    headwear_id,
+    formula_index,
+    formula_json
+        )
+        VALUES (?, ?, ?, ?)
+    """, (
+        formula_id,
+        headwear_id,
+        formula_index,
+        json.dumps(
+            formula_json,
+            ensure_ascii=False
+        )
+    ))
+
+    return formula_id
+
+
+def get_item_detail(
+    item
+):
+    detail_url = item["detail_url"]
+
+    if detail_url.startswith("/"):
+        detail_url = BASE_URL + detail_url
 
     response = session.get(
-        item["detail_url"],
-        headers=HEADERS
-    )
+            detail_url,
+            headers=HEADERS
+        )
 
     if response.status_code != 200:
-
-        print("[ERROR] DETAIL FAILED")
-
+        print("[ERROR] DETAIL FAILED", detail_url)
         return
 
-    raw_html = response.text
-
-    raw_html = get_clean_body_html(
-        BeautifulSoup(
-            raw_html,
-            "lxml"
+    clean_html =get_clean_body_html(
+            BeautifulSoup(
+                response.text,
+                "lxml"
+            )
         )
-    )
 
     soup = BeautifulSoup(
-        raw_html,
-        "lxml"
-    )
-
-    # =====================================
-    # BASIC INFO
-    # =====================================
+            clean_html,
+            "lxml"
+        )
 
     name = None
     item_type = None
@@ -289,207 +316,151 @@ def get_item_detail(item):
     quality = None
 
     name_tag = soup.select_one(
-        "span.text.font-semibold.leading-6.text-emerald-200"
-    )
+            "span.text.font-semibold.leading-6.text-emerald-200"
+        )
 
     if name_tag:
-        name = name_tag.get_text(strip=True)
-
-    type_tag = soup.select_one(
-        "span.inline-flex.items-center"
-    )
-
-    if type_tag:
-        item_type = type_tag.get_text(strip=True)
-
-    desc_tag = soup.select_one(
-        "p.text-base"
-    )
-
-    if desc_tag:
-        description = desc_tag.get_text(strip=True)
-
-    # =====================================
-    # DETAILS
-    # =====================================
-
-    effect_text = []
-    unlock_text = []
-
-    deposit_stats = []
-    unlock_stats = []
-
-    jobs = []
-
-    rows = soup.select(
-        "div.grid.grid-cols-12"
-    )
-
-    for row in rows:
-
-        label_span = row.select_one(
-            "span.text-sm.font-light.leading-6.text-emerald-200"
-        )
-
-        if not label_span:
-            continue
-
-        label = label_span.get_text(
-            strip=True
-        )
-
-        content_divs = row.select(
-            "div.col-span-10"
-        )
-
-        if not content_divs:
-            continue
-
-        content = content_divs[0]
-
-        # =================================
-        # QUALITY
-        # =================================
-
-        if label == "Quality":
-
-            quality = content.get_text(
+        name = name_tag.get_text(
                 " ",
                 strip=True
             )
 
-        # =================================
-        # EFFECT
-        # =================================
+    type_tag = soup.select_one(
+            "span.inline-flex.items-center"
+        )
 
-        elif label == "Effect":
+    if type_tag:
+        item_type = type_tag.get_text(
+                " ",
+                strip=True
+            )
 
-            effect_text = [
-                p.get_text(
-                    " ",
-                    strip=True
-                )
-                for p in content.select("p")
-            ]
+    desc_tag = soup.select_one(
+            "div.mt-1.grid.grid-cols-1 > div.border-t p.text-base"
+        )
 
-        # =================================
-        # DEPOSIT
-        # =================================
+    if desc_tag:
+        description = desc_tag.get_text(
+                " ",
+                strip=True
+            )
 
-        elif label == "Deposit":
+    effect_text = []
+    unlock_text = []
+    deposit_stats = []
+    unlock_stats = []
+    jobs = []
+    availability_date = None
 
-            deposit_stats = [
-                p.get_text(
-                    " ",
-                    strip=True
-                )
-                for p in content.select("p")
-            ]
+    sections = extract_detail_sections(
+            soup
+        )
 
-        # =================================
-        # UNLOCK
-        # =================================
+    if "Quality" in sections:
 
-        elif label == "Unlock":
+        quality_items = extract_section_items(
+                sections["Quality"]
+            )
 
-            unlock_text = [
-                p.get_text(
-                    " ",
-                    strip=True
-                )
-                for p in content.select("p")
-            ]
+        quality = quality_items[0] if quality_items else None
 
-            unlock_stats = unlock_text
+    if "Effect" in sections:
 
-        # =================================
-        # JOBS
-        # =================================
+        effect_text = extract_section_items(
+                sections["Effect"]
+            )
 
-        elif label == "Jobs":
+    if "Deposit" in sections:
 
-            jobs = [
-                x.get_text(strip=True)
-                for x in content.select(
-                    "span.inline-flex"
-                )
-            ]
+        deposit_stats = extract_section_items(
+                sections["Deposit"]
+            )
 
-    # =====================================
-    # FORMULA
-    # =====================================
+    if "Unlock" in sections:
+
+        unlock_text = extract_section_items(
+                sections["Unlock"]
+            )
+
+        unlock_stats = unlock_text
+
+    if "Jobs" in sections:
+
+        jobs_section = sections["Jobs"]
+
+        jobs = [
+            x.get_text(strip=True)
+            for x in jobs_section.select(
+                "span.inline-flex"
+            )
+        ]
+
+        if not jobs:
+            jobs = extract_section_items(
+                jobs_section
+            )
+
+    if "Availability Date" in sections:
+
+        availability_items = extract_section_items(
+                sections["Availability Date"]
+            )
+
+        availability_date = availability_items[0] if availability_items else None
 
     formula_id = None
 
     code_tags = soup.select(
-        "code.language-json"
-    )
-
-    for code_tag in code_tags:
-
-        raw_json = code_tag.get_text(
-            strip=True
+            "code.language-json"
         )
 
+    for index, code_tag in enumerate(code_tags):
+
+        raw_json = code_tag.get_text(
+                strip=True
+            )
+
         try:
+            formula_json = json.loads(raw_json)
 
-            formula_json = json.loads(
-                raw_json
-            )
-
-            current_formula_id = str(
-                formula_json.get("id")
-            )
-
-            cursor.execute("""
-            INSERT OR REPLACE INTO formulas (
-                id,
-                raw_json
-            )
-            VALUES (?, ?)
-            """, (
-                current_formula_id,
-                json.dumps(
-                    formula_json,
-                    ensure_ascii=False
+            current_formula_id = save_formula(
+                    item["id"],
+                    index,
+                    formula_json
                 )
-            ))
 
-            # ambil formula terakhir sebagai root
-            formula_id = current_formula_id
+            if formula_id is None:
+                formula_id = current_formula_id
 
         except Exception as e:
-
             print("[FORMULA ERROR]", e)
 
-    # =====================================
-    # SAVE HEADWEAR
-    # =====================================
+    item["detail_url"] = normalize_url(
+            item["detail_url"]
+        )
 
-    # update data detail_url & image remove BASE_URL if exist
-    if item["detail_url"].startswith(BASE_URL):
-        item["detail_url"] = item["detail_url"][len(BASE_URL):]
-    if item["image"] and item["image"].startswith(BASE_URL):
-        item["image"] = item["image"][len(BASE_URL):]
+    item["image"] = normalize_url(
+            item["image"]
+        )
 
     cursor.execute("""
-    INSERT OR REPLACE INTO headwears (
-        id,
-        detail_url,
-        image,
-        name,
-        type,
-        description,
-        quality,
-        effect_text,
-        unlock_text,
-        deposit_stats,
-        unlock_stats,
-        jobs,
-        formula_id,
-        raw_html
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO headwears (
+            id,
+            detail_url,
+            image,
+            name,
+            type,
+            description,
+            quality,
+            effect_text,
+            unlock_text,
+            deposit_stats,
+            unlock_stats,
+            jobs,
+            formula_id,
+            raw_html
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         item["id"],
         item["detail_url"],
@@ -504,21 +475,18 @@ def get_item_detail(item):
         json.dumps(unlock_stats, ensure_ascii=False),
         json.dumps(jobs, ensure_ascii=False),
         formula_id,
-        raw_html
+        clean_html
     ))
 
-    conn.commit()
-
-       # save to things table
     cursor.execute("""
-    INSERT OR REPLACE INTO things (
-        id,
-        type,
-        name,
-        image,
-        detail_url
-    )   
-    VALUES (?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO things (
+            id,
+            type,
+            name,
+            image,
+            detail_url
+        )
+        VALUES (?, ?, ?, ?, ?)
     """, (
         item["id"],
         "headwear",
@@ -529,15 +497,12 @@ def get_item_detail(item):
 
     conn.commit()
 
-    print(f"[OK] {name}")
+    print(
+        f"[OK] {name} | effect={len(effect_text)} deposit={len(deposit_stats)} unlock={len(unlock_text)} jobs={len(jobs)}"
+    )
 
-
-# =========================================
-# MAIN
-# =========================================
 
 page = 1
-
 seen_ids = set()
 
 while True:
@@ -547,9 +512,7 @@ while True:
     print(f"[INFO] FOUND {len(listing_items)} ITEMS")
 
     if len(listing_items) == 0:
-
         print("[INFO] NO MORE ITEMS")
-
         break
 
     new_items = []
@@ -558,26 +521,25 @@ while True:
 
         if item["id"] not in seen_ids:
 
-            seen_ids.add(item["id"])
+            seen_ids.add(
+                item["id"]
+            )
 
-            new_items.append(item)
+            new_items.append(
+                item
+            )
 
     if len(new_items) == 0:
-
         print("[INFO] NO NEW ITEMS")
-
         break
 
     for item in new_items:
 
         try:
-
             get_item_detail(item)
-
             time.sleep(1)
 
         except Exception as e:
-
             print("ERROR:", e)
 
     page += 1

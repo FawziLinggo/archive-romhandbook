@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS headwears (
     unlock_stats TEXT,
     jobs TEXT,
     formula_id TEXT,
+    COLUMN availability_date TEXT,
     raw_html TEXT
 );
 CREATE TABLE IF NOT EXISTS monsters (
@@ -279,10 +280,16 @@ SET detail_url = REPLACE(
         ''
     );
 UPDATE buffs
-SET image = '/assets/skills/skill_current-ab5b7d2a91b320dffc765f060de413e0474bed69b44393a9a9699fc39a0620fe.png'
+SET image = '/assets/skills/skill_current-ab5b7d2a91b320dffc765f060de413e0474bed69b44393a9a9699fc39a0620fe.png';
 UPDATE monsters
 SET detail_url = REPLACE(detail_url, 'https://romhandbook.com', '')
 WHERE detail_url LIKE 'https://romhandbook.com/%';
 UPDATE monsters
 SET image = REPLACE(image, 'https://romhandbook.com', '')
 WHERE image LIKE 'https://romhandbook.com/%';
+CREATE TABLE IF NOT EXISTS headwear_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    headwear_id TEXT,
+    formula_index INTEGER,
+    formula_json TEXT
+)
