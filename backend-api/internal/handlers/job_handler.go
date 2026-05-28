@@ -33,6 +33,7 @@ func (h *JobHandler) GetJobs(
 	page, limit =
 		utils.NormalizePagination(page, limit)
 
+	limit = 200
 	jobs, total, hasNext, err :=
 		repositories.GetJobs(
 			h.DB,

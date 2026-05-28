@@ -22,4 +22,5 @@ type ArchiveCounts struct {
 	Buffs CountTotal `json:"buffs"`
 
 	Formulas CountTotal `json:"formulas"`
+	Jobs     CountTotal `json:"jobs"`
 }

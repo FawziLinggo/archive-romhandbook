@@ -99,6 +99,13 @@ func GetArchiveCounts(
 		return nil, err
 	}
 
+	jobs, err :=
+		countTable(db, "jobs")
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &models.ArchiveCounts{
 		Cards:      cards,
 		Equipments: equipments,
@@ -109,5 +116,6 @@ func GetArchiveCounts(
 		Skills:     skills,
 		Buffs:      buffs,
 		Formulas:   formulas,
+		Jobs:       jobs,
 	}, nil
 }
