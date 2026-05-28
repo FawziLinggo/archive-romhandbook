@@ -183,4 +183,24 @@ func SetupRoutes(
 		"/api/v1/cards/:id",
 		cardHandler.GetCardByID,
 	)
+
+	monsterHandler :=
+		handlers.MonsterHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/monsters",
+		monsterHandler.GetMonsters,
+	)
+
+	router.GET(
+		"/api/v1/monsters/search",
+		monsterHandler.SearchMonsters,
+	)
+
+	router.GET(
+		"/api/v1/monsters/:slug",
+		monsterHandler.GetMonsterBySlug,
+	)
 }
