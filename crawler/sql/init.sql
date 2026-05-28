@@ -1,19 +1,83 @@
 CREATE TABLE IF NOT EXISTS formulas (id TEXT PRIMARY KEY, raw_json TEXT);
 CREATE TABLE IF NOT EXISTS equipments (
-    id TEXT PRIMARY KEY,
-    detail_url TEXT,
-    image TEXT,
-    name TEXT,
-    type TEXT,
-    description TEXT,
-    effect_text TEXT,
-    unlock_text TEXT,
-    deposit_stats TEXT,
-    unlock_stats TEXT,
-    jobs TEXT,
-    formula_id TEXT,
-    raw_html TEXT
+    id,
+    detail_url,
+    image,
+    name,
+    type,
+    description,
+    quality,
+    effect_text,
+    unlock_text,
+    deposit_stats,
+    unlock_stats,
+    jobs,
+    formula_id,
+    raw_html
 );
+CREATE TABLE IF NOT EXISTS equipment_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipment_id TEXT NOT NULL,
+    formula_id TEXT,
+    formula_index INTEGER NOT NULL,
+    formula_json TEXT,
+    UNIQUE(equipment_id, formula_index)
+);
+CREATE TABLE IF NOT EXISTS equipment_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipment_id TEXT NOT NULL,
+    relation_type TEXT NOT NULL,
+    related_id TEXT,
+    related_name TEXT,
+    related_image TEXT,
+    related_url TEXT,
+    relation_index INTEGER DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS equipment_tiers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipment_id TEXT NOT NULL,
+    tier_index INTEGER NOT NULL,
+    tier_text TEXT NOT NULL,
+    UNIQUE(equipment_id, tier_index)
+);
+CREATE TABLE IF NOT EXISTS equipment_equip_effects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipment_id TEXT NOT NULL,
+    effect_index INTEGER NOT NULL,
+    effect_text TEXT,
+    UNIQUE(equipment_id, effect_index)
+);
+CREATE TABLE IF NOT EXISTS equipment_equip_effect_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equip_effect_id INTEGER NOT NULL,
+    item_id TEXT,
+    item_name TEXT,
+    item_image TEXT,
+    item_url TEXT,
+    item_index INTEGER DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS equipment_equip_effects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipment_id TEXT NOT NULL,
+    effect_index INTEGER NOT NULL,
+    effect_text TEXT,
+    UNIQUE(equipment_id, effect_index)
+);
+CREATE TABLE IF NOT EXISTS equipment_equip_effect_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equip_effect_id INTEGER NOT NULL,
+    item_id TEXT,
+    item_name TEXT,
+    item_image TEXT,
+    item_url TEXT,
+    item_index INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_equipment_relations_equipment_id ON equipment_relations(equipment_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_relations_type ON equipment_relations(relation_type);
+CREATE INDEX IF NOT EXISTS idx_equipment_tiers_equipment_id ON equipment_tiers(equipment_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_formulas_equipment_id ON equipment_formulas(equipment_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_equip_effects_equipment_id ON equipment_equip_effects(equipment_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_equip_effect_items_effect_id ON equipment_equip_effect_items(equip_effect_id);
 CREATE TABLE IF NOT EXISTS headwears (
     id TEXT PRIMARY KEY,
     detail_url TEXT,
@@ -28,7 +92,7 @@ CREATE TABLE IF NOT EXISTS headwears (
     unlock_stats TEXT,
     jobs TEXT,
     formula_id TEXT,
-    COLUMN availability_date TEXT,
+    availability_date TEXT,
     raw_html TEXT
 );
 CREATE TABLE IF NOT EXISTS monsters (

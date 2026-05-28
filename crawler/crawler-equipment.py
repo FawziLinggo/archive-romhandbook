@@ -2,16 +2,15 @@ import json
 import time
 import sqlite3
 import requests
+import os
 
 from bs4 import BeautifulSoup
-
-# get from .env 
-import os
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
 
 BASE_URL = os.getenv("BASE_URL", "https://romhandbook.com")
+DB_FILE = os.getenv("DB_FILE", "database.db")
 
 HEADERS = {
     "User-Agent": (
@@ -22,594 +21,751 @@ HEADERS = {
 
 session = requests.Session()
 
-# =========================================
-# SQLITE
-# =========================================
-
-
-DB_FILE = os.getenv("DB_FILE", "database.db")
 conn = sqlite3.connect(DB_FILE)
-
 cursor = conn.cursor()
 
-with open(
-    "sql/init.sql",
-    "r",
-    encoding="utf-8"
-) as f:
-
-    sql_script = f.read()
-
-cursor.executescript(sql_script)
+with open("sql/init.sql", "r", encoding="utf-8") as f:
+    cursor.executescript(f.read())
 
 conn.commit()
 
 
-# =========================================
-# GET LISTING
-# =========================================
+def ensure_schema():
+    try:
+        cursor.execute("ALTER TABLE equipments ADD COLUMN quality TEXT")
+    except sqlite3.OperationalError:
+        pass
 
-def get_listing_items(page):
+    cursor.executescript("""
+        CREATE TABLE IF NOT EXISTS equipment_formulas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            equipment_id TEXT NOT NULL,
+            formula_id TEXT,
+            formula_index INTEGER NOT NULL,
+            formula_json TEXT,
+            UNIQUE(equipment_id, formula_index)
+        );
 
-    url = f"{BASE_URL}/equipments?page={page}"
+        CREATE TABLE IF NOT EXISTS equipment_relations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            equipment_id TEXT NOT NULL,
+            relation_type TEXT NOT NULL,
+            related_id TEXT,
+            related_name TEXT,
+            related_image TEXT,
+            related_url TEXT,
+            relation_index INTEGER DEFAULT 0
+        );
 
-    print(f"\n[INFO] LIST PAGE {page}")
+        CREATE TABLE IF NOT EXISTS equipment_tiers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            equipment_id TEXT NOT NULL,
+            tier_index INTEGER NOT NULL,
+            tier_text TEXT NOT NULL,
+            UNIQUE(equipment_id, tier_index)
+        );
 
-    response = session.get(
-        url,
-        headers=HEADERS
+        CREATE TABLE IF NOT EXISTS equipment_equip_effects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            equipment_id TEXT NOT NULL,
+            effect_index INTEGER NOT NULL,
+            effect_text TEXT,
+            UNIQUE(equipment_id, effect_index)
+        );
+
+        CREATE TABLE IF NOT EXISTS equipment_equip_effect_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            equip_effect_id INTEGER NOT NULL,
+            item_id TEXT,
+            item_name TEXT,
+            item_image TEXT,
+            item_url TEXT,
+            item_index INTEGER DEFAULT 0
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_equipment_relations_equipment_id
+        ON equipment_relations(equipment_id);
+
+        CREATE INDEX IF NOT EXISTS idx_equipment_tiers_equipment_id
+        ON equipment_tiers(equipment_id);
+
+        CREATE INDEX IF NOT EXISTS idx_equipment_formulas_equipment_id
+        ON equipment_formulas(equipment_id);
+
+        CREATE INDEX IF NOT EXISTS idx_equipment_equip_effects_equipment_id
+        ON equipment_equip_effects(equipment_id);
+
+        CREATE INDEX IF NOT EXISTS idx_equipment_equip_effect_items_effect_id
+        ON equipment_equip_effect_items(equip_effect_id);
+    """)
+
+    conn.commit()
+
+
+ensure_schema()
+
+
+def normalize_url(value):
+    if not value:
+        return value
+
+    return (
+        value
+        .replace("https://romhandbook.com", "")
+        .replace("http://romhandbook.com", "")
     )
 
-    # print("[STATUS]", response.status_code)
 
-    soup = BeautifulSoup(
-        response.text,
-        "lxml"
-    )
+def absolute_url(value):
+    if not value:
+        return value
 
-    cards = soup.select(
-        'a[href^="/things/"]'
-    )
+    if value.startswith("http"):
+        return value
 
-    results = []
+    return BASE_URL + value
 
-    for card in cards:
 
-        href = card.get("href")
+def get_id_from_url(url):
+    if not url:
+        return None
+
+    clean_url = url.rstrip("/")
+    last_part = clean_url.split("/")[-1]
+
+    if "-" not in last_part:
+        return last_part
+
+    return last_part.split("-")[-1]
+
+
+def clean_lines(text):
+    return [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip()
+    ]
+
+
+def extract_text_items(content):
+    items = []
+
+    paragraphs = content.select("p")
+
+    if paragraphs:
+        for p in paragraphs:
+            text = p.get_text("\n", strip=True)
+            items.extend(clean_lines(text))
+
+        return items
+
+    text = content.get_text("\n", strip=True)
+
+    return clean_lines(text)
+
+
+def extract_detail_sections(soup):
+    sections = {}
+
+    grid = soup.select_one("div.grid.grid-cols-12")
+
+    if not grid:
+        return sections
+
+    children = [
+        child
+        for child in grid.find_all("div", recursive=False)
+    ]
+
+    i = 0
+
+    while i < len(children) - 1:
+        label_div = children[i]
+        content_div = children[i + 1]
+
+        label_span = label_div.select_one(
+            "span.text-sm.font-light.leading-6.text-emerald-200"
+        )
+
+        label_classes = label_div.get("class", [])
+        content_classes = content_div.get("class", [])
+
+        if (
+            not label_span
+            or "col-span-2" not in label_classes
+            or "col-span-10" not in content_classes
+        ):
+            i += 1
+            continue
+
+        label = label_span.get_text(" ", strip=True)
+
+        sections[label] = content_div
+
+        i += 2
+
+    return sections
+
+
+def extract_relation_items(content):
+    items = []
+
+    links = content.select('a[href^="/things/"]')
+
+    for index, link in enumerate(links):
+        href = normalize_url(link.get("href"))
+
+        image_tag = link.select_one("img")
+        name_tag = link.select_one(
+            "span.text-sm.font-semibold.leading-6.text-emerald-200"
+        )
+
+        if not name_tag:
+            name_tag = link.select_one("span")
+
+        image = None
+        name = None
+
+        if image_tag:
+            image = normalize_url(image_tag.get("src"))
+
+        if name_tag:
+            name = name_tag.get_text(" ", strip=True)
+
+        items.append({
+            "id": get_id_from_url(href),
+            "name": name,
+            "image": image,
+            "url": href,
+            "index": index,
+        })
+
+    return items
+
+
+def extract_equip_effects(content):
+    effects = []
+
+    blocks = content.select("div.border-dashed.border-b")
+
+    if not blocks:
+        blocks = [content]
+
+    for effect_index, block in enumerate(blocks):
+        items = extract_relation_items(block)
+
+        p = block.select_one("p.text-sm.font-light.leading-6.text-white")
+
+        effect_text = None
+
+        if p:
+            effect_text = p.get_text(" ", strip=True)
+
+        if items or effect_text:
+            effects.append({
+                "index": effect_index,
+                "items": items,
+                "effect_text": effect_text,
+            })
+
+    return effects
+
+
+def rewrite_local_assets(body_tag):
+    for img in body_tag.find_all("img"):
+        src = img.get("src")
+
+        if not src:
+            continue
+
+        img["src"] = normalize_url(src)
+
+    for link in body_tag.find_all("link"):
+        href = link.get("href")
 
         if not href:
             continue
 
-        item_id = href.split("-")[-1]
+        link["href"] = normalize_url(href)
+
+    return body_tag
+
+
+def get_clean_body_html(soup):
+    body_tag = soup.select_one("body")
+
+    if not body_tag:
+        return ""
+
+    for el in body_tag.select(
+        "header, .sticky-top, .docs-sidebar, footer, script, style"
+    ):
+        el.decompose()
+
+    for el in body_tag.find_all(
+        string=lambda t: t and "will shut down" in t
+    ):
+        parent = el.find_parent("div")
+
+        if parent:
+            parent.decompose()
+
+    body_tag = rewrite_local_assets(body_tag)
+
+    return str(body_tag)
+
+
+def get_listing_items(page):
+    url = f"{BASE_URL}/equipments?page={page}"
+
+    print(f"\n[INFO] LIST PAGE {page}")
+
+    response = session.get(url, headers=HEADERS)
+
+    soup = BeautifulSoup(response.text, "lxml")
+
+    cards = soup.select('a[href^="/things/"]')
+
+    results = []
+
+    for card in cards:
+        href = card.get("href")
+
+        if not href:
+            continue
 
         image = card.select_one("img")
 
         image_url = None
 
         if image:
-            image_url = image.get("src")
+            image_url = normalize_url(image.get("src"))
 
         results.append({
-            "id": item_id,
-            "detail_url": BASE_URL + href,
+            "id": get_id_from_url(href),
+            "detail_url": normalize_url(href),
             "image": image_url,
         })
 
     return results
 
-# =========================================
-# REWRITE LOCAL ASSET PATHS
-# =========================================
 
-def rewrite_local_assets(body_tag):
-
-    # =========================
-    # IMG SRC
-    # =========================
-
-    for img in body_tag.find_all("img"):
-
-        src = img.get("src")
-
-        if not src:
-            continue
-
-        # only romhandbook assets
-        if "https://romhandbook.com/assets/" in src:
-
-            # remove domain
-            local_src = src.replace(
-                "https://romhandbook.com",
-                ""
-            )
-
-            # prepend local public path
-            # local_src = (
-            #     "/romhandbook"
-            #     + local_src
-            # )
-
-            img["src"] = local_src
-
-    # =========================
-    # LINK HREF
-    # =========================
-
-    for link in body_tag.find_all("link"):
-
-        href = link.get("href")
-
-        if not href:
-            continue
-
-        if "https://romhandbook.com/assets/" in href:
-
-            local_href = href.replace(
-                "https://romhandbook.com",
-                ""
-            )
-
-            # local_href = (
-            #     "/romhandbook"
-            #     + local_href
-            # )
-
-            link["href"] = local_href
-
-    return body_tag
-
-# =========================================
-# CLEAN BODY HTML
-# =========================================
-
-def get_clean_body_html(soup):
-
-    # =========================
-    # GET BODY
-    # =========================
-
-    body_tag = soup.select_one("body")
-
-    if not body_tag:
-        return ""
-
-    # =========================
-    # REMOVE HEADER
-    # =========================
-
-    for el in body_tag.select(
-        "header, .sticky-top"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE SIDEBAR
-    # =========================
-
-    for el in body_tag.select(
-        ".docs-sidebar"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE FOOTER
-    # =========================
-
-    for el in body_tag.select(
-        "footer"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE SCRIPTS
-    # =========================
-
-    for el in body_tag.select(
-        "script"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE STYLE TAGS
-    # =========================
-
-    for el in body_tag.select(
-        "style"
-    ):
-        el.decompose()
-
-    # =========================
-    # REMOVE SHUTDOWN NOTICE
-    # =========================
-
-    for el in body_tag.find_all(
-        string=lambda t:
-        t and "will shut down" in t
-    ):
-
-        parent = el.find_parent("div")
-
-        if parent:
-            parent.decompose()
-
-    # =========================
-    # REWRITE LOCAL ASSETS
-    # =========================
-
-    body_tag = rewrite_local_assets(
-        body_tag
+def clear_equipment_relations(equipment_id):
+    cursor.execute(
+        "DELETE FROM equipment_formulas WHERE equipment_id = ?",
+        (equipment_id,)
     )
 
-    # =========================
-    # RETURN HTML
-    # =========================
+    cursor.execute(
+        "DELETE FROM equipment_relations WHERE equipment_id = ?",
+        (equipment_id,)
+    )
 
-    return str(body_tag)
+    cursor.execute(
+        "DELETE FROM equipment_tiers WHERE equipment_id = ?",
+        (equipment_id,)
+    )
 
-# =========================================
-# GET DETAIL
-# =========================================
+    cursor.execute("""
+        DELETE FROM equipment_equip_effect_items
+        WHERE equip_effect_id IN (
+            SELECT id
+            FROM equipment_equip_effects
+            WHERE equipment_id = ?
+        )
+    """, (equipment_id,))
+
+    cursor.execute(
+        "DELETE FROM equipment_equip_effects WHERE equipment_id = ?",
+        (equipment_id,)
+    )
+
+
+def save_relation_items(equipment_id, relation_type, items):
+    for item in items:
+        cursor.execute("""
+            INSERT INTO equipment_relations (
+                equipment_id,
+                relation_type,
+                related_id,
+                related_name,
+                related_image,
+                related_url,
+                relation_index
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            equipment_id,
+            relation_type,
+            item.get("id"),
+            item.get("name"),
+            item.get("image"),
+            item.get("url"),
+            item.get("index", 0),
+        ))
+
+
+def save_tiers(equipment_id, tiers):
+    for index, tier_text in enumerate(tiers):
+        cursor.execute("""
+            INSERT OR REPLACE INTO equipment_tiers (
+                equipment_id,
+                tier_index,
+                tier_text
+            )
+            VALUES (?, ?, ?)
+        """, (
+            equipment_id,
+            index,
+            tier_text,
+        ))
+
+
+def save_equip_effects(equipment_id, effects):
+    for effect in effects:
+        cursor.execute("""
+            INSERT OR REPLACE INTO equipment_equip_effects (
+                equipment_id,
+                effect_index,
+                effect_text
+            )
+            VALUES (?, ?, ?)
+        """, (
+            equipment_id,
+            effect["index"],
+            effect["effect_text"],
+        ))
+
+        equip_effect_id = cursor.lastrowid
+
+        if not equip_effect_id:
+            row = cursor.execute("""
+                SELECT id
+                FROM equipment_equip_effects
+                WHERE equipment_id = ?
+                AND effect_index = ?
+            """, (
+                equipment_id,
+                effect["index"],
+            )).fetchone()
+
+            equip_effect_id = row[0] if row else None
+
+        if not equip_effect_id:
+            continue
+
+        for item in effect["items"]:
+            cursor.execute("""
+                INSERT INTO equipment_equip_effect_items (
+                    equip_effect_id,
+                    item_id,
+                    item_name,
+                    item_image,
+                    item_url,
+                    item_index
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                equip_effect_id,
+                item.get("id"),
+                item.get("name"),
+                item.get("image"),
+                item.get("url"),
+                item.get("index", 0),
+            ))
+
+
+def save_formulas(equipment_id, soup):
+    formula_id = None
+
+    code_tags = soup.select("code.language-json")
+
+    for index, code_tag in enumerate(code_tags):
+        raw_json = code_tag.get_text(strip=True)
+
+        try:
+            formula_json = json.loads(raw_json)
+            current_formula_id = str(formula_json.get("id"))
+
+            cursor.execute("""
+                INSERT OR REPLACE INTO formulas (
+                    id,
+                    raw_json
+                )
+                VALUES (?, ?)
+            """, (
+                current_formula_id,
+                json.dumps(formula_json, ensure_ascii=False),
+            ))
+
+            cursor.execute("""
+                INSERT OR REPLACE INTO equipment_formulas (
+                    equipment_id,
+                    formula_id,
+                    formula_index,
+                    formula_json
+                )
+                VALUES (?, ?, ?, ?)
+            """, (
+                equipment_id,
+                current_formula_id,
+                index,
+                json.dumps(formula_json, ensure_ascii=False),
+            ))
+
+            if formula_id is None:
+                formula_id = current_formula_id
+
+        except Exception as e:
+            print("[FORMULA ERROR]", e)
+
+            cursor.execute("""
+                INSERT OR REPLACE INTO equipment_formulas (
+                    equipment_id,
+                    formula_id,
+                    formula_index,
+                    formula_json
+                )
+                VALUES (?, ?, ?, ?)
+            """, (
+                equipment_id,
+                None,
+                index,
+                raw_json,
+            ))
+
+    return formula_id
+
 
 def get_item_detail(item):
+    request_url = absolute_url(item["detail_url"])
 
-    print(f"[DETAIL] {item['detail_url']}")
+    print(f"[DETAIL] {request_url}")
 
-    response = session.get(
-        item["detail_url"],
-        headers=HEADERS
-    )
+    response = session.get(request_url, headers=HEADERS)
 
     if response.status_code != 200:
-
         print("[ERROR] DETAIL FAILED")
-
         return None
 
-    soup = BeautifulSoup(
-        response.text,
-        "lxml"
-    )
+    source_soup = BeautifulSoup(response.text, "lxml")
 
-    raw_html = response.text
-    
+    raw_html = get_clean_body_html(source_soup)
 
-    raw_html = get_clean_body_html(
-    soup)   
-
-    # =====================================
-    # NAME
-    # =====================================
+    soup = BeautifulSoup(raw_html, "lxml")
 
     name = None
+    item_type = None
+    description = None
+    quality = None
 
     name_tag = soup.select_one(
         "span.text.font-semibold.leading-6.text-emerald-200"
     )
 
     if name_tag:
-        name = name_tag.get_text(strip=True)
+        name = name_tag.get_text(" ", strip=True)
 
-    # =====================================
-    # TYPE
-    # =====================================
-
-    item_type = None
-
-    type_tag = soup.select_one(
-        "span.inline-flex.items-center"
-    )
+    type_tag = soup.select_one("span.inline-flex.items-center")
 
     if type_tag:
-        item_type = type_tag.get_text(strip=True)
-
-    # =====================================
-    # DESCRIPTION
-    # =====================================
-
-    description = None
+        item_type = type_tag.get_text(" ", strip=True)
 
     desc_tag = soup.select_one(
-        "p.text-base"
+        "div.mt-1.grid.grid-cols-1 > div.border-t p.text-base"
     )
 
     if desc_tag:
-        description = desc_tag.get_text(strip=True)
+        description = desc_tag.get_text(" ", strip=True)
 
-    # =====================================
-    # EFFECT / UNLOCK / JOBS
-    # =====================================
-
-    effect_text = None
-    unlock_text = None
-
+    effect_text = []
+    unlock_text = []
     deposit_stats = []
     unlock_stats = []
-
     jobs = []
 
-    rows = soup.select(
-        "div.grid.grid-cols-12"
-    )
+    synth_from = []
+    tiers = []
+    equip_effects = []
+    craft_materials = []
 
-    for row in rows:
+    sections = extract_detail_sections(soup)
 
-        label_span = row.select_one(
-            "span.text-sm.font-light.leading-6.text-emerald-200"
-        )
+    if "Quality" in sections:
+        quality_items = extract_text_items(sections["Quality"])
+        quality = quality_items[0] if quality_items else None
 
-        if not label_span:
-            continue
+    if "Effect" in sections:
+        effect_text = extract_text_items(sections["Effect"])
 
-        label = label_span.get_text(
-            strip=True
-        )
+    if "Unlock" in sections:
+        unlock_text = extract_text_items(sections["Unlock"])
+        unlock_stats = unlock_text
 
-        # =================================
-        # EFFECT
-        # =================================
+    if "Deposit" in sections:
+        deposit_stats = extract_text_items(sections["Deposit"])
 
-        if label == "Effect":
+    if "Jobs" in sections:
+        jobs_section = sections["Jobs"]
 
-            p = row.select_one(
-                "p.text-sm.font-light.leading-6.text-white"
-            )
+        jobs = [
+            x.get_text(strip=True)
+            for x in jobs_section.select("span.inline-flex")
+            if x.get_text(strip=True)
+        ]
 
-            if p:
+        if not jobs:
+            jobs = extract_text_items(jobs_section)
 
-                effect_text = p.get_text(
-                    " ",
-                    strip=True
-                )
+    if "Synth From" in sections:
+        synth_from = extract_relation_items(sections["Synth From"])
 
-        # =================================
-        # UNLOCK
-        # =================================
+    if "Tiers" in sections:
+        tiers = extract_text_items(sections["Tiers"])
 
-        elif label == "Unlock":
+    if "Equip Effects" in sections:
+        equip_effects = extract_equip_effects(sections["Equip Effects"])
 
-            p = row.select_one(
-                "p.text-sm.font-light.leading-6.text-white"
-            )
+    if "Craft Materials" in sections:
+        craft_materials = extract_relation_items(sections["Craft Materials"])
 
-            # unlock text
-            if p:
+    item["detail_url"] = normalize_url(item["detail_url"])
+    item["image"] = normalize_url(item["image"])
 
-                unlock_text = p.get_text(
-                    " ",
-                    strip=True
-                )
+    clear_equipment_relations(item["id"])
 
-            # unlock stats
-            else:
-
-                unlock_stats = [
-                    x.get_text(strip=True)
-                    for x in row.select(
-                        "span, p"
-                    )
-                    if x.get_text(strip=True)
-                    and x.get_text(strip=True) != "Unlock"
-                ]
-
-        # =================================
-        # DEPOSIT
-        # =================================
-
-        elif label == "Deposit":
-
-            deposit_stats = [
-                x.get_text(strip=True)
-                for x in row.select(
-                    "span, p"
-                )
-                if x.get_text(strip=True)
-                and x.get_text(strip=True) != "Deposit"
-            ]
-
-        # =================================
-        # JOBS
-        # =================================
-
-        elif label == "Jobs":
-
-            jobs = [
-                x.get_text(strip=True)
-                for x in row.select(
-                    "span.inline-flex"
-                )
-                if x.get_text(strip=True)
-            ]
-
-    # =====================================
-    # FORMULA JSON
-    # =====================================
-
-    formula_json = None
-    formula_id = None
-
-    code_tag = soup.select_one(
-        "code.language-json"
-    )
-
-    if code_tag:
-
-        raw_json = code_tag.get_text(
-            strip=True
-        )
-
-        try:
-
-            formula_json = json.loads(raw_json)
-
-            formula_id = str(
-                formula_json.get("id")
-            )
-
-        except:
-
-            formula_json = raw_json
-
-    # =====================================
-    # SAVE FORMULA
-    # =====================================
-
-    if formula_id and formula_json:
-
-        cursor.execute("""
-        INSERT OR REPLACE INTO formulas (
-            id,
-            raw_json
-        )
-        VALUES (?, ?)
-        """, (
-            formula_id,
-            json.dumps(
-                formula_json,
-                ensure_ascii=False
-            )
-        ))
-
-    # =====================================
-    # SAVE EQUIPMENT
-    # =====================================
-
-
-    
-    # update data detail_url & image remove BASE_URL if exist
-    if item["detail_url"].startswith(BASE_URL):
-        item["detail_url"] = item["detail_url"][len(BASE_URL):]
-    if item["image"] and item["image"].startswith(BASE_URL):
-        item["image"] = item["image"][len(BASE_URL):]
+    formula_id = save_formulas(item["id"], soup)
 
     cursor.execute("""
-    INSERT OR REPLACE INTO equipments (
-        id,
-        detail_url,
-        image,
-        name,
-        type,
-        description,
-        effect_text,
-        unlock_text,
-        deposit_stats,
-        unlock_stats,
-        jobs,
-        formula_id,
-        raw_html
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO equipments (
+            id,
+            detail_url,
+            image,
+            name,
+            type,
+            description,
+            quality,
+            effect_text,
+            unlock_text,
+            deposit_stats,
+            unlock_stats,
+            jobs,
+            formula_id,
+            raw_html
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         item["id"],
         item["detail_url"],
         item["image"],
         name,
         item_type,
-            description,    
-    effect_text,
-    unlock_text,
-    json.dumps(
-        deposit_stats,
-        ensure_ascii=False
-    ),
-    json.dumps(
-        unlock_stats,
-        ensure_ascii=False
-    ),
-    json.dumps(
-        jobs,
-        ensure_ascii=False
-    ),
-        formula_id, 
-        raw_html
+        description,
+        quality,
+        json.dumps(effect_text, ensure_ascii=False),
+        json.dumps(unlock_text, ensure_ascii=False),
+        json.dumps(deposit_stats, ensure_ascii=False),
+        json.dumps(unlock_stats, ensure_ascii=False),
+        json.dumps(jobs, ensure_ascii=False),
+        formula_id,
+        raw_html,
     ))
 
-    conn.commit()
+    save_relation_items(
+        item["id"],
+        "synth_from",
+        synth_from
+    )
 
-       
-    # update data detail_url & image remove BASE_URL if exist
-    if item["detail_url"].startswith(BASE_URL):
-        item["detail_url"] = item["detail_url"][len(BASE_URL):]
-    if item["image"] and item["image"].startswith(BASE_URL):
-        item["image"] = item["image"][len(BASE_URL):]
+    save_relation_items(
+        item["id"],
+        "craft_material",
+        craft_materials
+    )
+
+    save_tiers(
+        item["id"],
+        tiers
+    )
+
+    save_equip_effects(
+        item["id"],
+        equip_effects
+    )
+
     cursor.execute("""
-    INSERT OR REPLACE INTO things (
-        id,
-        type,
-        name,
-        image,
-        detail_url
-    )   
-    VALUES (?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO things (
+            id,
+            type,
+            name,
+            image,
+            detail_url
+        )
+        VALUES (?, ?, ?, ?, ?)
     """, (
         item["id"],
         "equipment",
         name,
         item["image"],
-        item["detail_url"]
-        
+        item["detail_url"],
     ))
 
     conn.commit()
 
-    print(f"[OK] {name}")
+    print(
+        "[OK]",
+        name,
+        "| effect:",
+        len(effect_text),
+        "| unlock:",
+        len(unlock_text),
+        "| jobs:",
+        len(jobs),
+        "| synth:",
+        len(synth_from),
+        "| tiers:",
+        len(tiers),
+        "| equip effects:",
+        len(equip_effects),
+        "| craft:",
+        len(craft_materials),
+    )
 
     return True
 
 
-# =========================================
-# MAIN LOOP
-# =========================================
-
 page = 1
-
 seen_ids = set()
 
 while True:
-
     listing_items = get_listing_items(page)
 
     print(f"[INFO] FOUND {len(listing_items)} ITEMS")
 
     if len(listing_items) == 0:
-
         print("[INFO] NO MORE ITEMS")
-
         break
 
     new_items = []
 
     for item in listing_items:
-
         if item["id"] not in seen_ids:
-
             seen_ids.add(item["id"])
-
             new_items.append(item)
 
     if len(new_items) == 0:
-
         print("[INFO] NO NEW ITEMS")
-
         break
 
     for item in new_items:
-
         try:
-
             get_item_detail(item)
-
             time.sleep(1)
 
         except Exception as e:
-
             print("ERROR:", e)
 
     page += 1
-
-
-# =========================================
-# DONE
-# =========================================
 
 conn.close()
 
