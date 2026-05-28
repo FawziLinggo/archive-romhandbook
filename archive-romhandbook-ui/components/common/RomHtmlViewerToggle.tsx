@@ -5,7 +5,7 @@ import { useState } from "react"
 import RomHtmlViewer from "./RomHtmlViewer"
 
 type Props = {
-    html: string
+    html: string | null
 }
 
 export default function RomHtmlViewerToggle({
@@ -15,95 +15,128 @@ export default function RomHtmlViewerToggle({
     const [open, setOpen] =
         useState(false)
 
+    const hasHtml =
+        Boolean(html)
+
     return (
 
-        <div className="mt-12">
+        <div
+            className="
+                mt-8
 
-            {/* CONTAINER */}
+                sm:mt-12
+            "
+        >
+
             <div
                 className="
-                    rounded-3xl
+                    overflow-hidden
+                    rounded-2xl
                     border
                     border-zinc-800
                     bg-gradient-to-b
                     from-zinc-900
                     to-zinc-950
-                    overflow-hidden
                     shadow-2xl
                     shadow-black/30
+
+                    sm:rounded-3xl
                 "
             >
 
-                {/* HEADER */}
                 <div
                     className="
-                        px-8
-                        py-7
                         border-b
                         border-zinc-800
+                        px-4
+                        py-5
+
+                        sm:px-8
+                        sm:py-7
                     "
                 >
-
-                    {/* TITLE */}
                     <h2
                         className="
-                            text-2xl
+                            text-xl
                             font-bold
+                            leading-tight
                             text-white
+
+                            sm:text-2xl
                         "
                     >
                         ROM Handbook Snapshot
                     </h2>
 
-                    {/* SUBTITLE */}
                     <p
                         className="
-                            text-zinc-400
                             mt-2
+                            text-sm
+                            leading-6
+                            text-zinc-400
+
+                            sm:text-base
                         "
                     >
                         Archived Original Page
                     </p>
-
                 </div>
 
-                {/* ACTION */}
                 <div
                     className="
-                        px-8
-                        py-6
                         flex
-                        items-center
-                        justify-between
+                        flex-col
                         gap-4
-                        flex-wrap
+                        px-4
+                        py-5
+
+                        sm:px-8
+                        sm:py-6
+
+                        md:flex-row
+                        md:items-center
+                        md:justify-between
                     "
                 >
-
                     <div
                         className="
                             text-sm
+                            leading-6
                             text-zinc-500
                         "
                     >
-                        Preserved HTML snapshot from ROM Handbook
+                        {hasHtml
+                            ? "Preserved HTML snapshot from ROM Handbook"
+                            : "No original HTML snapshot archived for this entry"}
                     </div>
 
                     <button
+                        type="button"
                         onClick={() =>
                             setOpen(!open)
                         }
+                        disabled={!hasHtml}
                         className="
-                            px-5
-                            py-3
+                            h-12
+                            w-full
                             rounded-2xl
                             bg-violet-600
-                            hover:bg-violet-500
+                            px-5
+                            text-sm
+                            font-semibold
                             text-white
-                            font-medium
-                            transition-all
                             shadow-lg
                             shadow-violet-500/20
+                            transition-all
+
+                            hover:bg-violet-500
+
+                            disabled:cursor-not-allowed
+                            disabled:bg-zinc-800
+                            disabled:text-zinc-500
+                            disabled:shadow-none
+
+                            md:w-auto
                         "
                     >
 
@@ -112,22 +145,37 @@ export default function RomHtmlViewerToggle({
                             : "Open Snapshot"}
 
                     </button>
-
                 </div>
 
-                {/* VIEWER */}
-                {open && (
+                {open && hasHtml && (
 
                     <div
                         className="
+                            min-w-0
+                            overflow-hidden
                             border-t
                             border-zinc-800
                         "
                     >
 
-                        <RomHtmlViewer
-                            html={html}
-                        />
+                        {open && html && (
+
+                            <div
+                                className="
+            min-w-0
+            overflow-hidden
+            border-t
+            border-zinc-800
+        "
+                            >
+
+                                <RomHtmlViewer
+                                    html={html}
+                                />
+
+                            </div>
+
+                        )}
 
                     </div>
 

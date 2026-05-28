@@ -25,40 +25,42 @@ export default function SidebarToggle({
         <button
             onClick={onToggle}
             className="
-                absolute
+        absolute
 
-                left-full
-                top-1/2
+        left-full
+        top-1/2
 
-                z-50
+        z-50
 
-                flex
-                h-12
-                w-6
+        hidden
+        h-12
+        w-6
 
-                -translate-x-1/2
-                -translate-y-1/2
+        md:flex
 
-                items-center
-                justify-center
+        -translate-x-1/2
+        -translate-y-1/2
 
-                rounded-full
+        items-center
+        justify-center
 
-                border
-                border-zinc-800
+        rounded-full
 
-                bg-zinc-900
+        border
+        border-zinc-800
 
-                text-zinc-400
+        bg-zinc-900
 
-                shadow-xl
-                shadow-black/40
+        text-zinc-400
 
-                transition-all
+        shadow-xl
+        shadow-black/40
 
-                hover:border-violet-500
-                hover:text-white
-            "
+        transition-all
+
+        hover:border-violet-500
+        hover:text-white
+    "
         >
 
             {collapsed

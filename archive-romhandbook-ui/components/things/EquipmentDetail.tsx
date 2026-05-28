@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
+
 import {
     Prism as SyntaxHighlighter
 } from "react-syntax-highlighter"
@@ -132,7 +134,6 @@ function parseFormulaJson(
         value
 
     for (let i = 0; i < 2; i++) {
-
         if (typeof current !== "string") {
             return current
         }
@@ -192,55 +193,6 @@ function Chip({
     )
 }
 
-function InfoBox({
-    label,
-    value
-}: {
-    label: string
-    value: string | null
-}) {
-
-    if (!value) {
-        return null
-    }
-
-    return (
-
-        <div
-            className="
-                rounded-2xl
-                border
-                border-zinc-800
-                bg-black/30
-                p-4
-            "
-        >
-            <div
-                className="
-                    text-[11px]
-                    uppercase
-                    tracking-wider
-                    text-zinc-500
-                "
-            >
-                {label}
-            </div>
-
-            <div
-                className="
-                    mt-2
-                    text-sm
-                    leading-6
-                    text-zinc-200
-                "
-            >
-                {value}
-            </div>
-        </div>
-
-    )
-}
-
 function Section({
     title,
     children
@@ -257,16 +209,20 @@ function Section({
                 border
                 border-zinc-800
                 bg-zinc-950
-                p-5
+                p-4
+
+                sm:p-5
             "
         >
             <h2
                 className="
-                    text-sm
+                    text-xs
                     font-bold
                     uppercase
                     tracking-wider
                     text-zinc-400
+
+                    sm:text-sm
                 "
             >
                 {title}
@@ -314,16 +270,19 @@ function TextList({
                     key={`${item}-${index}`}
                     className="
                         flex
+                        min-w-0
                         gap-3
                         rounded-xl
                         border
                         border-zinc-800
                         bg-black/30
-                        px-4
+                        px-3
                         py-3
                         text-sm
                         leading-6
                         text-zinc-200
+
+                        sm:px-4
                     "
                 >
                     <span
@@ -337,7 +296,12 @@ function TextList({
                         `}
                     />
 
-                    <span>
+                    <span
+                        className="
+                            min-w-0
+                            break-words
+                        "
+                    >
                         {item}
                     </span>
                 </div>
@@ -370,6 +334,7 @@ function RelationCard({
                 bg-black/30
                 p-3
                 transition-colors
+
                 hover:border-violet-500/40
                 hover:bg-violet-500/5
             "
@@ -403,6 +368,7 @@ function RelationCard({
                         text-sm
                         font-bold
                         text-zinc-100
+
                         group-hover:text-violet-100
                     "
                 >
@@ -413,7 +379,6 @@ function RelationCard({
 
     )
 }
-
 
 function CompactRelationGroup({
     title,
@@ -435,16 +400,20 @@ function CompactRelationGroup({
                 border
                 border-zinc-800
                 bg-black/30
-                p-4
+                p-3
+
+                sm:p-4
             "
         >
             <div
                 className="
-                    text-[11px]
+                    text-[10px]
                     font-black
                     uppercase
                     tracking-[0.18em]
                     text-zinc-400
+
+                    sm:text-[11px]
                 "
             >
                 {title}
@@ -467,13 +436,14 @@ function CompactRelationGroup({
                             flex
                             min-w-0
                             items-center
-                            gap-3
+                            gap-2
                             rounded-xl
                             border
                             border-zinc-800
                             bg-zinc-950
                             p-2
                             transition-colors
+
                             hover:border-violet-500/40
                             hover:bg-violet-500/5
                         "
@@ -495,7 +465,7 @@ function CompactRelationGroup({
                                 src={normalizeImage(relation.related_image)}
                                 alt={relation.related_name || "Related item"}
                                 fill
-                                sizes="32px"
+                                sizes="28px"
                                 className="object-cover"
                             />
                         </span>
@@ -507,6 +477,7 @@ function CompactRelationGroup({
                                 text-xs
                                 font-bold
                                 text-zinc-200
+
                                 group-hover:text-violet-100
                             "
                         >
@@ -541,6 +512,7 @@ function RelationSection({
                     grid
                     grid-cols-1
                     gap-3
+
                     sm:grid-cols-2
                     xl:grid-cols-3
                 "
@@ -579,12 +551,16 @@ function TierSection({
                         key={tier.id}
                         className="
                             flex
-                            gap-4
+                            min-w-0
+                            gap-3
                             rounded-xl
                             border
                             border-zinc-800
                             bg-black/30
-                            p-4
+                            p-3
+
+                            sm:gap-4
+                            sm:p-4
                         "
                     >
                         <div
@@ -609,6 +585,8 @@ function TierSection({
 
                         <p
                             className="
+                                min-w-0
+                                break-words
                                 text-sm
                                 leading-6
                                 text-zinc-200
@@ -637,6 +615,7 @@ function EquipEffectItem({
             href={relationHref(item)}
             className="
                 flex
+                max-w-full
                 items-center
                 gap-2
                 rounded-full
@@ -646,12 +625,15 @@ function EquipEffectItem({
                 py-1
                 pl-1
                 pr-3
-                text-sm
+                text-xs
                 font-semibold
                 text-zinc-200
                 transition-colors
+
                 hover:border-cyan-500/40
                 hover:text-cyan-100
+
+                sm:text-sm
             "
         >
             <span
@@ -659,6 +641,7 @@ function EquipEffectItem({
                     relative
                     h-7
                     w-7
+                    shrink-0
                     overflow-hidden
                     rounded-full
                     bg-black
@@ -673,7 +656,7 @@ function EquipEffectItem({
                 />
             </span>
 
-            <span>
+            <span className="truncate">
                 {item.item_name || item.item_id}
             </span>
         </Link>
@@ -704,7 +687,9 @@ function EquipEffectsSection({
                             border
                             border-zinc-800
                             bg-black/30
-                            p-4
+                            p-3
+
+                            sm:p-4
                         "
                     >
                         {effect.items.length > 0 && (
@@ -733,6 +718,8 @@ function EquipEffectsSection({
 
                             <p
                                 className="
+                                    min-w-0
+                                    break-words
                                     text-sm
                                     leading-6
                                     text-zinc-200
@@ -784,10 +771,12 @@ function FormulaBlock({
                     border-b
                     border-zinc-800
                     bg-zinc-900/70
-                    px-5
+                    px-4
                     py-3
                     text-sm
                     text-zinc-400
+
+                    sm:px-5
                 "
             >
                 <span>
@@ -816,9 +805,9 @@ function FormulaBlock({
                 customStyle={{
                     margin: 0,
                     background: "transparent",
-                    fontSize: "13px",
-                    lineHeight: "1.8",
-                    padding: "24px",
+                    fontSize: "12px",
+                    lineHeight: "1.7",
+                    padding: "16px",
                     overflowX: "hidden",
                     maxWidth: "100%",
                 }}
@@ -864,14 +853,18 @@ export default function EquipmentDetail({
                 className="
                     grid
                     grid-cols-1
-                    gap-8
+                    gap-6
+
                     lg:grid-cols-[340px_1fr]
                     lg:items-start
+                    lg:gap-8
                 "
             >
 
                 <aside
                     className="
+                        min-w-0
+
                         lg:sticky
                         lg:top-24
                         lg:self-start
@@ -886,20 +879,34 @@ export default function EquipmentDetail({
                             bg-zinc-950
                             shadow-xl
                             shadow-black/20
+
+                            sm:mx-auto
+                            sm:max-w-md
+
+                            lg:max-w-full
                         "
                     >
-                        <div className="p-6">
+                        <div
+                            className="
+                                p-4
+
+                                sm:p-6
+                            "
+                        >
                             <div
                                 className="
                                     relative
                                     mx-auto
-                                    h-44
-                                    w-44
+                                    h-32
+                                    w-32
                                     overflow-hidden
                                     rounded-3xl
                                     border
                                     border-zinc-800
                                     bg-black
+
+                                    sm:h-44
+                                    sm:w-44
                                 "
                             >
                                 <Image
@@ -913,11 +920,13 @@ export default function EquipmentDetail({
 
                             <div
                                 className="
-                                    mt-6
+                                    mt-5
                                     flex
                                     flex-wrap
                                     justify-center
                                     gap-2
+
+                                    sm:mt-6
                                 "
                             >
                                 <Chip
@@ -945,12 +954,15 @@ export default function EquipmentDetail({
 
                             <h1
                                 className="
-                                    mt-5
+                                    mt-4
                                     text-center
-                                    text-3xl
+                                    text-2xl
                                     font-black
                                     leading-tight
                                     text-white
+
+                                    sm:mt-5
+                                    sm:text-3xl
                                 "
                             >
                                 {equipment.name}
@@ -961,6 +973,7 @@ export default function EquipmentDetail({
                                 <p
                                     className="
                                         mt-4
+                                        break-words
                                         text-center
                                         text-sm
                                         leading-6
@@ -972,8 +985,15 @@ export default function EquipmentDetail({
 
                             )}
 
+                            <div
+                                className="
+                                    mt-5
+                                    grid
+                                    gap-3
 
-                            <div className="mt-6 grid gap-3">
+                                    sm:mt-6
+                                "
+                            >
                                 <CompactRelationGroup
                                     title="Synth From"
                                     relations={equipment.synth_from}
@@ -1006,14 +1026,12 @@ export default function EquipmentDetail({
                         />
                     </Section>
 
-
                     <Section title="Unlock">
                         <TextList
                             items={unlocks}
                             tone="cyan"
                         />
                     </Section>
-
 
                     <Section title="Deposit">
                         <TextList
@@ -1045,7 +1063,6 @@ export default function EquipmentDetail({
 
                     )}
 
-
                     <TierSection
                         tiers={equipment.tiers}
                     />
@@ -1065,7 +1082,6 @@ export default function EquipmentDetail({
                         relations={equipment.dropped_by}
                     />
 
-
                     <EquipEffectsSection
                         effects={equipment.equip_effects}
                     />
@@ -1075,9 +1091,11 @@ export default function EquipmentDetail({
                         <section className="space-y-4">
                             <h2
                                 className="
-                                    text-2xl
+                                    text-xl
                                     font-black
                                     text-white
+
+                                    sm:text-2xl
                                 "
                             >
                                 Formulas
@@ -1093,6 +1111,20 @@ export default function EquipmentDetail({
 
                             ))}
                         </section>
+
+                    )}
+
+
+                    {/* SNAPSHOT */}
+                    {equipment.raw_html && (
+
+                        <div className="mt-4">
+
+                            <RomHtmlViewerToggle
+                                html={equipment.raw_html}
+                            />
+
+                        </div>
 
                     )}
                 </main>

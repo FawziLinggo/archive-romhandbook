@@ -1,3 +1,5 @@
+import { headers } from "next/headers"
+
 import EquipmentSearchClient from "@/components/equipments/EquipmentSearchClient"
 
 import type {
@@ -21,14 +23,18 @@ type Props = {
 function buildQueryString(
     params: Record<string, string | number>
 ) {
-    const searchParams = new URLSearchParams()
+    const searchParams =
+        new URLSearchParams()
 
     Object.entries(params).forEach(([key, value]) => {
         if (value === "" || value === 0) {
             return
         }
 
-        searchParams.set(key, String(value))
+        searchParams.set(
+            key,
+            String(value)
+        )
     })
 
     return searchParams.toString()
@@ -36,6 +42,7 @@ function buildQueryString(
 
 async function getEquipments({
     page,
+    limit,
     query,
     type,
     quality,
@@ -45,6 +52,7 @@ async function getEquipments({
     sort,
 }: {
     page: number
+    limit: number
     query: string
     type: string
     quality: string
@@ -57,26 +65,28 @@ async function getEquipments({
         process.env.NEXT_PUBLIC_API_URL ||
         "http://127.0.0.1:8080"
 
-    const qs = buildQueryString({
-        page,
-        limit: 24,
-        query,
-        type,
-        quality,
-        stat,
-        unlock,
-        depo,
-        sort,
-    })
+    const qs =
+        buildQueryString({
+            page,
+            limit,
+            query,
+            type,
+            quality,
+            stat,
+            unlock,
+            depo,
+            sort,
+        })
 
-    const res = await fetch(
-        `${API_URL}/api/v1/equipments?${qs}`,
-        {
-            next: {
-                revalidate: 60,
-            },
-        }
-    )
+    const res =
+        await fetch(
+            `${API_URL}/api/v1/equipments?${qs}`,
+            {
+                next: {
+                    revalidate: 60,
+                },
+            }
+        )
 
     if (!res.ok) {
         throw new Error("Failed to fetch equipments")
@@ -88,50 +98,81 @@ async function getEquipments({
 export default async function EquipmentsPage({
     searchParams,
 }: Props) {
-    const params = await searchParams
+    const params =
+        await searchParams
 
-    const page = Math.max(
-        1,
-        Number(params.page || "1")
-    )
+    const requestHeaders =
+        await headers()
 
-    const query = params.query || ""
-    const type = params.type || ""
-    const quality = params.quality || ""
-    const stat = params.stat || ""
-    const unlock = params.unlock || ""
-    const depo = params.depo || ""
-    const sort = params.sort || "Name asc"
+    const userAgent =
+        requestHeaders.get("user-agent") || ""
 
-    const response = await getEquipments({
-        page,
-        query,
-        type,
-        quality,
-        stat,
-        unlock,
-        depo,
-        sort,
-    })
+    const isMobile =
+        /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent)
+
+    const limit =
+        isMobile
+            ? 8
+            : 24
+
+    const page =
+        Math.max(
+            1,
+            Number(params.page || "1")
+        )
+
+    const query =
+        params.query || ""
+
+    const type =
+        params.type || ""
+
+    const quality =
+        params.quality || ""
+
+    const stat =
+        params.stat || ""
+
+    const unlock =
+        params.unlock || ""
+
+    const depo =
+        params.depo || ""
+
+    const sort =
+        params.sort || "Name asc"
+
+    const response =
+        await getEquipments({
+            page,
+            limit,
+            query,
+            type,
+            quality,
+            stat,
+            unlock,
+            depo,
+            sort,
+        })
 
     return (
         <main
             className="
                 mx-auto
+                w-full
                 max-w-7xl
-                px-4
-                py-10
-                sm:px-6
-                lg:px-8
+                space-y-6
             "
         >
-            <section className="mb-8">
+            <section className="space-y-2">
                 <h1
                     className="
-                        text-4xl
-                        font-bold
+                        text-3xl
+                        font-black
                         tracking-tight
                         text-white
+
+                        sm:text-4xl
                     "
                 >
                     Equipments
@@ -139,11 +180,12 @@ export default async function EquipmentsPage({
 
                 <p
                     className="
-                        mt-3
                         max-w-2xl
-                        text-base
-                        leading-7
+                        text-sm
+                        leading-6
                         text-zinc-400
+
+                        sm:text-base
                     "
                 >
                     Browse weapons, armor, accessories, costumes, deposits,

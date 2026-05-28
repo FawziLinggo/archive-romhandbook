@@ -9,7 +9,9 @@ import SearchInput from "@/components/search/SearchInput"
 import SearchStatus from "@/components/search/SearchStatus"
 import useDebounce from "@/components/search/useDebounce"
 
-import type { Equipment } from "@/lib/types/Equipment"
+import type {
+    Equipment
+} from "@/lib/types/Equipment"
 
 import EquipmentGrid from "./EquipmentGrid"
 
@@ -126,15 +128,21 @@ const sortOptions = [
     "Name desc",
 ]
 
-function buildQueryString(params: Record<string, string | number>) {
-    const searchParams = new URLSearchParams()
+function buildQueryString(
+    params: Record<string, string | number>
+) {
+    const searchParams =
+        new URLSearchParams()
 
     Object.entries(params).forEach(([key, value]) => {
         if (value === "" || value === 0) {
             return
         }
 
-        searchParams.set(key, String(value))
+        searchParams.set(
+            key,
+            String(value)
+        )
     })
 
     return searchParams.toString()
@@ -159,18 +167,21 @@ function buildPageUrl({
     depo: string
     sort: string
 }) {
-    const qs = buildQueryString({
-        page,
-        query,
-        type,
-        quality,
-        stat,
-        unlock,
-        depo,
-        sort,
-    })
+    const qs =
+        buildQueryString({
+            page,
+            query,
+            type,
+            quality,
+            stat,
+            unlock,
+            depo,
+            sort,
+        })
 
-    return qs ? `/equipments?${qs}` : "/equipments"
+    return qs
+        ? `/equipments?${qs}`
+        : "/equipments"
 }
 
 function SelectControl({
@@ -187,7 +198,10 @@ function SelectControl({
     return (
         <select
             value={value}
-            onChange={(event) => onChange(event.target.value)}
+            aria-label={label}
+            onChange={(event) =>
+                onChange(event.target.value)
+            }
             className="
                 h-12
                 w-full
@@ -200,6 +214,7 @@ function SelectControl({
                 text-white
                 outline-none
                 transition-colors
+
                 hover:border-zinc-700
                 focus:border-violet-500
             "
@@ -237,30 +252,40 @@ function FilterPagination({
     depo: string
     sort: string
 }) {
-    const previousUrl = buildPageUrl({
-        page: Math.max(1, page - 1),
-        query,
-        type,
-        quality,
-        stat,
-        unlock,
-        depo,
-        sort,
-    })
+    const previousUrl =
+        buildPageUrl({
+            page: Math.max(1, page - 1),
+            query,
+            type,
+            quality,
+            stat,
+            unlock,
+            depo,
+            sort,
+        })
 
-    const nextUrl = buildPageUrl({
-        page: page + 1,
-        query,
-        type,
-        quality,
-        stat,
-        unlock,
-        depo,
-        sort,
-    })
+    const nextUrl =
+        buildPageUrl({
+            page: page + 1,
+            query,
+            type,
+            quality,
+            stat,
+            unlock,
+            depo,
+            sort,
+        })
 
     return (
-        <div className="flex items-center justify-center gap-3">
+        <div
+            className="
+                flex
+                items-center
+                justify-center
+                gap-3
+                pt-2
+            "
+        >
             {page > 1 ? (
                 <Link
                     href={previousUrl}
@@ -275,6 +300,7 @@ function FilterPagination({
                         font-semibold
                         text-zinc-200
                         transition-colors
+
                         hover:border-violet-500/40
                         hover:text-white
                     "
@@ -299,7 +325,18 @@ function FilterPagination({
                 </span>
             )}
 
-            <span className="text-sm text-zinc-500">
+            <span
+                className="
+                    rounded-xl
+                    border
+                    border-zinc-800
+                    bg-black
+                    px-4
+                    py-2
+                    text-sm
+                    text-zinc-400
+                "
+            >
                 Page {page}
             </span>
 
@@ -317,6 +354,7 @@ function FilterPagination({
                         font-semibold
                         text-zinc-200
                         transition-colors
+
                         hover:border-violet-500/40
                         hover:text-white
                     "
@@ -357,39 +395,59 @@ export default function EquipmentSearchClient({
     initialDepo,
     initialSort,
 }: Props) {
-    const router = useRouter()
-    const pathname = usePathname()
-    const didMount = useRef(false)
+    const router =
+        useRouter()
 
-    const [query, setQuery] = useState(initialQuery)
-    const [type, setType] = useState(initialType)
-    const [quality, setQuality] = useState(initialQuality)
-    const [stat, setStat] = useState(initialStat)
-    const [unlock, setUnlock] = useState(initialUnlock)
-    const [depo, setDepo] = useState(initialDepo)
-    const [sort, setSort] = useState(initialSort || "Name asc")
+    const pathname =
+        usePathname()
 
-    const debouncedQuery = useDebounce(query, 300)
+    const didMount =
+        useRef(false)
 
-    const isFiltered = useMemo(() => {
-        return Boolean(
-            debouncedQuery ||
-            type ||
-            quality ||
-            stat ||
-            unlock ||
-            depo ||
-            sort !== "Name asc"
-        )
-    }, [
-        debouncedQuery,
-        type,
-        quality,
-        stat,
-        unlock,
-        depo,
-        sort,
-    ])
+    const [query, setQuery] =
+        useState(initialQuery)
+
+    const [type, setType] =
+        useState(initialType)
+
+    const [quality, setQuality] =
+        useState(initialQuality)
+
+    const [stat, setStat] =
+        useState(initialStat)
+
+    const [unlock, setUnlock] =
+        useState(initialUnlock)
+
+    const [depo, setDepo] =
+        useState(initialDepo)
+
+    const [sort, setSort] =
+        useState(initialSort || "Name asc")
+
+    const debouncedQuery =
+        useDebounce(query, 300)
+
+    const isFiltered =
+        useMemo(() => {
+            return Boolean(
+                debouncedQuery ||
+                type ||
+                quality ||
+                stat ||
+                unlock ||
+                depo ||
+                sort !== "Name asc"
+            )
+        }, [
+            debouncedQuery,
+            type,
+            quality,
+            stat,
+            unlock,
+            depo,
+            sort,
+        ])
 
     function clearFilters() {
         setQuery("")
@@ -400,9 +458,12 @@ export default function EquipmentSearchClient({
         setDepo("")
         setSort("Name asc")
 
-        router.replace("/equipments", {
-            scroll: false,
-        })
+        router.replace(
+            "/equipments",
+            {
+                scroll: false,
+            }
+        )
     }
 
     useEffect(() => {
@@ -411,20 +472,24 @@ export default function EquipmentSearchClient({
             return
         }
 
-        const qs = buildQueryString({
-            query: debouncedQuery,
-            type,
-            quality,
-            stat,
-            unlock,
-            depo,
-            sort,
-            page: 1,
-        })
+        const qs =
+            buildQueryString({
+                query: debouncedQuery,
+                type,
+                quality,
+                stat,
+                unlock,
+                depo,
+                sort,
+                page: 1,
+            })
 
-        router.replace(qs ? `${pathname}?${qs}` : pathname, {
-            scroll: false,
-        })
+        router.replace(
+            qs ? `${pathname}?${qs}` : pathname,
+            {
+                scroll: false,
+            }
+        )
     }, [
         debouncedQuery,
         type,
@@ -448,8 +513,22 @@ export default function EquipmentSearchClient({
                     p-4
                 "
             >
-                <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-                    <div className="xl:col-span-4">
+                <div
+                    className="
+                        grid
+                        grid-cols-1
+                        gap-3
+
+                        md:grid-cols-2
+                        xl:grid-cols-12
+                    "
+                >
+                    <div
+                        className="
+                            md:col-span-2
+                            xl:col-span-4
+                        "
+                    >
                         <SearchInput
                             value={query}
                             onChange={setQuery}
@@ -499,17 +578,26 @@ export default function EquipmentSearchClient({
                             font-semibold
                             text-zinc-300
                             transition-colors
+
                             hover:border-violet-500/40
                             hover:text-white
+
                             disabled:cursor-not-allowed
                             disabled:opacity-40
+
+                            md:col-span-2
                             xl:col-span-2
                         "
                     >
                         Clear
                     </button>
 
-                    <div className="xl:col-span-4">
+                    <div
+                        className="
+                            md:col-span-2
+                            xl:col-span-4
+                        "
+                    >
                         <SelectControl
                             value={stat}
                             label="Effect stat"
@@ -518,7 +606,12 @@ export default function EquipmentSearchClient({
                         />
                     </div>
 
-                    <div className="xl:col-span-4">
+                    <div
+                        className="
+                            md:col-span-1
+                            xl:col-span-4
+                        "
+                    >
                         <SelectControl
                             value={unlock}
                             label="Unlock stat"
@@ -527,7 +620,12 @@ export default function EquipmentSearchClient({
                         />
                     </div>
 
-                    <div className="xl:col-span-4">
+                    <div
+                        className="
+                            md:col-span-1
+                            xl:col-span-4
+                        "
+                    >
                         <SelectControl
                             value={depo}
                             label="Deposit stat"
@@ -559,7 +657,9 @@ export default function EquipmentSearchClient({
                 </div>
             </div>
 
-            <EquipmentGrid equipments={initialEquipments} />
+            <EquipmentGrid
+                equipments={initialEquipments}
+            />
 
             {isFiltered ? (
                 <FilterPagination
