@@ -1,0 +1,638 @@
+import Image from "next/image"
+
+import {
+    Prism as SyntaxHighlighter
+} from "react-syntax-highlighter"
+
+import {
+    oneDark
+} from "react-syntax-highlighter/dist/cjs/styles/prism"
+
+import DetailContainer from "../layout/DetailContainer"
+
+import type {
+    HeadwearDetail as HeadwearDetailType
+} from "@/lib/types/Headwear"
+
+type Props = {
+
+    headwear: HeadwearDetailType
+
+}
+
+function parseJsonArray(
+    value: string | null
+) {
+    if (!value) {
+        return []
+    }
+
+    try {
+        const parsed =
+            JSON.parse(value)
+
+        if (Array.isArray(parsed)) {
+            return parsed.filter(Boolean)
+        }
+
+        return []
+    } catch {
+        return []
+    }
+}
+
+function normalizeImage(
+    image: string | null
+) {
+    if (!image) {
+        return "/placeholder.png"
+    }
+
+    return image
+        .replace("https://romhandbook.com", "")
+        .replace("http://romhandbook.com", "")
+}
+
+function qualityClass(
+    quality: string | null
+) {
+    switch (quality) {
+        case "Purple":
+            return "border-violet-500/40 bg-violet-500/10 text-violet-200"
+
+        case "Blue":
+            return "border-sky-500/40 bg-sky-500/10 text-sky-200"
+
+        case "Green":
+            return "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+
+        case "White":
+            return "border-zinc-400/40 bg-zinc-400/10 text-zinc-200"
+
+        default:
+            return "border-zinc-700 bg-zinc-900 text-zinc-300"
+    }
+}
+
+function parseFormulaJson(
+    value: unknown
+) {
+    let current =
+        value
+
+    for (let i = 0; i < 2; i++) {
+
+        if (typeof current !== "string") {
+            return current
+        }
+
+        try {
+            current =
+                JSON.parse(current)
+        } catch {
+            return current
+        }
+    }
+
+    return current
+}
+
+function formatFormulaJson(
+    value: unknown
+) {
+    const parsed =
+        parseFormulaJson(value)
+
+    if (typeof parsed === "string") {
+        return parsed
+    }
+
+    return JSON.stringify(
+        parsed,
+        null,
+        2
+    )
+}
+
+function Chip({
+    children,
+    className = ""
+}: {
+    children: React.ReactNode
+    className?: string
+}) {
+
+    return (
+
+        <span
+            className={`
+                rounded-full
+                border
+                px-3
+                py-1
+                text-xs
+                font-semibold
+                ${className}
+            `}
+        >
+            {children}
+        </span>
+
+    )
+}
+
+function InfoBox({
+    label,
+    value
+}: {
+    label: string
+    value: string | null
+}) {
+
+    if (!value) {
+        return null
+    }
+
+    return (
+
+        <div
+            className="
+                rounded-2xl
+                border
+                border-zinc-800
+                bg-black/30
+                p-4
+            "
+        >
+            <div
+                className="
+                    text-[11px]
+                    uppercase
+                    tracking-wider
+                    text-zinc-500
+                "
+            >
+                {label}
+            </div>
+
+            <div
+                className="
+                    mt-2
+                    text-sm
+                    leading-6
+                    text-zinc-200
+                "
+            >
+                {value}
+            </div>
+        </div>
+
+    )
+}
+
+function TextSection({
+    title,
+    items,
+    tone = "violet"
+}: {
+    title: string
+    items: string[]
+    tone?: "violet" | "emerald" | "cyan"
+}) {
+
+    if (items.length === 0) {
+        return null
+    }
+
+    const dotClass =
+        tone === "emerald"
+            ? "bg-emerald-400"
+            : tone === "cyan"
+                ? "bg-cyan-400"
+                : "bg-violet-400"
+
+    return (
+
+        <section
+            className="
+                rounded-2xl
+                border
+                border-zinc-800
+                bg-zinc-950
+                p-5
+            "
+        >
+            <h2
+                className="
+                    text-sm
+                    font-bold
+                    uppercase
+                    tracking-wider
+                    text-zinc-400
+                "
+            >
+                {title}
+            </h2>
+
+            <div
+                className="
+                    mt-4
+                    space-y-2
+                "
+            >
+                {items.map((item, index) => (
+
+                    <div
+                        key={index}
+                        className="
+                            flex
+                            gap-3
+                            rounded-xl
+                            border
+                            border-zinc-800
+                            bg-black/30
+                            px-4
+                            py-3
+                            text-sm
+                            leading-6
+                            text-zinc-200
+                        "
+                    >
+                        <span
+                            className={`
+                                mt-2
+                                h-1.5
+                                w-1.5
+                                shrink-0
+                                rounded-full
+                                ${dotClass}
+                            `}
+                        />
+
+                        <span>
+                            {item}
+                        </span>
+                    </div>
+
+                ))}
+            </div>
+        </section>
+
+    )
+}
+
+function FormulaBlock({
+    formula,
+    index
+}: {
+    formula: {
+        formula_json: string | null
+    }
+    index: number
+}) {
+
+    return (
+
+        <div
+            className="
+                overflow-hidden
+                rounded-2xl
+                border
+                border-zinc-800
+                bg-zinc-950
+            "
+        >
+            <div
+                className="
+                    border-b
+                    border-zinc-800
+                    bg-zinc-900/70
+                    px-5
+                    py-3
+                    text-sm
+                    text-zinc-400
+                "
+            >
+                Formula #{index + 1}
+            </div>
+
+            <SyntaxHighlighter
+                language="json"
+                style={oneDark}
+                wrapLongLines={true}
+                PreTag="div"
+                codeTagProps={{
+                    style: {
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
+                    }
+                }}
+                customStyle={{
+                    margin: 0,
+                    background: "transparent",
+                    fontSize: "13px",
+                    lineHeight: "1.8",
+                    padding: "24px",
+                    overflowX: "hidden",
+                    maxWidth: "100%",
+                }}
+            >
+                {formatFormulaJson(
+                    formula.formula_json
+                )}
+            </SyntaxHighlighter>
+        </div>
+
+    )
+}
+
+export default function HeadwearDetail({
+    headwear
+}: Props) {
+
+    const effects =
+        parseJsonArray(
+            headwear.effect_text
+        )
+
+    const deposits =
+        parseJsonArray(
+            headwear.deposit_stats
+        )
+
+    const unlocks =
+        parseJsonArray(
+            headwear.unlock_text
+        )
+
+    const jobs =
+        parseJsonArray(
+            headwear.jobs
+        )
+
+    return (
+
+        <DetailContainer>
+
+            <div
+                className="
+                    grid
+                    grid-cols-1
+                    gap-8
+                    lg:grid-cols-[340px_1fr]
+                    lg:items-start
+                "
+            >
+
+                <aside
+                    className="
+                        lg:sticky
+                        lg:top-24
+                        lg:self-start
+                    "
+                >
+                    <div
+                        className="
+                            overflow-hidden
+                            rounded-3xl
+                            border
+                            border-zinc-800
+                            bg-zinc-950
+                            shadow-xl
+                            shadow-black/20
+                        "
+                    >
+                        <div
+                            className="
+                                p-6
+                            "
+                        >
+                            <div
+                                className="
+                                    relative
+                                    mx-auto
+                                    h-40
+                                    w-40
+                                    overflow-hidden
+                                    rounded-3xl
+                                    border
+                                    border-zinc-800
+                                    bg-black
+                                "
+                            >
+                                <Image
+                                    src={normalizeImage(headwear.image)}
+                                    alt={headwear.name}
+                                    fill
+                                    sizes="160px"
+                                    className="
+                                        object-cover
+                                    "
+                                />
+                            </div>
+
+                            <div
+                                className="
+                                    mt-6
+                                    flex
+                                    flex-wrap
+                                    justify-center
+                                    gap-2
+                                "
+                            >
+                                <Chip
+                                    className="
+                                        border-cyan-500/20
+                                        bg-cyan-500/10
+                                        text-cyan-200
+                                    "
+                                >
+                                    {headwear.type || "Headwear"}
+                                </Chip>
+
+                                {headwear.quality && (
+
+                                    <Chip
+                                        className={qualityClass(
+                                            headwear.quality
+                                        )}
+                                    >
+                                        {headwear.quality}
+                                    </Chip>
+
+                                )}
+                            </div>
+
+                            <h1
+                                className="
+                                    mt-5
+                                    text-center
+                                    text-3xl
+                                    font-black
+                                    leading-tight
+                                    text-white
+                                "
+                            >
+                                {headwear.name}
+                            </h1>
+
+                            {headwear.description && (
+
+                                <p
+                                    className="
+                                        mt-4
+                                        text-center
+                                        text-sm
+                                        leading-6
+                                        text-zinc-400
+                                    "
+                                >
+                                    {headwear.description}
+                                </p>
+
+                            )}
+
+                            <div
+                                className="
+                                    mt-6
+                                    grid
+                                    gap-3
+                                "
+                            >
+                                <InfoBox
+                                    label="Availability"
+                                    value={headwear.availability_date}
+                                />
+
+                                <InfoBox
+                                    label="Formula ID"
+                                    value={headwear.formula_id}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <main
+                    className="
+                        min-w-0
+                        space-y-6
+                    "
+                >
+
+                    <TextSection
+                        title="Effect"
+                        items={effects}
+                        tone="violet"
+                    />
+
+                    <div
+                        className="
+                            grid
+                            grid-cols-1
+                            gap-6
+                            xl:grid-cols-2
+                        "
+                    >
+                        <TextSection
+                            title="Deposit"
+                            items={deposits}
+                            tone="emerald"
+                        />
+
+                        <TextSection
+                            title="Unlock"
+                            items={unlocks}
+                            tone="cyan"
+                        />
+                    </div>
+
+                    {jobs.length > 0 && (
+
+                        <section
+                            className="
+                                rounded-2xl
+                                border
+                                border-zinc-800
+                                bg-zinc-950
+                                p-5
+                            "
+                        >
+                            <h2
+                                className="
+                                    text-sm
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-zinc-400
+                                "
+                            >
+                                Jobs
+                            </h2>
+
+                            <div
+                                className="
+                                    mt-4
+                                    flex
+                                    flex-wrap
+                                    gap-2
+                                "
+                            >
+                                {jobs.map((job, index) => (
+
+                                    <Chip
+                                        key={index}
+                                        className="
+                                            border-red-500/30
+                                            bg-red-500/10
+                                            text-red-200
+                                        "
+                                    >
+                                        {job}
+                                    </Chip>
+
+                                ))}
+                            </div>
+                        </section>
+
+                    )}
+
+                    {headwear.formulas.length > 0 && (
+
+                        <section
+                            className="
+                                space-y-4
+                            "
+                        >
+                            <h2
+                                className="
+                                    text-2xl
+                                    font-black
+                                    text-white
+                                "
+                            >
+                                Formulas
+                            </h2>
+
+                            {headwear.formulas.map((formula, index) => (
+
+                                <FormulaBlock
+                                    key={formula.id}
+                                    formula={formula}
+                                    index={index}
+                                />
+
+                            ))}
+                        </section>
+
+                    )}
+
+                </main>
+
+            </div>
+
+        </DetailContainer>
+
+    )
+}

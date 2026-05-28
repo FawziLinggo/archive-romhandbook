@@ -203,4 +203,29 @@ func SetupRoutes(
 		"/api/v1/monsters/:slug",
 		monsterHandler.GetMonsterBySlug,
 	)
+
+	headwearHandler :=
+		handlers.HeadwearHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/headwears",
+		headwearHandler.GetHeadwears,
+	)
+
+	router.GET(
+		"/api/v1/headwears/search",
+		headwearHandler.SearchHeadwears,
+	)
+
+	router.GET(
+		"/api/v1/headwears/:id/formulas",
+		headwearHandler.GetHeadwearFormulas,
+	)
+
+	router.GET(
+		"/api/v1/headwears/:id",
+		headwearHandler.GetHeadwearByID,
+	)
 }

@@ -5,6 +5,12 @@ import PetEggDetail from "@/components/things/PetEggDetail"
 
 import MountDetail from "@/components/things/MountDetail"
 
+import HeadwearDetail from "@/components/things/HeadwearDetail"
+
+import type {
+    HeadwearDetail as HeadwearDetailType
+} from "@/lib/types/Headwear"
+
 import type {
     CardDetail as CardDetailType
 } from "@/lib/types/Card"
@@ -133,6 +139,27 @@ export default async function ThingPage({
             return (
                 <MountDetail
                     mount={mount}
+                />
+            )
+        }
+
+        case "headwear": {
+
+            const headwear =
+                thingResponse.data as HeadwearDetailType | undefined
+
+            if (!headwear) {
+
+                return (
+                    <div>
+                        Headwear not found
+                    </div>
+                )
+            }
+
+            return (
+                <HeadwearDetail
+                    headwear={headwear}
                 />
             )
         }

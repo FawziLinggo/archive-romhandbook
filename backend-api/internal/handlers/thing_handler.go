@@ -167,6 +167,35 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 
+	case "headwear":
+		headwear, err :=
+			repositories.GetHeadwearByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if headwear == nil {
+			utils.Error(c, 404, "Headwear not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    headwear,
+				"meta":    nil,
+			},
+		)
+
+		return
+
 	default:
 		c.JSON(
 			http.StatusNotImplemented,
