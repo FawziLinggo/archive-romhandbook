@@ -1,13 +1,13 @@
-import {
-    getCardById,
-    getCardFormulas,
-} from "@/lib/queries/cards"
 
 import CardDetail from "@/components/things/CardDetail"
 
 import PetEggDetail from "@/components/things/PetEggDetail"
 
 import MountDetail from "@/components/things/MountDetail"
+
+import type {
+    CardDetail as CardDetailType
+} from "@/lib/types/Card"
 
 import type {
     MountDetail as MountDetailType
@@ -76,15 +76,21 @@ export default async function ThingPage({
         case "card": {
 
             const card =
-                getCardById(id)
+                thingResponse.data as CardDetailType | undefined
 
-            const formulas =
-                getCardFormulas(id)
+            if (!card) {
+
+                return (
+                    <div>
+                        Card not found
+                    </div>
+                )
+            }
 
             return (
                 <CardDetail
                     card={card}
-                    formulas={formulas}
+                    formulas={card.formulas}
                 />
             )
         }

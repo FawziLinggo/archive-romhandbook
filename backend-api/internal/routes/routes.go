@@ -158,4 +158,29 @@ func SetupRoutes(
 		"/api/v1/archive/counts",
 		archiveHandler.GetArchiveCounts,
 	)
+
+	cardHandler :=
+		handlers.CardHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/cards",
+		cardHandler.GetCards,
+	)
+
+	router.GET(
+		"/api/v1/cards/search",
+		cardHandler.SearchCards,
+	)
+
+	router.GET(
+		"/api/v1/cards/:id/formulas",
+		cardHandler.GetCardFormulas,
+	)
+
+	router.GET(
+		"/api/v1/cards/:id",
+		cardHandler.GetCardByID,
+	)
 }

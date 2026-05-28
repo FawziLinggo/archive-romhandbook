@@ -60,6 +60,54 @@ export default function CardDetail({
     formulas
 }: Props) {
 
+
+    function parseFormulaJson(
+        value: unknown
+    ) {
+
+        let current =
+            value
+
+        for (let i = 0; i < 2; i++) {
+
+            if (typeof current !== "string") {
+
+                return current
+            }
+
+            try {
+
+                current =
+                    JSON.parse(current)
+
+            } catch {
+
+                return current
+            }
+        }
+
+        return current
+    }
+
+    function formatFormulaJson(
+        value: unknown
+    ) {
+
+        const parsed =
+            parseFormulaJson(value)
+
+        if (typeof parsed === "string") {
+
+            return parsed
+        }
+
+        return JSON.stringify(
+            parsed,
+            null,
+            2
+        )
+    }
+
     const qualityColor =
         getQualityColor(card.quality)
 
@@ -452,10 +500,8 @@ backdrop-blur
                                                 }}
                                             >
 
-                                                {JSON.stringify(
-                                                    formula.formula_json,
-                                                    null,
-                                                    2
+                                                {formatFormulaJson(
+                                                    formula.formula_json
                                                 )}
 
                                             </SyntaxHighlighter>

@@ -138,6 +138,35 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 
+	case "card":
+		card, err :=
+			repositories.GetCardByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if card == nil {
+			utils.Error(c, 404, "Card not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    card,
+				"meta":    nil,
+			},
+		)
+
+		return
+
 	default:
 		c.JSON(
 			http.StatusNotImplemented,

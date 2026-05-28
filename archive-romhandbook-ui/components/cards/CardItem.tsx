@@ -1,11 +1,13 @@
 import { slugify } from "@/lib/utils"
 import Link from "next/link"
 
+import type {
+    Card
+} from "@/lib/types/Card"
 
 type CardItemProps = {
-    card: any
+    card: Card
 }
-
 
 function getQualityColor(
     quality?: string
@@ -49,7 +51,23 @@ function getQualityColor(
 
 export default function CardItem({ card }: CardItemProps) {
 
-    const qualityColor = getQualityColor(card.quality)
+    const qualityColor = getQualityColor(card.quality || undefined)
+
+
+
+    let effectTexts: string[] = []
+    try {
+
+        effectTexts =
+            JSON.parse(
+                card.effect_text || "[]"
+            )
+
+    } catch {
+
+        effectTexts = []
+    }
+
 
     return (
 
@@ -84,7 +102,7 @@ export default function CardItem({ card }: CardItemProps) {
                     >
 
                         <img
-                            src={card.image}
+                            src={card.image || "/placeholder.png"}
                             alt={card.name}
                             className="
                             w-full
@@ -133,7 +151,7 @@ export default function CardItem({ card }: CardItemProps) {
                     </div>
 
                     {/* EFFECT */}
-                    <div className="mt-3">
+                    {/* <div className="mt-3">
 
                         <p
                             className="
@@ -142,10 +160,10 @@ export default function CardItem({ card }: CardItemProps) {
                             line-clamp-2
                         "
                         >
-                            {card.effect_texts?.[0]}
+                            {effectTexts[0] || "No effect available"}
                         </p>
 
-                    </div>
+                    </div> */}
 
                 </div>
 
