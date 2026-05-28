@@ -2,9 +2,7 @@ import MagicCursorTrail from "@/components/effects/MagicCursorTrail"
 import "./globals.css"
 
 import Navbar from "@/components/layout/Navbar"
-
 import Sidebar from "@/components/layout/Sidebar"
-
 
 import AIAssistant from "@/components/ai-assistant/AIAssistant"
 
@@ -22,24 +20,38 @@ export default function RootLayout({
 
       <body
         className="
-          bg-black
-          text-white
-        "
+                    bg-black
+                    text-white
+                "
       >
 
         <SidebarProvider>
 
           <Navbar />
 
-          <div className="flex">
+          <div
+            className="
+                            flex
+                            min-h-[calc(100vh-4rem)]
+                        "
+          >
 
             <Sidebar />
 
             <main
               className="
-              flex-1
-              p-6
-            "
+        min-w-0
+        flex-1
+
+        px-5
+        py-6
+
+        sm:px-6
+        sm:py-7
+
+        lg:px-8
+        lg:py-8
+    "
             >
               {children}
             </main>
@@ -47,8 +59,13 @@ export default function RootLayout({
           </div>
 
           <AIAssistant />
-          <MagicCursorTrail />
+
+          <div className="hidden md:block">
+            <MagicCursorTrail />
+          </div>
+
         </SidebarProvider>
+
       </body>
 
     </html>

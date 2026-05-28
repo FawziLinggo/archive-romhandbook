@@ -1,11 +1,15 @@
-import type { ApiResponse, ArchiveCounts } from "@/lib/types/Archive"
-import SidebarClient from "../sidebar/SidebarClient"
+import type {
+    ApiResponse,
+    ArchiveCounts
+} from "@/lib/types/Archive"
 
+import SidebarClient from "../sidebar/SidebarClient"
 
 export default async function Sidebar() {
 
     const API_URL =
-        process.env.NEXT_PUBLIC_API_URL
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://127.0.0.1:8080"
 
     const res =
         await fetch(

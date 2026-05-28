@@ -4,6 +4,8 @@ import {
     useSidebar
 } from "@/contexts/SidebarContext"
 
+import Link from "next/link"
+
 export default function Navbar() {
 
     const {
@@ -185,17 +187,25 @@ export default function Navbar() {
 
                     <div
                         className="
-                            text-lg
-                            font-bold
-                            leading-tight
-                            text-white
+        min-w-0
+        text-base
+        font-bold
+        leading-tight
+        text-white
 
-                            md:text-xl
-                        "
+        sm:text-lg
+        md:text-xl
+    "
                     >
-                        <a href="/">
+                        <Link
+                            href="/"
+                            className="
+            block
+            truncate
+        "
+                        >
                             ROM Handbook Archive
-                        </a>
+                        </Link>
                     </div>
 
                 </div>
