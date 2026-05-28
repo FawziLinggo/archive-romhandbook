@@ -1,22 +1,40 @@
 import CardSearchClient from "@/components/cards/CardSearchClient"
+import { headers } from "next/headers"
 
 import type {
     Card,
     PaginatedApiResponse
 } from "@/lib/types/Card"
 
-export default async function CardsPage({
-    searchParams
-}: {
+type Props = {
     searchParams: Promise<{
         type?: string
         quality?: string
         page?: string
     }>
-}) {
+}
+
+export default async function CardsPage({
+    searchParams
+}: Props) {
 
     const params =
         await searchParams
+
+
+    const requestHeaders =
+        await headers()
+
+    const userAgent =
+        requestHeaders.get("user-agent") || ""
+
+    const isMobile =
+        /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent)
+
+    const limit =
+        isMobile
+            ? 8
+            : 24
 
     const type =
         params.type || ""
@@ -25,16 +43,18 @@ export default async function CardsPage({
         params.quality || ""
 
     const page =
-        Number(
-            params.page || "1"
+        Math.max(
+            1,
+            Number(params.page || "1")
         )
 
     const API_URL =
-        process.env.NEXT_PUBLIC_API_URL
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://127.0.0.1:8080"
 
     const res =
         await fetch(
-            `${API_URL}/api/v1/cards?page=${page}&limit=24&type=${encodeURIComponent(type)}&quality=${encodeURIComponent(quality)}`,
+            `${API_URL}/api/v1/cards?page=${page}&limit=${limit}&type=${encodeURIComponent(type)}&quality=${encodeURIComponent(quality)}`,
             {
                 next: {
                     revalidate: 60
@@ -52,41 +72,62 @@ export default async function CardsPage({
     const response =
         await res.json() as PaginatedApiResponse<Card>
 
-    const cards =
-        response.data
-
-    const hasNext =
-        response.meta.has_next
-
     return (
 
-        <div>
+        <main
+            className="
+                mx-auto
+                w-full
+                max-w-7xl
 
-            <div className="mb-6">
+                space-y-6
+            "
+        >
+
+            <section
+                className="
+                    space-y-2
+                "
+            >
 
                 <h1
                     className="
                         text-3xl
-                        font-bold
+                        font-black
+                        tracking-tight
+                        text-white
+
+                        sm:text-4xl
                     "
                 >
                     Cards
                 </h1>
 
-                <p className="text-zinc-400 mt-1">
-                    Browse all ROM cards
+                <p
+                    className="
+                        max-w-2xl
+                        text-sm
+                        leading-6
+                        text-zinc-400
+
+                        sm:text-base
+                    "
+                >
+                    Browse monster cards, equipment cards, deposit bonuses,
+                    unlock stats, and archived ROM formulas.
                 </p>
 
-            </div>
+            </section>
 
             <CardSearchClient
-                initialCards={cards}
-                page={page}
-                hasNext={hasNext}
+                initialCards={response.data}
+                page={response.meta.page}
+                hasNext={response.meta.has_next}
                 initialType={type}
                 initialQuality={quality}
+                limit={limit}
             />
 
-        </div>
+        </main>
     )
 }

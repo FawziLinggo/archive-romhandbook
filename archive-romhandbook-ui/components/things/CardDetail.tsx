@@ -118,29 +118,31 @@ export default function CardDetail({
             {/* TOP */}
             <div
                 className="
-         grid
+        grid
         grid-cols-1
-        lg:grid-cols-[320px_1fr]
-        gap-8
         items-start
+        gap-6
+
+        lg:grid-cols-[320px_1fr]
+        lg:gap-8
     "
             >
 
                 {/* LEFT */}
                 <div
                     className="
-        sticky
-        top-24
         self-start
+
+        lg:sticky
+        lg:top-24
     "
                 >
 
                     {/* CARD */}
                     <div
                         className="
-    rounded-3xl
-    max-w-full
     overflow-hidden
+    rounded-3xl
     border
     border-zinc-800
     bg-gradient-to-b
@@ -148,19 +150,33 @@ export default function CardDetail({
     to-zinc-950
     shadow-xl
     shadow-black/20
+
+    sm:max-w-sm
+    sm:mx-auto
+
+    lg:max-w-full
 "
                     >
 
                         {/* IMAGE */}
-                        <img
-                            src={card.image}
-                            alt={card.name}
+                        <div
                             className="
-                w-full
-                aspect-square
-                object-cover
-            "
-                        />
+        mx-auto
+        max-w-[260px]
+
+        lg:max-w-none
+    "
+                        >
+                            <img
+                                src={card.image || "/placeholder.png"}
+                                alt={card.name}
+                                className="
+            aspect-square
+            w-full
+            object-cover
+        "
+                            />
+                        </div>
 
                         {/* CONTENT */}
                         <div className="p-5">
@@ -205,13 +221,17 @@ export default function CardDetail({
 
                                     <div
                                         className="
-                    flex
-                    items-start
-                    gap-4
-                    rounded-xl
-                    bg-zinc-800/50
-                    p-4
-                "
+    flex
+    flex-col
+    gap-3
+    rounded-xl
+    bg-zinc-800/50
+    p-4
+
+    sm:flex-row
+    sm:items-start
+    sm:gap-4
+"
                                     >
 
                                         <div
@@ -262,13 +282,17 @@ export default function CardDetail({
 
                                     <div
                                         className="
-                    flex
-                    items-start
-                    gap-4
-                    rounded-xl
-                    bg-zinc-800/50
-                    p-4
-                "
+    flex
+    flex-col
+    gap-3
+    rounded-xl
+    bg-zinc-800/50
+    p-4
+
+    sm:flex-row
+    sm:items-start
+    sm:gap-4
+"
                                     >
 
                                         <div
@@ -328,16 +352,20 @@ export default function CardDetail({
                 <div>
 
                     <div
-                        className="        rounded-3xl
-        border
-        border-zinc-800
-        bg-gradient-to-b
-        from-zinc-900
-        to-zinc-950
-        p-7
-        shadow-2xl
-        shadow-black/30
-    "
+                        className="
+    rounded-3xl
+    border
+    border-zinc-800
+    bg-gradient-to-b
+    from-zinc-900
+    to-zinc-950
+    p-4
+    shadow-2xl
+    shadow-black/30
+
+    sm:p-6
+    lg:p-7
+"
                     >
 
                         <div className="grid md:grid-cols-1 gap-8">
@@ -452,16 +480,17 @@ export default function CardDetail({
 
                                         <div
                                             key={index}
-                                            className="        rounded-3xl
-        border
-        border-zinc-800
-        bg-gradient-to-b
-        from-zinc-900
-        to-zinc-950
-        p-7
-        shadow-2xl
-        shadow-black/30
-                                "
+                                            className="
+    overflow-hidden
+    rounded-3xl
+    border
+    border-zinc-800
+    bg-gradient-to-b
+    from-zinc-900
+    to-zinc-950
+    shadow-2xl
+    shadow-black/30
+"
                                         >
 
                                             <div
@@ -493,8 +522,9 @@ backdrop-blur
                                                 customStyle={{
                                                     margin: 0,
                                                     background: "transparent",
-                                                    fontSize: "13px",
-                                                    padding: "24px",
+                                                    fontSize: "12px",
+                                                    lineHeight: "1.7",
+                                                    padding: "16px",
                                                     overflowX: "hidden",
                                                     maxWidth: "100%"
                                                 }}

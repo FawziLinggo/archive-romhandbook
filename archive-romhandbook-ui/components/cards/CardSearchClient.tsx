@@ -6,7 +6,6 @@ import {
 } from "react"
 
 import CardItem from "@/components/cards/CardItem"
-
 import Pagination from "@/components/common/Pagination"
 
 import SearchInput from "@/components/search/SearchInput"
@@ -29,9 +28,54 @@ type Props = {
     initialType: string
 
     initialQuality: string
+
+    limit?: number
 }
 
 const LIMIT = 24
+
+function SelectControl({
+    value,
+    label,
+    children,
+    onChange
+}: {
+    value: string
+    label: string
+    children: React.ReactNode
+    onChange: (value: string) => void
+}) {
+
+    return (
+
+        <select
+            value={value}
+            aria-label={label}
+            onChange={(event) =>
+                onChange(event.target.value)
+            }
+            className="
+                h-12
+                w-full
+                rounded-xl
+                border
+                border-zinc-800
+                bg-black
+                px-4
+                text-sm
+                text-white
+                outline-none
+                transition-colors
+
+                hover:border-zinc-700
+                focus:border-violet-500
+            "
+        >
+            {children}
+        </select>
+
+    )
+}
 
 export default function CardSearchClient({
 
@@ -39,7 +83,8 @@ export default function CardSearchClient({
     page,
     hasNext,
     initialType,
-    initialQuality
+    initialQuality,
+    limit = 24
 
 }: Props) {
 
@@ -114,11 +159,12 @@ export default function CardSearchClient({
             try {
 
                 const API_URL =
-                    process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080"
+                    process.env.NEXT_PUBLIC_API_URL ||
+                    "http://127.0.0.1:8080"
 
                 const res =
                     await fetch(
-                        `${API_URL}/api/v1/cards?page=${currentPage}&limit=${LIMIT}&query=${encodeURIComponent(debouncedQuery)}&type=${encodeURIComponent(type)}&quality=${encodeURIComponent(quality)}`
+                        `${API_URL}/api/v1/cards?page=${currentPage}&limit=${limit}&query=${encodeURIComponent(debouncedQuery)}&type=${encodeURIComponent(type)}&quality=${encodeURIComponent(quality)}`
                     )
 
                 if (!res.ok) {
@@ -154,13 +200,13 @@ export default function CardSearchClient({
         quality,
         currentPage,
         initialCards,
-        hasNext
+        hasNext,
+        limit
     ])
 
     function nextPage() {
 
         if (!searchHasNext) {
-
             return
         }
 
@@ -170,7 +216,6 @@ export default function CardSearchClient({
     function prevPage() {
 
         if (currentPage <= 1) {
-
             return
         }
 
@@ -179,112 +224,104 @@ export default function CardSearchClient({
 
     return (
 
-        <div>
+        <div
+            className="
+                space-y-6
+            "
+        >
 
             <div
                 className="
-                    flex
-                    gap-3
-                    mb-6
-                    flex-wrap
-                "
+        mb-6
+        flex
+        flex-col
+        gap-3
+
+        md:flex-row
+        md:flex-wrap
+    "
             >
 
-                <div className="min-w-[260px] flex-1">
+                <div
+                    className="
+            w-full
 
+            md:min-w-[260px]
+            md:flex-1
+        "
+                >
                     <SearchInput
                         value={query}
                         onChange={setQuery}
                         placeholder="Search card..."
                     />
-
                 </div>
 
                 <select
                     value={type}
                     onChange={(event) => setType(event.target.value)}
                     className="
-                        bg-zinc-900
-                        border
-                        border-zinc-700
-                        rounded-xl
-                        px-4
-                        py-2
-                    "
+            h-12
+            w-full
+            rounded-xl
+            border
+            border-zinc-700
+            bg-zinc-900
+            px-4
+            text-sm
+            text-white
+
+            md:w-auto
+            md:min-w-[180px]
+        "
                 >
-
-                    <option value="">
-                        All Types
-                    </option>
-
-                    <option value="Accessory Card">
-                        Accessory Card
-                    </option>
-
-                    <option value="Armor Card">
-                        Armor Card
-                    </option>
-
-                    <option value="Garments Card">
-                        Garments Card
-                    </option>
-
-                    <option value="Headwear Card">
-                        Headwear Card
-                    </option>
-
-                    <option value="Off Hand Card">
-                        Off Hand Card
-                    </option>
-
-                    <option value="Shoe Card">
-                        Shoe Card
-                    </option>
-
-                    <option value="Weapon Card">
-                        Weapon Card
-                    </option>
-
+                    <option value="">All Types</option>
+                    <option value="Accessory Card">Accessory Card</option>
+                    <option value="Armor Card">Armor Card</option>
+                    <option value="Garments Card">Garments Card</option>
+                    <option value="Headwear Card">Headwear Card</option>
+                    <option value="Off Hand Card">Off Hand Card</option>
+                    <option value="Shoe Card">Shoe Card</option>
+                    <option value="Weapon Card">Weapon Card</option>
                 </select>
 
                 <select
                     value={quality}
                     onChange={(event) => setQuality(event.target.value)}
                     className="
-                        bg-zinc-900
-                        border
-                        border-zinc-700
-                        rounded-xl
-                        px-4
-                        py-2
-                    "
+            h-12
+            w-full
+            rounded-xl
+            border
+            border-zinc-700
+            bg-zinc-900
+            px-4
+            text-sm
+            text-white
+
+            md:w-auto
+            md:min-w-[160px]
+        "
                 >
-
-                    <option value="">
-                        All Quality
-                    </option>
-
-                    <option value="White">
-                        White
-                    </option>
-
-                    <option value="Green">
-                        Green
-                    </option>
-
-                    <option value="Blue">
-                        Blue
-                    </option>
-
-                    <option value="Purple">
-                        Purple
-                    </option>
-
+                    <option value="">All Quality</option>
+                    <option value="White">White</option>
+                    <option value="Green">Green</option>
+                    <option value="Blue">Blue</option>
+                    <option value="Purple">Purple</option>
                 </select>
 
             </div>
 
-            <div className="mb-6">
+            <div
+                className="
+                    flex
+                    flex-wrap
+                    items-center
+                    justify-between
+                    gap-3
+                    text-sm
+                "
+            >
 
                 <SearchStatus
                     query={query}
@@ -292,30 +329,81 @@ export default function CardSearchClient({
                     count={cards.length}
                 />
 
-            </div>
-
-            <div
-                className="
-                    grid
-                    grid-cols-2
-                    sm:grid-cols-3
-                    md:grid-cols-4
-                    lg:grid-cols-5
-                    xl:grid-cols-6
-                    gap-5
-                "
-            >
-
-                {cards.map((card) => (
-
-                    <CardItem
-                        key={card.id}
-                        card={card}
-                    />
-
-                ))}
+                <div
+                    className="
+                        text-zinc-500
+                    "
+                >
+                    Showing {cards.length} cards
+                </div>
 
             </div>
+
+            {cards.length > 0 ? (
+
+                <div
+                    className="
+        grid
+        grid-cols-2
+        gap-3
+
+        sm:grid-cols-3
+
+        md:grid-cols-4
+        md:gap-5
+
+        lg:grid-cols-5
+        xl:grid-cols-6
+    "
+                >
+
+                    {cards.map((card) => (
+
+                        <CardItem
+                            key={card.id}
+                            card={card}
+                        />
+
+                    ))}
+
+                </div>
+
+            ) : (
+
+                <div
+                    className="
+                        rounded-2xl
+                        border
+                        border-dashed
+                        border-zinc-800
+                        bg-zinc-950/50
+                        px-6
+                        py-16
+                        text-center
+                    "
+                >
+                    <h3
+                        className="
+                            text-lg
+                            font-bold
+                            text-white
+                        "
+                    >
+                        No cards found
+                    </h3>
+
+                    <p
+                        className="
+                            mt-2
+                            text-sm
+                            text-zinc-500
+                        "
+                    >
+                        Try another search or filter.
+                    </p>
+                </div>
+
+            )}
 
             {!isSearching && (
 
@@ -337,8 +425,8 @@ export default function CardSearchClient({
                         flex
                         items-center
                         justify-center
-                        gap-4
-                        mt-12
+                        gap-3
+                        pt-4
                     "
                 >
 
@@ -346,17 +434,25 @@ export default function CardSearchClient({
                         onClick={prevPage}
                         disabled={currentPage <= 1}
                         className="
-                            h-12
-                            px-5
+                            h-11
                             rounded-xl
                             border
                             border-zinc-800
-                            bg-zinc-900
-                            text-white
-                            transition-all
+                            bg-zinc-950
+                            px-4
+                            text-sm
+                            font-semibold
+                            text-zinc-300
+                            transition-colors
+
+                            hover:border-violet-500/40
+                            hover:text-white
+
                             disabled:pointer-events-none
                             disabled:opacity-40
-                            hover:bg-zinc-800
+
+                            sm:h-12
+                            sm:px-5
                         "
                     >
                         Prev
@@ -364,6 +460,12 @@ export default function CardSearchClient({
 
                     <div
                         className="
+                            rounded-xl
+                            border
+                            border-zinc-800
+                            bg-black
+                            px-4
+                            py-2
                             text-sm
                             text-zinc-400
                         "
@@ -375,17 +477,25 @@ export default function CardSearchClient({
                         onClick={nextPage}
                         disabled={!searchHasNext}
                         className="
-                            h-12
-                            px-5
+                            h-11
                             rounded-xl
                             border
                             border-zinc-800
-                            bg-zinc-900
-                            text-white
-                            transition-all
+                            bg-zinc-950
+                            px-4
+                            text-sm
+                            font-semibold
+                            text-zinc-300
+                            transition-colors
+
+                            hover:border-violet-500/40
+                            hover:text-white
+
                             disabled:pointer-events-none
                             disabled:opacity-40
-                            hover:bg-zinc-800
+
+                            sm:h-12
+                            sm:px-5
                         "
                     >
                         Next
