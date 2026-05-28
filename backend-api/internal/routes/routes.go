@@ -253,4 +253,25 @@ func SetupRoutes(
 		"/api/v1/equipments/:id",
 		equipmentHandler.GetEquipmentByID,
 	)
+
+	jobHandler :=
+		handlers.JobHandler{
+
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/jobs",
+		jobHandler.GetJobs,
+	)
+
+	router.GET(
+		"/api/v1/jobs/search",
+		jobHandler.SearchJobs,
+	)
+
+	router.GET(
+		"/api/v1/jobs/:slug",
+		jobHandler.GetJobBySlug,
+	)
 }

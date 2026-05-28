@@ -38,7 +38,8 @@ TABLES = [
     "pets",
     "skills",
     "crafting_materials",
-    "pet_eggs"
+    "pet_eggs",
+    "job"
 ]
 
 HEADERS = {

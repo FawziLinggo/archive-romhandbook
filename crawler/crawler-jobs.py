@@ -38,11 +38,6 @@ def clean_text(value):
     ).strip()
 
 
-def normalize_url(value):
-    if not value:
-        return ""
-
-    return urljoin(BASE_URL, value)
 
 
 def slug_from_job_href(href):
@@ -87,6 +82,7 @@ def fetch(url):
 
 
 def upsert_job(job):
+        
     cursor.execute(
         """
         INSERT OR REPLACE INTO jobs (
@@ -227,7 +223,7 @@ def parse_job_card(anchor):
     return {
         "slug": slug,
         "detail_url": f"/jobs/{slug}",
-        "image": normalize_url(img.get("src", "")) if img else "",
+        "image": img.get("src", "") if img else "",
         "name": clean_text(name_node),
     }
 
@@ -274,7 +270,7 @@ def parse_header_job(soup, slug):
             name_node = class_row.select_one(".col-span-4 span")
 
             job_name = clean_text(name_node)
-            job_image = normalize_url(img.get("src", "")) if img else ""
+            job_image = img.get("src", "") if img else ""
 
     return {
         "slug": slug,
@@ -331,7 +327,7 @@ def parse_summary_links(soup, title):
                     "anchor": href,
                     "slug": slug_from_href(href),
                     "name": clean_text(name_node),
-                    "image": normalize_url(img.get("src", "")) if img else "",
+                    "image": img.get("src", "") if img else "",
                 }
             )
 
@@ -406,7 +402,7 @@ def parse_skill_cards(soup):
             {
                 "slug": slug_from_href(href),
                 "name": clean_text(name_node),
-                "image": normalize_url(img.get("src", "")) if img else "",
+                "image": img.get("src", "") if img else "",
                 "url": href,
                 "section": current_section,
                 "max_level": max_level,
@@ -463,7 +459,7 @@ def parse_rune_cards(soup):
             {
                 "slug": slug_from_href(href),
                 "name": clean_text(name_node),
-                "image": normalize_url(images[-1].get("src", "")) if images else "",
+                "image": images[-1].get("src", "") if images else "",
                 "url": href,
                 "tags": tags,
                 "effects": effects,
