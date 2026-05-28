@@ -256,6 +256,9 @@ export default function FormulaCodeViewer({
             <div
                 className={`
         flex
+        min-w-0
+        max-w-full
+        overflow-hidden
 
         ${fullscreen
                         ? "min-h-screen"
@@ -267,16 +270,16 @@ export default function FormulaCodeViewer({
                 {/* CODE */}
                 <div
                     className={`
-            transition-all
-            duration-300
+        min-w-0
+        max-w-full
+        transition-all
+        duration-300
 
-            ${aiOpen
-
+        ${aiOpen
                             ? "w-[70%]"
-
                             : "w-full"
                         }
-        `}
+    `}
                 >
 
                     <FormulaCode
@@ -297,6 +300,7 @@ export default function FormulaCodeViewer({
                     <div
                         className={`
             w-[30%]
+            shrink-0
 
             border-l
 

@@ -537,6 +537,45 @@ def save_formulas(equipment_id, soup):
     return formula_id
 
 
+def extract_any_relation_items(content):
+    items = []
+
+    links = content.select("a[href]")
+
+    for index, link in enumerate(links):
+        href = normalize_url(link.get("href"))
+
+        if not href:
+            continue
+
+        image_tag = link.select_one("img")
+
+        name_tag = link.select_one(
+            "span.text-sm.font-semibold.leading-6.text-emerald-200"
+        )
+
+        if not name_tag:
+            name_tag = link.select_one("span")
+
+        image = None
+        name = None
+
+        if image_tag:
+            image = normalize_url(image_tag.get("src"))
+
+        if name_tag:
+            name = name_tag.get_text(" ", strip=True)
+
+        items.append({
+            "id": get_id_from_url(href),
+            "name": name,
+            "image": image,
+            "url": href,
+            "index": index,
+        })
+
+    return items
+
 def get_item_detail(item):
     request_url = absolute_url(item["detail_url"])
 
@@ -585,6 +624,10 @@ def get_item_detail(item):
     jobs = []
 
     synth_from = []
+    synth_to = []
+    craftable = []
+    dropped_by = []
+    skills = []
     tiers = []
     equip_effects = []
     craft_materials = []
@@ -618,7 +661,10 @@ def get_item_detail(item):
             jobs = extract_text_items(jobs_section)
 
     if "Synth From" in sections:
-        synth_from = extract_relation_items(sections["Synth From"])
+        synth_from = extract_any_relation_items(sections["Synth From"])
+
+    if "Synth To" in sections:
+        synth_to = extract_any_relation_items(sections["Synth To"])
 
     if "Tiers" in sections:
         tiers = extract_text_items(sections["Tiers"])
@@ -627,7 +673,16 @@ def get_item_detail(item):
         equip_effects = extract_equip_effects(sections["Equip Effects"])
 
     if "Craft Materials" in sections:
-        craft_materials = extract_relation_items(sections["Craft Materials"])
+        craft_materials = extract_any_relation_items(sections["Craft Materials"])
+
+    if "Craftable" in sections:
+        craftable = extract_any_relation_items(sections["Craftable"])
+
+    if "Dropped by" in sections:
+        dropped_by = extract_any_relation_items(sections["Dropped by"])
+
+    if "Skills" in sections:
+        skills = extract_any_relation_items(sections["Skills"])
 
     item["detail_url"] = normalize_url(item["detail_url"])
     item["image"] = normalize_url(item["image"])
@@ -676,12 +731,33 @@ def get_item_detail(item):
         "synth_from",
         synth_from
     )
+    save_relation_items(
+    item["id"],
+    "synth_to",
+    synth_to
+)
 
     save_relation_items(
         item["id"],
         "craft_material",
         craft_materials
     )
+    save_relation_items(
+    item["id"],
+    "craftable",
+    craftable
+)   
+    save_relation_items(
+    item["id"],
+    "dropped_by",
+    dropped_by
+)
+    save_relation_items(
+    item["id"],
+    "skill",
+    skills
+)
+
 
     save_tiers(
         item["id"],
@@ -713,23 +789,31 @@ def get_item_detail(item):
     conn.commit()
 
     print(
-        "[OK]",
-        name,
-        "| effect:",
-        len(effect_text),
-        "| unlock:",
-        len(unlock_text),
-        "| jobs:",
-        len(jobs),
-        "| synth:",
-        len(synth_from),
-        "| tiers:",
-        len(tiers),
-        "| equip effects:",
-        len(equip_effects),
-        "| craft:",
-        len(craft_materials),
-    )
+    "[OK]",
+    name,
+    "| effect:",
+    len(effect_text),
+    "| unlock:",
+    len(unlock_text),
+    "| jobs:",
+    len(jobs),
+    "| synth from:",
+    len(synth_from),
+    "| synth to:",
+    len(synth_to),
+    "| tiers:",
+    len(tiers),
+    "| equip effects:",
+    len(equip_effects),
+    "| craft materials:",
+    len(craft_materials),
+    "| craftable:",
+    len(craftable),
+    "| dropped by:",
+    len(dropped_by),
+    "| skills:",
+    len(skills),
+)
 
     return True
 
@@ -760,7 +844,7 @@ while True:
     for item in new_items:
         try:
             get_item_detail(item)
-            time.sleep(1)
+            time.sleep(0.5)
 
         except Exception as e:
             print("ERROR:", e)
