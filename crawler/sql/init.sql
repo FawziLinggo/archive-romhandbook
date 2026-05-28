@@ -40,13 +40,6 @@ CREATE TABLE IF NOT EXISTS equipment_tiers (
     tier_text TEXT NOT NULL,
     UNIQUE(equipment_id, tier_index)
 );
-CREATE TABLE IF NOT EXISTS equipment_equip_effects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    equipment_id TEXT NOT NULL,
-    effect_index INTEGER NOT NULL,
-    effect_text TEXT,
-    UNIQUE(equipment_id, effect_index)
-);
 CREATE TABLE IF NOT EXISTS equipment_equip_effect_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     equip_effect_id INTEGER NOT NULL,
@@ -62,15 +55,6 @@ CREATE TABLE IF NOT EXISTS equipment_equip_effects (
     effect_index INTEGER NOT NULL,
     effect_text TEXT,
     UNIQUE(equipment_id, effect_index)
-);
-CREATE TABLE IF NOT EXISTS equipment_equip_effect_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    equip_effect_id INTEGER NOT NULL,
-    item_id TEXT,
-    item_name TEXT,
-    item_image TEXT,
-    item_url TEXT,
-    item_index INTEGER DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_equipment_relations_equipment_id ON equipment_relations(equipment_id);
 CREATE INDEX IF NOT EXISTS idx_equipment_relations_type ON equipment_relations(relation_type);
@@ -410,3 +394,69 @@ CREATE INDEX IF NOT EXISTS idx_job_relations_job_id ON job_relations(job_id);
 CREATE INDEX IF NOT EXISTS idx_job_relations_type ON job_relations(relation_type);
 CREATE INDEX IF NOT EXISTS idx_job_skills_job_id ON job_skills(job_id);
 CREATE INDEX IF NOT EXISTS idx_job_runes_job_id ON job_runes(job_id);
+-- =========================
+-- DETAIL LOOKUP INDEXES
+-- =========================
+CREATE INDEX IF NOT EXISTS idx_cards_detail_url ON cards(detail_url);
+CREATE INDEX IF NOT EXISTS idx_monsters_detail_url ON monsters(detail_url);
+CREATE INDEX IF NOT EXISTS idx_skills_detail_url ON skills(detail_url);
+CREATE INDEX IF NOT EXISTS idx_pets_detail_url ON pets(detail_url);
+CREATE INDEX IF NOT EXISTS idx_buffs_detail_url ON buffs(detail_url);
+CREATE INDEX IF NOT EXISTS idx_mounts_detail_url ON mounts(detail_url);
+CREATE INDEX IF NOT EXISTS idx_headwears_detail_url ON headwears(detail_url);
+CREATE INDEX IF NOT EXISTS idx_equipments_detail_url ON equipments(detail_url);
+CREATE INDEX IF NOT EXISTS idx_formulas_code_detail_url ON formulas_code(detail_url);
+-- =========================
+-- LOWER NAME / SORT INDEXES
+-- =========================
+CREATE INDEX IF NOT EXISTS idx_cards_lower_name ON cards(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_monsters_lower_name ON monsters(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_skills_lower_name ON skills(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_pets_lower_name ON pets(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_buffs_lower_name ON buffs(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_mounts_lower_name ON mounts(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_headwears_lower_name ON headwears(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_equipments_lower_name ON equipments(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_formulas_code_lower_name ON formulas_code(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_jobs_lower_name ON jobs(LOWER(name));
+-- =========================
+-- FILTER INDEXES
+-- =========================
+CREATE INDEX IF NOT EXISTS idx_monsters_size ON monsters(size);
+CREATE INDEX IF NOT EXISTS idx_monsters_element ON monsters(element);
+CREATE INDEX IF NOT EXISTS idx_monsters_race ON monsters(race);
+CREATE INDEX IF NOT EXISTS idx_monsters_filter_sort ON monsters(size, element, race, LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_equipments_type_quality_name ON equipments(type, quality, LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_headwears_type_name ON headwears(type, LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_cards_type_quality_name ON cards(card_type, quality, LOWER(name));
+-- =========================
+-- RELATION / CHILD TABLE INDEXES
+-- =========================
+CREATE INDEX IF NOT EXISTS idx_skill_levels_skill_id_level ON skill_levels(skill_id, level DESC);
+CREATE INDEX IF NOT EXISTS idx_mount_formulas_mount_id ON mount_formulas(mount_id);
+CREATE INDEX IF NOT EXISTS idx_headwear_formulas_headwear_id ON headwear_formulas(headwear_id);
+CREATE INDEX IF NOT EXISTS idx_card_formulas_card_id ON card_formulas(card_id);
+CREATE INDEX IF NOT EXISTS idx_card_craftable_card_id ON card_craftable(card_id);
+CREATE INDEX IF NOT EXISTS idx_card_dropped_by_card_id ON card_dropped_by(card_id);
+CREATE INDEX IF NOT EXISTS idx_card_skills_card_id ON card_skills(card_id);
+CREATE INDEX IF NOT EXISTS idx_card_craft_materials_card_id ON card_craft_materials(card_id);
+CREATE INDEX IF NOT EXISTS idx_card_account_bonuses_card_id_type ON card_account_bonuses(card_id, bonus_type);
+CREATE INDEX IF NOT EXISTS idx_pets_egg_id ON pets(egg_id);
+CREATE INDEX IF NOT EXISTS idx_pet_eggs_id_detail_url ON pet_eggs(id, detail_url);
+CREATE INDEX IF NOT EXISTS idx_crafting_material_formulas_material_id ON crafting_material_formulas(material_id);
+CREATE INDEX IF NOT EXISTS idx_crafting_material_craftables_material_id ON crafting_material_craftables(material_id);
+CREATE INDEX IF NOT EXISTS idx_crafting_material_dropped_by_material_id ON crafting_material_dropped_by(material_id);
+-- =========================
+-- JOB INDEXES
+-- =========================
+CREATE INDEX IF NOT EXISTS idx_job_relations_job_type_order ON job_relations(job_id, relation_type, relation_index);
+CREATE INDEX IF NOT EXISTS idx_job_skills_job_order ON job_skills(job_id, skill_index);
+CREATE INDEX IF NOT EXISTS idx_job_runes_job_order ON job_runes(job_id, rune_index);
+CREATE VIRTUAL TABLE IF NOT EXISTS archive_search_fts USING fts5(
+    type UNINDEXED,
+    label,
+    href UNINDEXED,
+    image UNINDEXED,
+    description,
+    tokenize = 'unicode61 remove_diacritics 2'
+);
