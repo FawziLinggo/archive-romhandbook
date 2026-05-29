@@ -491,15 +491,102 @@ CREATE TABLE IF NOT EXISTS furniture_relations (
     related_name TEXT,
     related_image TEXT,
     related_url TEXT,
+    quantity TEXT,
     relation_index INTEGER DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS crawl_resolved_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT,
+    source_table TEXT,
+    source_id TEXT,
+    resolved_table TEXT,
+    resolved_id TEXT,
+    note TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS crawl_failures (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT,
+    source_table TEXT,
+    source_id TEXT,
+    status_code INTEGER,
+    error TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
 CREATE INDEX IF NOT EXISTS idx_furnitures_detail_url ON furnitures(detail_url);
-CREATE INDEX IF NOT EXISTS idx_furnitures_name ON furnitures(name);
 CREATE INDEX IF NOT EXISTS idx_furnitures_lower_name ON furnitures(LOWER(name));
 CREATE INDEX IF NOT EXISTS idx_furnitures_type ON furnitures(furniture_type);
 CREATE INDEX IF NOT EXISTS idx_furnitures_subtype ON furnitures(furniture_subtype);
-CREATE INDEX IF NOT EXISTS idx_furnitures_quality ON furnitures(quality);
 CREATE INDEX IF NOT EXISTS idx_furniture_formulas_furniture_id ON furniture_formulas(furniture_id);
 CREATE INDEX IF NOT EXISTS idx_furniture_relations_furniture_id ON furniture_relations(furniture_id);
 CREATE INDEX IF NOT EXISTS idx_furniture_relations_type ON furniture_relations(relation_type);
-CREATE INDEX IF NOT EXISTS idx_furniture_relations_related_url ON furniture_relations(related_url);
+CREATE TABLE IF NOT EXISTS cooking_ingredients (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT UNIQUE,
+    image TEXT,
+    name TEXT,
+    ingredient_type TEXT,
+    description TEXT,
+    quality TEXT,
+    raw_tags TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS cooking_ingredient_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ingredient_id TEXT NOT NULL,
+    formula_index INTEGER NOT NULL,
+    formula_json TEXT,
+    UNIQUE(ingredient_id, formula_index)
+);
+CREATE TABLE IF NOT EXISTS cooking_ingredient_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ingredient_id TEXT NOT NULL,
+    relation_type TEXT NOT NULL,
+    related_id TEXT,
+    related_name TEXT,
+    related_image TEXT,
+    related_url TEXT,
+    relation_index INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_cooking_ingredients_detail_url ON cooking_ingredients(detail_url);
+CREATE INDEX IF NOT EXISTS idx_cooking_ingredients_lower_name ON cooking_ingredients(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_cooking_ingredients_type ON cooking_ingredients(ingredient_type);
+CREATE INDEX IF NOT EXISTS idx_cooking_ingredient_formulas_ingredient_id ON cooking_ingredient_formulas(ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_cooking_ingredient_relations_ingredient_id ON cooking_ingredient_relations(ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_cooking_ingredient_relations_type ON cooking_ingredient_relations(relation_type);
+CREATE TABLE IF NOT EXISTS pet_headwear_unlock_items (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT UNIQUE,
+    image TEXT,
+    name TEXT,
+    item_type TEXT,
+    pet_headwear_name TEXT,
+    pet_name TEXT,
+    description TEXT,
+    quality TEXT,
+    formula_id TEXT,
+    compose_id TEXT,
+    unlock_item_id TEXT,
+    unlock_effect_type TEXT,
+    unlock_body_ids TEXT,
+    raw_tags TEXT,
+    raw_formula TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS pet_headwear_unlock_item_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id TEXT NOT NULL,
+    relation_type TEXT NOT NULL,
+    related_id TEXT,
+    related_name TEXT,
+    related_image TEXT,
+    related_url TEXT,
+    quantity TEXT,
+    relation_index INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_items_detail_url ON pet_headwear_unlock_items(detail_url);
+CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_items_lower_name ON pet_headwear_unlock_items(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_items_pet_name ON pet_headwear_unlock_items(pet_name);
+CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_items_quality ON pet_headwear_unlock_items(quality);
+CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_item_relations_item_id ON pet_headwear_unlock_item_relations(item_id);
+CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_item_relations_type ON pet_headwear_unlock_item_relations(relation_type);

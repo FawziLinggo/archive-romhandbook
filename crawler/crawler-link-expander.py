@@ -11,13 +11,18 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-ROOT = Path(__file__).resolve().parent
+BASE_URL = os.getenv("BASE_URL", "https://romhandbook.com")
+DB_FILE = os.getenv("DB_FILE", "database.db")
+DB_PATH = str(Path(DB_FILE).resolve())
 
-load_dotenv(dotenv_path=ROOT.parent / ".env")
 
-BASE_URL = os.getenv("BASE_URL", "https://romhandbook.com").strip().rstrip("/")
-DB_FILE = os.getenv("DB_FILE", "../backend-api/storage/rom.db")
-DB_PATH = (ROOT / DB_FILE).resolve()
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) "
+        "Gecko/20100101 Firefox/150.0"
+    )
+}
+
 
 HEADERS = {
     "User-Agent": (
@@ -56,6 +61,17 @@ HEADWEAR_TYPES = {
     "Mouth",
     "Back",
     "Tail",
+}
+
+INGREDIENT_TYPES = {
+    "Vegetable",
+    "Seafood",
+    "Meat",
+    "Spice",
+}
+
+PET_HEADWEAR_UNLOCK_TYPES = {
+    "Pet Headwear Unlock Item",
 }
 
 EQUIPMENT_TYPES = {
@@ -101,6 +117,9 @@ THING_TYPE_BY_TABLE = {
     "monsters": "monster",
     "mounts": "mount",
     "pet_eggs": "pet_egg",
+    "furnitures": "furniture",
+    "cooking_ingredients": "cooking_ingredient",
+    "pet_headwear_unlock_items": "pet_headwear_unlock_item",
 }
 
 INSERT_COLUMNS = {
@@ -202,6 +221,37 @@ INSERT_COLUMNS = {
         "formula_code",
         "raw_html",
     ],
+    "furnitures": [
+        "id",
+        "detail_url",
+        "image",
+        "name",
+        "furniture_type",
+        "furniture_subtype",
+        "is_blueprint",
+        "description",
+        "raw_html",
+    ],
+    "cooking_ingredients": [
+        "id",
+        "detail_url",
+        "image",
+        "name",
+        "ingredient_type",
+        "description",
+        "raw_html",
+    ],
+    "pet_headwear_unlock_items": [
+        "id",
+        "detail_url",
+        "image",
+        "name",
+        "item_type",
+        "pet_headwear_name",
+        "pet_name",
+        "description",
+        "raw_html",
+    ],
 }
 
 
@@ -209,7 +259,7 @@ def connect_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    init_path = ROOT / "sql" / "init.sql"
+    init_path = Path("sql") / "init.sql"
 
     if init_path.exists():
         conn.executescript(init_path.read_text(encoding="utf-8"))
@@ -545,6 +595,50 @@ def extract_basic_data(table, path, soup, raw_html, detected_type=None):
     item_id = id_from_path(path)
     detail_url = normalize_detail_for_table(table, path)
 
+    if table == "furnitures":
+        furniture_subtype = None
+        is_blueprint = 0
+
+        if detected_type and detected_type.startswith("Furniture"):
+            furniture_subtype = (
+                detected_type
+                .replace("Furniture", "", 1)
+                .strip()
+            )
+
+            if furniture_subtype == "Blueprint":
+                is_blueprint = 1
+
+        data.update({
+            "furniture_type": detected_type,
+            "furniture_subtype": furniture_subtype,
+            "is_blueprint": is_blueprint,
+        })
+
+    if table == "cooking_ingredients":
+        data.update({
+            "ingredient_type": detected_type,
+        })
+
+    if table == "pet_headwear_unlock_items":
+        pet_headwear_name = data["name"]
+        pet_name = None
+
+        match = re.match(
+            r"^(.*?)\s*\((.*?)\)\s*$",
+            data["name"] or "",
+        )
+
+        if match:
+            pet_headwear_name = match.group(1).strip()
+            pet_name = match.group(2).strip()
+
+        data.update({
+            "item_type": detected_type,
+            "pet_headwear_name": pet_headwear_name,
+            "pet_name": pet_name,
+        })
+
     data = {
         "id": item_id,
         "slug": slug_from_path(path),
@@ -590,6 +684,18 @@ def classify_thing(soup):
     if badge_set & EQUIPMENT_TYPES:
         detected = list(badge_set & EQUIPMENT_TYPES)[0]
         return "equipments", detected, badges
+    
+    for text in badges:
+        if text in PET_HEADWEAR_UNLOCK_TYPES:
+            return "pet_headwear_unlock_items", text, badges
+
+    for text in badges:
+        if text.startswith("Furniture"):
+            return "furnitures", text, badges
+
+    for text in badges:
+        if text in INGREDIENT_TYPES:
+            return "cooking_ingredients", text, badges
 
     for text in badges:
         if text.startswith("Weapon ") or text.startswith("Off Hand "):
@@ -866,7 +972,7 @@ def main():
 
     parser.add_argument(
         "--unknown-file",
-        default=str(ROOT / "unresolved-things-links.jsonl"),
+        default=str(Path("unresolved-things-links.jsonl").resolve()),
     )
 
     args = parser.parse_args()
