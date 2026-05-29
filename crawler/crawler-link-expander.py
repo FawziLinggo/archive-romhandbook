@@ -11,8 +11,19 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-BASE_URL = os.getenv("BASE_URL", "https://romhandbook.com")
-DB_FILE = os.getenv("DB_FILE", "database.db")
+
+load_dotenv(dotenv_path="../.env")
+
+BASE_URL = os.getenv(
+    "BASE_URL",
+    "https://romhandbook.com"
+)
+
+DB_FILE = os.getenv(
+    "DB_FILE",
+    "database.db"
+)
+
 DB_PATH = str(Path(DB_FILE).resolve())
 
 
