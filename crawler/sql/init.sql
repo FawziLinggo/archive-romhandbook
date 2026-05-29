@@ -460,3 +460,46 @@ CREATE VIRTUAL TABLE IF NOT EXISTS archive_search_fts USING fts5(
     description,
     tokenize = 'unicode61 remove_diacritics 2'
 );
+CREATE TABLE IF NOT EXISTS furnitures (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT UNIQUE,
+    image TEXT,
+    name TEXT,
+    furniture_type TEXT,
+    furniture_subtype TEXT,
+    is_blueprint INTEGER DEFAULT 0,
+    description TEXT,
+    quality TEXT,
+    effect_text TEXT,
+    unlock_text TEXT,
+    deposit_stats TEXT,
+    raw_tags TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS furniture_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    furniture_id TEXT NOT NULL,
+    formula_index INTEGER NOT NULL,
+    formula_json TEXT,
+    UNIQUE(furniture_id, formula_index)
+);
+CREATE TABLE IF NOT EXISTS furniture_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    furniture_id TEXT NOT NULL,
+    relation_type TEXT NOT NULL,
+    related_id TEXT,
+    related_name TEXT,
+    related_image TEXT,
+    related_url TEXT,
+    relation_index INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_furnitures_detail_url ON furnitures(detail_url);
+CREATE INDEX IF NOT EXISTS idx_furnitures_name ON furnitures(name);
+CREATE INDEX IF NOT EXISTS idx_furnitures_lower_name ON furnitures(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_furnitures_type ON furnitures(furniture_type);
+CREATE INDEX IF NOT EXISTS idx_furnitures_subtype ON furnitures(furniture_subtype);
+CREATE INDEX IF NOT EXISTS idx_furnitures_quality ON furnitures(quality);
+CREATE INDEX IF NOT EXISTS idx_furniture_formulas_furniture_id ON furniture_formulas(furniture_id);
+CREATE INDEX IF NOT EXISTS idx_furniture_relations_furniture_id ON furniture_relations(furniture_id);
+CREATE INDEX IF NOT EXISTS idx_furniture_relations_type ON furniture_relations(relation_type);
+CREATE INDEX IF NOT EXISTS idx_furniture_relations_related_url ON furniture_relations(related_url);

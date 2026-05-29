@@ -132,6 +132,18 @@ def rebuild_search_fts():
             image,
             NULL
         FROM jobs
+
+
+        UNION ALL
+
+    SELECT
+        'Furniture' AS type,
+        name AS label,
+        detail_url AS href,
+        image AS image,
+        COALESCE(description, '') AS description
+    FROM furnitures
+
         WHERE name IS NOT NULL AND name != '';
         """
     )
