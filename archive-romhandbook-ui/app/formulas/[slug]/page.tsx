@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation"
-
+import FormulaGraphPanel from "@/components/formulas/FormulaGraphPanel"
 import FormulaCodeViewer from "@/components/formulas/code-viewer"
+import { notFound } from "next/navigation"
 
 import type {
     ApiResponse,
@@ -91,6 +91,11 @@ export default async function FormulaDetailPage(
 
             <FormulaCodeViewer
                 code={formula.formula_code}
+            />
+
+            <FormulaGraphPanel
+                formulaId={slug}
+                formulaName={formula.name}
             />
 
         </main>

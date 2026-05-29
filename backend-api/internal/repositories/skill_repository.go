@@ -63,7 +63,7 @@ func GetSkills(
 			s.image,
 			s.name,
 
-			MAX(s.max_level) as max_level,
+			COALESCE(MAX(s.max_level), 0) as max_level,
 
 			s.skill_type,
 			s.damage_type,
@@ -176,7 +176,7 @@ func SearchSkills(
 			s.image,
 			s.name,
 
-			MAX(s.max_level) as max_level,
+			COALESCE(MAX(s.max_level), 0) as max_level,
 
 			s.skill_type,
 			s.damage_type,
@@ -289,7 +289,7 @@ func GetSkillBySlug(
 			detail_url,
 			image,
 			name,
-			max_level,
+			COALESCE(max_level, 0) as max_level,
 
 			skill_type,
 			damage_type,

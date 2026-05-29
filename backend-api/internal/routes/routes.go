@@ -143,6 +143,15 @@ func SetupRoutes(
 		"/api/v1/formulas/featured",
 		formulaHandler.GetFeaturedFormula,
 	)
+	router.GET(
+		"/api/v1/formulas/:slug/graph/summary",
+		formulaHandler.GetFormulaGraphSummaryByID,
+	)
+
+	router.GET(
+		"/api/v1/formulas/:slug/graph",
+		formulaHandler.GetFormulaGraphByID,
+	)
 
 	router.GET(
 		"/api/v1/formulas/:slug",
