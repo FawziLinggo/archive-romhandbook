@@ -519,11 +519,30 @@ for row in materials:
 
         # skip kalau tidak valid
         if not found_type:
-
             print(
-                f"Skipped: "
-                f"Type not found"
+                f"Skipped invalid material: {material_id}"
             )
+
+            cursor.execute("""
+                DELETE FROM crafting_materials
+                WHERE id = ?
+                AND (
+                    raw_html IS NULL
+                    OR raw_html = ''
+                )
+            """, (
+                material_id,
+            ))
+
+            cursor.execute("""
+                DELETE FROM things
+                WHERE id = ?
+                AND type = 'crafting_material'
+            """, (
+                material_id,
+            ))
+
+            conn.commit()
 
             continue
 
