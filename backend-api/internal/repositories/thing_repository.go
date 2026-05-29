@@ -542,3 +542,201 @@ func GetPetHeadwearUnlockItemByID(
 
 	return &item, nil
 }
+func getCraftingMaterialCraftables(
+	db *sql.DB,
+	materialID string,
+) (
+	[]models.CraftingMaterialCraftable,
+	error,
+) {
+	rows, err := db.Query(`
+
+		SELECT
+			id,
+			material_id,
+			item_name,
+			item_image,
+			item_url
+
+		FROM crafting_material_craftables
+
+		WHERE material_id = ?
+
+		ORDER BY id ASC
+
+	`, materialID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	items :=
+		[]models.CraftingMaterialCraftable{}
+
+	for rows.Next() {
+		var item models.CraftingMaterialCraftable
+
+		err := rows.Scan(
+			&item.ID,
+			&item.MaterialID,
+			&item.ItemName,
+			&item.ItemImage,
+			&item.ItemURL,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(
+			items,
+			item,
+		)
+	}
+
+	return items, rows.Err()
+}
+
+func getCraftingMaterialDroppedBy(
+	db *sql.DB,
+	materialID string,
+) (
+	[]models.CraftingMaterialDroppedBy,
+	error,
+) {
+	rows, err := db.Query(`
+
+		SELECT
+			id,
+			material_id,
+			monster_name,
+			monster_image,
+			monster_url
+
+		FROM crafting_material_dropped_by
+
+		WHERE material_id = ?
+
+		ORDER BY id ASC
+
+	`, materialID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	items :=
+		[]models.CraftingMaterialDroppedBy{}
+
+	for rows.Next() {
+		var item models.CraftingMaterialDroppedBy
+
+		err := rows.Scan(
+			&item.ID,
+			&item.MaterialID,
+			&item.MonsterName,
+			&item.MonsterImage,
+			&item.MonsterURL,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(
+			items,
+			item,
+		)
+	}
+
+	return items, rows.Err()
+}
+
+func GetCraftingMaterialByID(
+	db *sql.DB,
+	id string,
+) (
+	*models.CraftingMaterialDetail,
+	error,
+) {
+	var material models.CraftingMaterialDetail
+
+	err := db.QueryRow(`
+
+		SELECT
+			id,
+			detail_url,
+			image,
+			name,
+			material_type,
+			quality,
+			description,
+			raw_html
+
+		FROM crafting_materials
+
+		WHERE id = ?
+
+		LIMIT 1
+
+	`, id).Scan(
+		&material.ID,
+		&material.DetailURL,
+		&material.Image,
+		&material.Name,
+		&material.MaterialType,
+		&material.Quality,
+		&material.Description,
+		&material.RawHTML,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	formulas, err :=
+		getThingFormulas(
+			db,
+			"crafting_material_formulas",
+			"material_id",
+			id,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	craftable, err :=
+		getCraftingMaterialCraftables(
+			db,
+			id,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	droppedBy, err :=
+		getCraftingMaterialDroppedBy(
+			db,
+			id,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	material.Formulas = formulas
+	material.Craftable = craftable
+	material.DroppedBy = droppedBy
+
+	return &material, nil
+}

@@ -13,6 +13,7 @@ import ArchiveThingDetail from "@/components/things/ArchiveThingDetail"
 
 import type {
     CookingIngredientDetail,
+    CraftingMaterialDetail,
     FurnitureDetail,
     PetHeadwearUnlockItemDetail
 } from "@/lib/types/Thing"
@@ -260,6 +261,26 @@ export default async function ThingPage({
             )
         }
 
+        case "crafting_material": {
+
+            const material =
+                thingResponse.data as CraftingMaterialDetail | undefined
+
+            if (!material) {
+                return (
+                    <div>
+                        Crafting material not found
+                    </div>
+                )
+            }
+
+            return (
+                <ArchiveThingDetail
+                    type="crafting_material"
+                    detail={material}
+                />
+            )
+        }
         default:
 
             return (

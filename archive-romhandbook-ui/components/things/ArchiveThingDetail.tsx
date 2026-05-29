@@ -6,6 +6,7 @@ import DetailContainer from "@/components/layout/DetailContainer"
 
 import type {
     CookingIngredientDetail,
+    CraftingMaterialDetail,
     FurnitureDetail,
     PetHeadwearUnlockItemDetail,
     ThingRelation
@@ -15,11 +16,13 @@ type ArchiveThingType =
     | "furniture"
     | "cooking_ingredient"
     | "pet_headwear_unlock_item"
+    | "crafting_material"
 
 type ArchiveThingDetail =
     | FurnitureDetail
     | CookingIngredientDetail
     | PetHeadwearUnlockItemDetail
+    | CraftingMaterialDetail
 
 type Props = {
     type: ArchiveThingType
@@ -254,7 +257,35 @@ function RelationSection({
         </Section>
     )
 }
+function materialCraftableToRelations(
+    detail: CraftingMaterialDetail
+): ThingRelation[] {
+    return detail.craftable.map((item) => ({
+        id: item.id,
+        relation_type: "craftable",
+        related_id: null,
+        related_name: item.item_name,
+        related_image: item.item_image,
+        related_url: item.item_url,
+        quantity: null,
+        relation_index: null
+    }))
+}
 
+function materialDroppedByToRelations(
+    detail: CraftingMaterialDetail
+): ThingRelation[] {
+    return detail.dropped_by.map((item) => ({
+        id: item.id,
+        relation_type: "dropped_by",
+        related_id: null,
+        related_name: item.monster_name,
+        related_image: item.monster_image,
+        related_url: item.monster_url,
+        quantity: null,
+        relation_index: null
+    }))
+}
 function getTitle(type: ArchiveThingType) {
     if (type === "furniture") {
         return "Furniture"
@@ -263,6 +294,7 @@ function getTitle(type: ArchiveThingType) {
     if (type === "cooking_ingredient") {
         return "Cooking Ingredient"
     }
+
 
     return "Pet Headwear Unlock Item"
 }
@@ -308,6 +340,14 @@ function getBadges(type: ArchiveThingType, detail: ArchiveThingDetail) {
         }
     }
 
+    if (type === "crafting_material") {
+        const item = detail as CraftingMaterialDetail
+
+        if (item.material_type) {
+            badges.push(item.material_type)
+        }
+    }
+
     return badges
 }
 
@@ -350,6 +390,11 @@ export default function ArchiveThingDetail({
     const petHeadwear =
         type === "pet_headwear_unlock_item"
             ? detail as PetHeadwearUnlockItemDetail
+            : null
+
+    const craftingMaterial =
+        type === "crafting_material"
+            ? detail as CraftingMaterialDetail
             : null
 
     return (
@@ -518,6 +563,20 @@ export default function ArchiveThingDetail({
                         />
                     )}
 
+                    {craftingMaterial && (
+                        <>
+                            <RelationSection
+                                title="Craftable"
+                                relations={materialCraftableToRelations(craftingMaterial)}
+                            />
+
+                            <RelationSection
+                                title="Dropped By"
+                                relations={materialDroppedByToRelations(craftingMaterial)}
+                            />
+                        </>
+                    )}
+
                     {formulaCode && (
                         <FormulaViewer
                             title="Formula"
@@ -536,3 +595,4 @@ export default function ArchiveThingDetail({
         </DetailContainer>
     )
 }
+

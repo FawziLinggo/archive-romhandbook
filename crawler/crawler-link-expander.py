@@ -1,7 +1,7 @@
 import argparse
 import json
 import os
-from random import random
+import random
 import re
 import sqlite3
 import time
@@ -939,7 +939,7 @@ def discover_links(conn, source_tables):
     return found
 
 
-def process_path(conn, session, path, source_table, source_id, dry_run):
+def process_path(conn, session, path, source_table, source_id, dry_run, sleep_seconds):
     existing_thing = None
 
     if path.startswith("/things/"):
@@ -955,6 +955,9 @@ def process_path(conn, session, path, source_table, source_id, dry_run):
                 "monster": "monsters",
                 "mount": "mounts",
                 "pet_egg": "pet_eggs",
+                "furniture": "furnitures",
+                "cooking_ingredient": "cooking_ingredients",
+                "pet_headwear_unlock_item": "pet_headwear_unlock_items",
             }.get(existing_type)
 
             if table and exists_in_table(conn, table, path):
@@ -970,7 +973,11 @@ def process_path(conn, session, path, source_table, source_id, dry_run):
     if dry_run:
         return "would_fetch"
 
-    soup, raw_html = fetch_page(session, path)
+    soup, raw_html = fetch_page(
+    session,
+    path,
+    sleep_seconds=sleep_seconds,
+)
 
     detected_type = None
     badges = []

@@ -95,3 +95,33 @@ export type PetHeadwearUnlockItemDetail = {
     relations: ThingRelation[]
     craft_materials: ThingRelation[]
 }
+
+export type CraftingMaterialCraftable = {
+    id: number
+    material_id: string
+    item_name: string | null
+    item_image: string | null
+    item_url: string | null
+}
+
+export type CraftingMaterialDroppedBy = {
+    id: number
+    material_id: string
+    monster_name: string | null
+    monster_image: string | null
+    monster_url: string | null
+}
+
+export type CraftingMaterialDetail = {
+    id: string
+    detail_url: string
+    image: string | null
+    name: string
+    material_type: string | null
+    quality: string | null
+    description: string | null
+    raw_html: string | null
+    formulas: ThingFormula[]
+    craftable: CraftingMaterialCraftable[]
+    dropped_by: CraftingMaterialDroppedBy[]
+}

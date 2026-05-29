@@ -161,3 +161,51 @@ type PetHeadwearUnlockItemDetail struct {
 
 	Craftable []ThingRelation `json:"craftable"`
 }
+
+type CraftingMaterialCraftable struct {
+	ID int `json:"id"`
+
+	MaterialID string `json:"material_id"`
+
+	ItemName *string `json:"item_name"`
+
+	ItemImage *string `json:"item_image"`
+
+	ItemURL *string `json:"item_url"`
+}
+
+type CraftingMaterialDroppedBy struct {
+	ID int `json:"id"`
+
+	MaterialID string `json:"material_id"`
+
+	MonsterName *string `json:"monster_name"`
+
+	MonsterImage *string `json:"monster_image"`
+
+	MonsterURL *string `json:"monster_url"`
+}
+
+type CraftingMaterialDetail struct {
+	ID string `json:"id"`
+
+	DetailURL string `json:"detail_url"`
+
+	Image *string `json:"image"`
+
+	Name string `json:"name"`
+
+	MaterialType *string `json:"material_type"`
+
+	Quality *string `json:"quality"`
+
+	Description *string `json:"description"`
+
+	RawHTML *string `json:"raw_html"`
+
+	Formulas []ThingFormula `json:"formulas"`
+
+	Craftable []CraftingMaterialCraftable `json:"craftable"`
+
+	DroppedBy []CraftingMaterialDroppedBy `json:"dropped_by"`
+}

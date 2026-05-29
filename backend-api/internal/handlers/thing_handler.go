@@ -312,6 +312,35 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 
+	case "crafting_material":
+		material, err :=
+			repositories.GetCraftingMaterialByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if material == nil {
+			utils.Error(c, 404, "Crafting material not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    material,
+				"meta":    nil,
+			},
+		)
+
+		return
+
 	default:
 		c.JSON(
 			http.StatusNotImplemented,

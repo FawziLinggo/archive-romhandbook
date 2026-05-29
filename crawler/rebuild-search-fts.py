@@ -134,17 +134,74 @@ def rebuild_search_fts():
         FROM jobs
 
 
+                UNION ALL
+
+        SELECT
+            'Furniture',
+            name,
+            CASE
+                WHEN detail_url LIKE '/things/%'
+                THEN detail_url
+                ELSE '/things/' || detail_url
+            END,
+            image,
+            TRIM(
+                COALESCE(furniture_type, '') || ' ' ||
+                COALESCE(furniture_subtype, '') || ' ' ||
+                COALESCE(quality, '') || ' ' ||
+                COALESCE(description, '') || ' ' ||
+                COALESCE(effect_text, '') || ' ' ||
+                COALESCE(unlock_text, '') || ' ' ||
+                COALESCE(deposit_stats, '') || ' ' ||
+                COALESCE(raw_tags, '')
+            )
+        FROM furnitures
+        WHERE name IS NOT NULL AND TRIM(name) != ''
+
         UNION ALL
 
-    SELECT
-        'Furniture' AS type,
-        name AS label,
-        detail_url AS href,
-        image AS image,
-        COALESCE(description, '') AS description
-    FROM furnitures
+        SELECT
+            'Cooking Ingredient',
+            name,
+            CASE
+                WHEN detail_url LIKE '/things/%'
+                THEN detail_url
+                ELSE '/things/' || detail_url
+            END,
+            image,
+            TRIM(
+                COALESCE(ingredient_type, '') || ' ' ||
+                COALESCE(quality, '') || ' ' ||
+                COALESCE(description, '') || ' ' ||
+                COALESCE(raw_tags, '')
+            )
+        FROM cooking_ingredients
+        WHERE name IS NOT NULL AND TRIM(name) != ''
 
-        WHERE name IS NOT NULL AND name != '';
+        UNION ALL
+
+        SELECT
+            'Pet Headwear Unlock Item',
+            name,
+            CASE
+                WHEN detail_url LIKE '/things/%'
+                THEN detail_url
+                ELSE '/things/' || detail_url
+            END,
+            image,
+            TRIM(
+                COALESCE(item_type, '') || ' ' ||
+                COALESCE(pet_headwear_name, '') || ' ' ||
+                COALESCE(pet_name, '') || ' ' ||
+                COALESCE(quality, '') || ' ' ||
+                COALESCE(description, '') || ' ' ||
+                COALESCE(unlock_effect_type, '') || ' ' ||
+                COALESCE(unlock_body_ids, '') || ' ' ||
+                COALESCE(raw_tags, '') || ' ' ||
+                COALESCE(raw_formula, '')
+            )
+        FROM pet_headwear_unlock_items
+        WHERE name IS NOT NULL AND TRIM(name) != '';
         """
     )
 
