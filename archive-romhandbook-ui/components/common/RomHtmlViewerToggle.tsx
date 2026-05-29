@@ -46,44 +46,6 @@ export default function RomHtmlViewerToggle({
 
                 <div
                     className="
-                        border-b
-                        border-zinc-800
-                        px-4
-                        py-5
-
-                        sm:px-8
-                        sm:py-7
-                    "
-                >
-                    <h2
-                        className="
-                            text-xl
-                            font-bold
-                            leading-tight
-                            text-white
-
-                            sm:text-2xl
-                        "
-                    >
-                        ROM Handbook Snapshot
-                    </h2>
-
-                    <p
-                        className="
-                            mt-2
-                            text-sm
-                            leading-6
-                            text-zinc-400
-
-                            sm:text-base
-                        "
-                    >
-                        Archived Original Page
-                    </p>
-                </div>
-
-                <div
-                    className="
                         flex
                         flex-col
                         gap-4

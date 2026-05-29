@@ -326,3 +326,67 @@ func (h *FormulaHandler) GetFormulaGraphNodeRelations(
 		},
 	)
 }
+
+func (h *FormulaHandler) GetFormulaGraphMeta(
+	c *gin.Context,
+) {
+	meta, err :=
+		repositories.GetFormulaGraphMeta(
+			h.DB,
+		)
+
+	if err != nil {
+		utils.Error(c, 500, err.Error())
+		return
+	}
+
+	utils.Success(
+		c,
+		200,
+		meta,
+		gin.H{
+			"node_types": len(meta.NodeTypes),
+			"edge_types": len(meta.EdgeTypes),
+		},
+	)
+}
+
+func (h *FormulaHandler) SearchFormulaGraphNodes(
+	c *gin.Context,
+) {
+	query :=
+		c.DefaultQuery("query", "")
+
+	nodeType :=
+		c.DefaultQuery("node_type", "")
+
+	limit, _ :=
+		strconv.Atoi(
+			c.DefaultQuery("limit", "20"),
+		)
+
+	nodes, err :=
+		repositories.SearchFormulaGraphNodes(
+			h.DB,
+			query,
+			nodeType,
+			limit,
+		)
+
+	if err != nil {
+		utils.Error(c, 500, err.Error())
+		return
+	}
+
+	utils.Success(
+		c,
+		200,
+		nodes,
+		gin.H{
+			"query":     query,
+			"node_type": nodeType,
+			"limit":     limit,
+			"total":     len(nodes),
+		},
+	)
+}

@@ -1304,3 +1304,269 @@ func GetFormulaGraphNodeRelations(
 		Edges:    edges,
 	}, nil
 }
+
+func GetFormulaGraphMeta(
+	db *sql.DB,
+) (
+	*models.FormulaGraphMeta,
+	error,
+) {
+	nodeRows, err :=
+		db.Query(`
+
+			SELECT
+				node_type,
+				COUNT(*) AS total
+
+			FROM formula_graph_nodes
+
+			GROUP BY node_type
+
+			ORDER BY
+				total DESC,
+				node_type ASC
+
+		`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer nodeRows.Close()
+
+	nodeTypes :=
+		[]models.FormulaGraphNodeTypeCount{}
+
+	for nodeRows.Next() {
+		var item models.FormulaGraphNodeTypeCount
+
+		err := nodeRows.Scan(
+			&item.NodeType,
+			&item.Total,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		nodeTypes = append(
+			nodeTypes,
+			item,
+		)
+	}
+
+	if err := nodeRows.Err(); err != nil {
+		return nil, err
+	}
+
+	edgeRows, err :=
+		db.Query(`
+
+			SELECT
+				edge_type,
+				COUNT(*) AS total
+
+			FROM formula_graph_edges
+
+			GROUP BY edge_type
+
+			ORDER BY
+				total DESC,
+				edge_type ASC
+
+		`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer edgeRows.Close()
+
+	edgeTypes :=
+		[]models.FormulaGraphEdgeTypeCount{}
+
+	for edgeRows.Next() {
+		var item models.FormulaGraphEdgeTypeCount
+
+		err := edgeRows.Scan(
+			&item.EdgeType,
+			&item.Total,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		edgeTypes = append(
+			edgeTypes,
+			item,
+		)
+	}
+
+	if err := edgeRows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &models.FormulaGraphMeta{
+		NodeTypes: nodeTypes,
+		EdgeTypes: edgeTypes,
+	}, nil
+}
+
+func SearchFormulaGraphNodes(
+	db *sql.DB,
+	query string,
+	nodeTypeFilter string,
+	limit int,
+) (
+	[]models.FormulaGraphNode,
+	error,
+) {
+	query =
+		strings.TrimSpace(query)
+
+	if len(query) < 2 {
+		return []models.FormulaGraphNode{}, nil
+	}
+
+	if limit <= 0 {
+		limit = 20
+	}
+
+	if limit > 50 {
+		limit = 50
+	}
+
+	filter :=
+		parseGraphNodeTypeFilter(
+			nodeTypeFilter,
+		)
+
+	search :=
+		"%" + query + "%"
+
+	prefix :=
+		query + "%"
+
+	args :=
+		[]any{
+			search,
+			search,
+			search,
+			search,
+		}
+
+	sqlQuery := `
+
+		SELECT
+			node_key,
+			node_type,
+			ref_id,
+			label,
+			detail_url,
+			image,
+			meta_json
+
+		FROM formula_graph_nodes
+
+		WHERE (
+			LOWER(node_key) LIKE LOWER(?)
+			OR LOWER(ref_id) LIKE LOWER(?)
+			OR LOWER(COALESCE(label, '')) LIKE LOWER(?)
+			OR LOWER(COALESCE(detail_url, '')) LIKE LOWER(?)
+		)
+	`
+
+	if graphHasNodeTypeFilter(filter) {
+		nodeTypes :=
+			graphKeysToSlice(
+				filter,
+			)
+
+		sqlQuery += `
+			AND node_type IN (` + graphPlaceholders(len(nodeTypes)) + `)
+		`
+
+		for _, nodeType := range nodeTypes {
+			args = append(
+				args,
+				nodeType,
+			)
+		}
+	}
+
+	sqlQuery += `
+
+		ORDER BY
+			CASE
+				WHEN LOWER(ref_id) = LOWER(?) THEN 0
+				WHEN LOWER(COALESCE(label, '')) = LOWER(?) THEN 1
+				WHEN LOWER(ref_id) LIKE LOWER(?) THEN 2
+				WHEN LOWER(COALESCE(label, '')) LIKE LOWER(?) THEN 3
+				ELSE 4
+			END,
+			CASE node_type
+				WHEN 'formula_code' THEN 0
+				WHEN 'skill' THEN 1
+				WHEN 'card' THEN 2
+				WHEN 'equipment' THEN 3
+				WHEN 'headwear' THEN 4
+				WHEN 'buff' THEN 5
+				WHEN 'formula_json' THEN 6
+				WHEN 'buff_json' THEN 7
+				ELSE 9
+			END,
+			LOWER(COALESCE(label, ref_id)) ASC
+
+		LIMIT ?
+	`
+
+	args = append(
+		args,
+		query,
+		query,
+		prefix,
+		prefix,
+		limit,
+	)
+
+	rows, err :=
+		db.Query(
+			sqlQuery,
+			args...,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	nodes :=
+		[]models.FormulaGraphNode{}
+
+	for rows.Next() {
+		var node models.FormulaGraphNode
+
+		err := rows.Scan(
+			&node.NodeKey,
+			&node.NodeType,
+			&node.RefID,
+			&node.Label,
+			&node.DetailURL,
+			&node.Image,
+			&node.MetaJSON,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		nodes = append(
+			nodes,
+			node,
+		)
+	}
+
+	return nodes, rows.Err()
+}

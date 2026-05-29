@@ -1,4 +1,5 @@
 import MagicCursorTrail from "@/components/effects/MagicCursorTrail"
+import "@xyflow/react/dist/style.css"
 import "./globals.css"
 
 import Navbar from "@/components/layout/Navbar"

@@ -644,6 +644,109 @@ def add_formula_json_edges():
                     )
 
 
+def extract_formula_function_names(value):
+    if not value:
+        return set()
+
+    return set(
+        re.findall(
+            r"function\s+([A-Za-z0-9_]+\.[A-Za-z0-9_]+)\s*\(",
+            value,
+        )
+    )
+
+
+def add_skill_formula_edges():
+    if not table_exists("skills"):
+        return
+
+    if not table_exists("formulas_code"):
+        return
+
+    formula_rows = cursor.execute(
+        """
+        SELECT
+            id,
+            name
+        FROM formulas_code
+        WHERE name IS NOT NULL
+        AND TRIM(name) != ''
+        """
+    ).fetchall()
+
+    formula_by_name = {}
+
+    for row in formula_rows:
+        formula_by_name[row["name"]] = row["id"]
+
+    rows = cursor.execute(
+        """
+        SELECT
+            id,
+            name,
+            formula_raw
+        FROM skills
+        WHERE formula_raw IS NOT NULL
+        AND TRIM(formula_raw) != ''
+        """
+    ).fetchall()
+
+    inserted = 0
+    unmatched = 0
+
+    for row in rows:
+        skill_key = node_key(
+            "skill",
+            row["id"],
+        )
+
+        function_names = extract_formula_function_names(
+                row["formula_raw"],
+            )
+
+        if not function_names:
+            unmatched += 1
+            continue
+
+        matched = False
+
+        for function_name in sorted(function_names):
+            formula_id = formula_by_name.get(function_name)
+
+            if not formula_id:
+                continue
+
+            formula_key = node_key(
+                "formula_code",
+                formula_id,
+            )
+
+            if not node_exists(formula_key):
+                continue
+
+            add_edge(
+                skill_key,
+                formula_key,
+                "USES_FORMULA_CODE",
+                function_name,
+                "skills",
+                row["id"],
+            )
+
+            inserted += 1
+            matched = True
+
+        if not matched:
+            unmatched += 1
+
+    print(
+        "[SKILL FORMULA EDGES]",
+        "inserted=",
+        inserted,
+        "unmatched=",
+        unmatched,
+    )
+
 def add_formula_code_edges():
     if not table_exists("formulas_code"):
         return
@@ -793,6 +896,9 @@ def main():
     add_buff_raw_json_aliases()
     add_formula_id_edges()
     add_formula_json_edges()
+
+    add_skill_formula_edges()
+
     add_formula_code_edges()
 
     conn.commit()

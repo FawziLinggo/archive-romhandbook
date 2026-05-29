@@ -70,44 +70,6 @@ export default function RomHtmlViewer({
             "
         >
 
-            {/* HEADER */}
-            <div
-                className="
-                    px-5
-                    py-4
-                    border-b
-                    border-zinc-800
-                    flex
-                    items-center
-                    justify-between
-                "
-            >
-
-                <div>
-
-                    <h2
-                        className="
-                            text-lg
-                            font-bold
-                            text-white
-                        "
-                    >
-                        ROM Handbook Snapshot
-                    </h2>
-
-                    <p
-                        className="
-                            text-sm
-                            text-zinc-400
-                            mt-1
-                        "
-                    >
-                        Archived original HTML
-                    </p>
-
-                </div>
-
-            </div>
 
             {/* HTML VIEWER */}
             <iframe

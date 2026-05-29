@@ -79,3 +79,21 @@ type FormulaGraphNodeRelations struct {
 
 	Edges []FormulaGraphEdge `json:"edges"`
 }
+
+type FormulaGraphNodeTypeCount struct {
+	NodeType string `json:"node_type"`
+
+	Total int `json:"total"`
+}
+
+type FormulaGraphEdgeTypeCount struct {
+	EdgeType string `json:"edge_type"`
+
+	Total int `json:"total"`
+}
+
+type FormulaGraphMeta struct {
+	NodeTypes []FormulaGraphNodeTypeCount `json:"node_types"`
+
+	EdgeTypes []FormulaGraphEdgeTypeCount `json:"edge_types"`
+}
