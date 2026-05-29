@@ -606,6 +606,21 @@ def extract_basic_data(table, path, soup, raw_html, detected_type=None):
     item_id = id_from_path(path)
     detail_url = normalize_detail_for_table(table, path)
 
+    data = {
+        "id": item_id,
+        "slug": slug_from_path(path),
+        "detail_url": detail_url,
+        "image": image,
+        "name": name or slug_from_path(path),
+        "description": description,
+        "raw_html": raw_html,
+        "type": detected_type,
+        "card_type": detected_type,
+        "material_type": detected_type,
+        "mount_type": detected_type,
+        "formula_code": None,
+    }
+
     if table == "furnitures":
         furniture_subtype = None
         is_blueprint = 0
@@ -650,23 +665,7 @@ def extract_basic_data(table, path, soup, raw_html, detected_type=None):
             "pet_name": pet_name,
         })
 
-    data = {
-        "id": item_id,
-        "slug": slug_from_path(path),
-        "detail_url": detail_url,
-        "image": image,
-        "name": name or slug_from_path(path),
-        "description": description,
-        "raw_html": raw_html,
-        "type": detected_type,
-        "card_type": detected_type,
-        "material_type": detected_type,
-        "mount_type": detected_type,
-        "formula_code": None,
-    }
-
     return data
-
 
 def badge_texts(soup):
     texts = []
