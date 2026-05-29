@@ -9,6 +9,14 @@ import HeadwearDetail from "@/components/things/HeadwearDetail"
 
 import EquipmentDetail from "@/components/things/EquipmentDetail"
 
+import ArchiveThingDetail from "@/components/things/ArchiveThingDetail"
+
+import type {
+    CookingIngredientDetail,
+    FurnitureDetail,
+    PetHeadwearUnlockItemDetail
+} from "@/lib/types/Thing"
+
 import type {
     HeadwearDetail as HeadwearDetailType
 } from "@/lib/types/Headwear"
@@ -185,6 +193,69 @@ export default async function ThingPage({
             return (
                 <EquipmentDetail
                     equipment={equipment}
+                />
+            )
+        }
+
+        case "furniture": {
+
+            const furniture =
+                thingResponse.data as FurnitureDetail | undefined
+
+            if (!furniture) {
+                return (
+                    <div>
+                        Furniture not found
+                    </div>
+                )
+            }
+
+            return (
+                <ArchiveThingDetail
+                    type="furniture"
+                    detail={furniture}
+                />
+            )
+        }
+
+        case "cooking_ingredient": {
+
+            const ingredient =
+                thingResponse.data as CookingIngredientDetail | undefined
+
+            if (!ingredient) {
+                return (
+                    <div>
+                        Cooking ingredient not found
+                    </div>
+                )
+            }
+
+            return (
+                <ArchiveThingDetail
+                    type="cooking_ingredient"
+                    detail={ingredient}
+                />
+            )
+        }
+
+        case "pet_headwear_unlock_item": {
+
+            const item =
+                thingResponse.data as PetHeadwearUnlockItemDetail | undefined
+
+            if (!item) {
+                return (
+                    <div>
+                        Pet headwear unlock item not found
+                    </div>
+                )
+            }
+
+            return (
+                <ArchiveThingDetail
+                    type="pet_headwear_unlock_item"
+                    detail={item}
                 />
             )
         }

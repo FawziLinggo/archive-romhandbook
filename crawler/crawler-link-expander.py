@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+from random import random
 import re
 import sqlite3
 import time
@@ -549,21 +550,82 @@ def clean_body_html(soup):
     return str(body)
 
 
-def fetch_page(session, path):
-    response = session.get(
-        BASE_URL + path,
-        headers=HEADERS,
-        timeout=30,
+def fetch_page(
+    session,
+    path,
+    sleep_seconds=1.0,
+    max_retries=5,
+):
+    url = BASE_URL + path
+
+    for attempt in range(max_retries):
+
+        if sleep_seconds > 0:
+            delay = sleep_seconds + random.uniform(0, sleep_seconds * 0.75)
+
+            time.sleep(delay)
+
+        response = session.get(
+                url,
+                headers=HEADERS,
+                timeout=30,
+            )
+
+        if response.status_code == 200:
+            source_soup = BeautifulSoup(
+                    response.text,
+                    "html.parser",
+                )
+
+            raw_html = clean_body_html(source_soup)
+
+            soup = BeautifulSoup(
+                    raw_html,
+                    "html.parser",
+                )
+
+            return soup, raw_html
+
+        if response.status_code == 429:
+            retry_after = response.headers.get("Retry-After")
+
+            if retry_after and retry_after.isdigit():
+                wait_seconds = int(retry_after)
+            else:
+                wait_seconds = min(
+                        120,
+                        max(10, sleep_seconds) * (attempt + 1),
+                    )
+
+            print(
+                f"[RATE LIMITED] {path} - waiting {wait_seconds}s"
+            )
+
+            time.sleep(wait_seconds)
+
+            continue
+
+        if response.status_code >= 500:
+            wait_seconds = min(
+                    60,
+                    5 * (attempt + 1),
+                )
+
+            print(
+                f"[SERVER ERROR {response.status_code}] {path} - waiting {wait_seconds}s"
+            )
+
+            time.sleep(wait_seconds)
+
+            continue
+
+        raise RuntimeError(
+            f"HTTP {response.status_code}"
+        )
+
+    raise RuntimeError(
+        "HTTP 429 too many retries"
     )
-
-    if response.status_code != 200:
-        raise RuntimeError(f"HTTP {response.status_code}")
-
-    source_soup = BeautifulSoup(response.text, "html.parser")
-    raw_html = clean_body_html(source_soup)
-    soup = BeautifulSoup(raw_html, "html.parser")
-
-    return soup, raw_html
 
 
 def first_text(soup, selectors):
@@ -1035,13 +1097,14 @@ def main():
 
         try:
             result = process_path(
-                conn,
-                session,
-                path,
-                source_table,
-                source_id,
-                args.dry_run,
-            )
+    conn,
+    session,
+    path,
+    source_table,
+    source_id,
+    args.dry_run,
+    args.sleep,
+)
 
             counts[result] = counts.get(result, 0) + 1
 

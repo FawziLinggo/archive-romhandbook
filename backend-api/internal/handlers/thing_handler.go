@@ -225,6 +225,93 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 
+	case "furniture":
+		furniture, err :=
+			repositories.GetFurnitureByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if furniture == nil {
+			utils.Error(c, 404, "Furniture not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    furniture,
+				"meta":    nil,
+			},
+		)
+
+		return
+
+	case "cooking_ingredient":
+		ingredient, err :=
+			repositories.GetCookingIngredientByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if ingredient == nil {
+			utils.Error(c, 404, "Cooking ingredient not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    ingredient,
+				"meta":    nil,
+			},
+		)
+
+		return
+
+	case "pet_headwear_unlock_item":
+		item, err :=
+			repositories.GetPetHeadwearUnlockItemByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if item == nil {
+			utils.Error(c, 404, "Pet headwear unlock item not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    item,
+				"meta":    nil,
+			},
+		)
+
+		return
+
 	default:
 		c.JSON(
 			http.StatusNotImplemented,

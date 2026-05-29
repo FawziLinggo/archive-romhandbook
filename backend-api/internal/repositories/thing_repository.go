@@ -133,3 +133,412 @@ func GetRandomSnapshotCard(
 
 	return &card, nil
 }
+
+func getThingFormulas(
+	db *sql.DB,
+	table string,
+	ownerColumn string,
+	ownerID string,
+) (
+	[]models.ThingFormula,
+	error,
+) {
+	rows, err := db.Query(`
+
+		SELECT
+			id,
+			formula_index,
+			formula_json
+
+		FROM `+table+`
+
+		WHERE `+ownerColumn+` = ?
+
+		ORDER BY formula_index ASC
+
+	`, ownerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	formulas :=
+		[]models.ThingFormula{}
+
+	for rows.Next() {
+		var formula models.ThingFormula
+
+		err := rows.Scan(
+			&formula.ID,
+			&formula.FormulaIndex,
+			&formula.FormulaJSON,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		formulas = append(
+			formulas,
+			formula,
+		)
+	}
+
+	return formulas, rows.Err()
+}
+
+func getThingRelations(
+	db *sql.DB,
+	table string,
+	ownerColumn string,
+	ownerID string,
+	hasQuantity bool,
+) (
+	[]models.ThingRelation,
+	error,
+) {
+	quantityColumn :=
+		"NULL AS quantity"
+
+	if hasQuantity {
+		quantityColumn = "quantity"
+	}
+
+	rows, err := db.Query(`
+
+		SELECT
+			id,
+			relation_type,
+			related_id,
+			related_name,
+			related_image,
+			related_url,
+			`+quantityColumn+`,
+			relation_index
+
+		FROM `+table+`
+
+		WHERE `+ownerColumn+` = ?
+
+		ORDER BY relation_index ASC
+
+	`, ownerID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	relations :=
+		[]models.ThingRelation{}
+
+	for rows.Next() {
+		var relation models.ThingRelation
+
+		err := rows.Scan(
+			&relation.ID,
+			&relation.RelationType,
+			&relation.RelatedID,
+			&relation.RelatedName,
+			&relation.RelatedImage,
+			&relation.RelatedURL,
+			&relation.Quantity,
+			&relation.RelationIndex,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		relations = append(
+			relations,
+			relation,
+		)
+	}
+
+	return relations, rows.Err()
+}
+
+func filterThingRelations(
+	relations []models.ThingRelation,
+	relationType string,
+) []models.ThingRelation {
+	filtered :=
+		[]models.ThingRelation{}
+
+	for _, relation := range relations {
+		if relation.RelationType == relationType {
+			filtered = append(
+				filtered,
+				relation,
+			)
+		}
+	}
+
+	return filtered
+}
+
+func GetFurnitureByID(
+	db *sql.DB,
+	id string,
+) (
+	*models.FurnitureDetail,
+	error,
+) {
+	var furniture models.FurnitureDetail
+
+	err := db.QueryRow(`
+
+		SELECT
+			id,
+			detail_url,
+			image,
+			name,
+			furniture_type,
+			furniture_subtype,
+			is_blueprint,
+			description,
+			quality,
+			effect_text,
+			unlock_text,
+			deposit_stats,
+			raw_tags,
+			raw_html
+
+		FROM furnitures
+
+		WHERE id = ?
+
+		LIMIT 1
+
+	`, id).Scan(
+		&furniture.ID,
+		&furniture.DetailURL,
+		&furniture.Image,
+		&furniture.Name,
+		&furniture.FurnitureType,
+		&furniture.FurnitureSubtype,
+		&furniture.IsBlueprint,
+		&furniture.Description,
+		&furniture.Quality,
+		&furniture.EffectText,
+		&furniture.UnlockText,
+		&furniture.DepositStats,
+		&furniture.RawTags,
+		&furniture.RawHTML,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	formulas, err :=
+		getThingFormulas(
+			db,
+			"furniture_formulas",
+			"furniture_id",
+			id,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	relations, err :=
+		getThingRelations(
+			db,
+			"furniture_relations",
+			"furniture_id",
+			id,
+			true,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	furniture.Formulas = formulas
+	furniture.Relations = relations
+	furniture.CraftMaterials =
+		filterThingRelations(relations, "craft_materials")
+	furniture.Craftable =
+		filterThingRelations(relations, "craftable")
+	furniture.DroppedBy =
+		filterThingRelations(relations, "dropped_by")
+
+	return &furniture, nil
+}
+
+func GetCookingIngredientByID(
+	db *sql.DB,
+	id string,
+) (
+	*models.CookingIngredientDetail,
+	error,
+) {
+	var ingredient models.CookingIngredientDetail
+
+	err := db.QueryRow(`
+
+		SELECT
+			id,
+			detail_url,
+			image,
+			name,
+			ingredient_type,
+			description,
+			quality,
+			raw_tags,
+			raw_html
+
+		FROM cooking_ingredients
+
+		WHERE id = ?
+
+		LIMIT 1
+
+	`, id).Scan(
+		&ingredient.ID,
+		&ingredient.DetailURL,
+		&ingredient.Image,
+		&ingredient.Name,
+		&ingredient.IngredientType,
+		&ingredient.Description,
+		&ingredient.Quality,
+		&ingredient.RawTags,
+		&ingredient.RawHTML,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	formulas, err :=
+		getThingFormulas(
+			db,
+			"cooking_ingredient_formulas",
+			"ingredient_id",
+			id,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	relations, err :=
+		getThingRelations(
+			db,
+			"cooking_ingredient_relations",
+			"ingredient_id",
+			id,
+			false,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ingredient.Formulas = formulas
+	ingredient.Relations = relations
+	ingredient.DroppedBy =
+		filterThingRelations(relations, "dropped_by")
+
+	return &ingredient, nil
+}
+
+func GetPetHeadwearUnlockItemByID(
+	db *sql.DB,
+	id string,
+) (
+	*models.PetHeadwearUnlockItemDetail,
+	error,
+) {
+	var item models.PetHeadwearUnlockItemDetail
+
+	err := db.QueryRow(`
+
+		SELECT
+			id,
+			detail_url,
+			image,
+			name,
+			item_type,
+			pet_headwear_name,
+			pet_name,
+			description,
+			quality,
+			formula_id,
+			compose_id,
+			unlock_item_id,
+			unlock_effect_type,
+			unlock_body_ids,
+			raw_tags,
+			raw_formula,
+			raw_html
+
+		FROM pet_headwear_unlock_items
+
+		WHERE id = ?
+
+		LIMIT 1
+
+	`, id).Scan(
+		&item.ID,
+		&item.DetailURL,
+		&item.Image,
+		&item.Name,
+		&item.ItemType,
+		&item.PetHeadwearName,
+		&item.PetName,
+		&item.Description,
+		&item.Quality,
+		&item.FormulaID,
+		&item.ComposeID,
+		&item.UnlockItemID,
+		&item.UnlockEffectType,
+		&item.UnlockBodyIDs,
+		&item.RawTags,
+		&item.RawFormula,
+		&item.RawHTML,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	relations, err :=
+		getThingRelations(
+			db,
+			"pet_headwear_unlock_item_relations",
+			"item_id",
+			id,
+			true,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	item.Relations = relations
+	item.CraftMaterials =
+		filterThingRelations(relations, "craft_materials")
+	item.Craftable =
+		filterThingRelations(relations, "craftable")
+
+	return &item, nil
+}
