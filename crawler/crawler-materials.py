@@ -2,6 +2,7 @@ import json
 import time
 import sqlite3
 import requests
+import re
 
 from bs4 import BeautifulSoup
 
@@ -455,9 +456,13 @@ for row in materials:
     time.sleep(1)
 
     try:
+        fetch_url = detail_url
+
+        if fetch_url.startswith("/"):
+            fetch_url = BASE_URL + fetch_url
 
         response = session.get(
-            detail_url,
+            fetch_url,
             headers=HEADERS,
             timeout=30
         )
@@ -490,7 +495,13 @@ for row in materials:
         # pastikan salah satu badgenya "Crafting Material" and "Blueprint"
         allowed_types = [
             "Crafting Material",
-            "Blueprint"
+            "Blueprint",
+            "Potion Effect",
+            "Enhance Equipment",
+            "Redeem Item",
+            "Pet Material",
+            "Zeny",
+            "Arrows",
         ]
 
         found_type = None
@@ -613,21 +624,21 @@ for row in materials:
 
                 name = ?,
                 image = ?,
+                material_type = ?,
                 quality = ?,
                 description = ?,
                 raw_html = ?
 
             WHERE id = ?
 
-        """, (
-
+                """, (
             name,
             image,
+            found_type,
             quality,
             description,
             html,
             material_id
-
         ))
 
         # =========================================
@@ -699,6 +710,99 @@ for row in materials:
             material_id,
         ))
 
+        cursor.execute("""
+            DELETE FROM crafting_material_craft_materials
+            WHERE material_id = ?
+        """, (
+            material_id,
+        ))
+        
+        craft_material_labels = soup.find_all(
+            string=lambda text:
+            text and "Craft Materials" in text
+        )
+
+        for label in craft_material_labels:
+
+            title_wrapper = label.find_parent("div")
+
+            if not title_wrapper:
+                continue
+
+            container = title_wrapper.find_next_sibling("div")
+
+            if not container:
+                continue
+
+            links = container.find_all(
+                "a",
+                href=True
+            )
+
+            for relation_index, link in enumerate(links):
+
+                href = link.get("href", "")
+
+                if "/things/" not in href:
+                    continue
+
+                raw_name = link.get_text(
+                    " ",
+                    strip=True
+                )
+
+                if not raw_name:
+                    continue
+
+                quantity = None
+                item_name = raw_name
+
+                match = re.match(
+                    r"^(\d+)\s*x\s+(.+)$",
+                    raw_name,
+                )
+
+                if match:
+                    quantity = match.group(1)
+                    item_name = match.group(2).strip()
+
+                img = link.find("img")
+
+                item_image = None
+
+                if img:
+                    item_image = (
+                        img.get("src")
+                        or
+                        img.get("data-src")
+                    )
+
+                item_url = href
+
+                if item_url.startswith(BASE_URL):
+                    item_url = item_url[len(BASE_URL):]
+
+                if item_image and item_image.startswith(BASE_URL):
+                    item_image = item_image[len(BASE_URL):]
+
+                cursor.execute("""
+                    INSERT INTO crafting_material_craft_materials (
+                        material_id,
+                        item_name,
+                        item_image,
+                        item_url,
+                        quantity,
+                        relation_index
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    material_id,
+                    item_name,
+                    item_image,
+                    item_url,
+                    quantity,
+                    relation_index,
+                ))
         # =========================================
         # FIND CRAFTABLE SECTION
         # =========================================

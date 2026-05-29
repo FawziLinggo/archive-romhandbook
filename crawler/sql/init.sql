@@ -590,3 +590,14 @@ CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_items_pet_name ON pet_headwea
 CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_items_quality ON pet_headwear_unlock_items(quality);
 CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_item_relations_item_id ON pet_headwear_unlock_item_relations(item_id);
 CREATE INDEX IF NOT EXISTS idx_pet_headwear_unlock_item_relations_type ON pet_headwear_unlock_item_relations(relation_type);
+CREATE TABLE IF NOT EXISTS crafting_material_craft_materials (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    material_id TEXT,
+    item_name TEXT,
+    item_image TEXT,
+    item_url TEXT,
+    quantity TEXT,
+    relation_index INTEGER,
+    FOREIGN KEY(material_id) REFERENCES crafting_materials(id)
+);
+CREATE INDEX IF NOT EXISTS idx_crafting_material_craft_materials_material_id ON crafting_material_craft_materials(material_id);
