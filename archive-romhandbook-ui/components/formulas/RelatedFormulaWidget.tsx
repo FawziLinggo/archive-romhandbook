@@ -765,25 +765,34 @@ function RelationMiniGraph({
                                         </text>
                                     )}
 
-                                    <text
-                                        x={item.x - 42}
-                                        y={item.y - 5}
-                                        fill="#ffffff"
-                                        fontSize="13"
-                                        fontWeight="900"
-                                    >
-                                        {truncateText(getNodeLabel(item.node), 19)}
-                                    </text>
+                                    {(() => {
+                                        const parts =
+                                            getGraphNodeTitleParts(item.node)
 
-                                    <text
-                                        x={item.x - 42}
-                                        y={item.y + 15}
-                                        fill={color}
-                                        fontSize="11"
-                                        fontWeight="800"
-                                    >
-                                        {formatNodeType(item.node.node_type)}
-                                    </text>
+                                        return (
+                                            <>
+                                                <text
+                                                    x={item.x - 42}
+                                                    y={item.y - 7}
+                                                    fill={color}
+                                                    fontSize="11"
+                                                    fontWeight="800"
+                                                >
+                                                    {truncateText(parts.eyebrow, 20)}
+                                                </text>
+
+                                                <text
+                                                    x={item.x - 42}
+                                                    y={item.y + 14}
+                                                    fill="#ffffff"
+                                                    fontSize="13"
+                                                    fontWeight="900"
+                                                >
+                                                    {truncateText(parts.title, 18)}
+                                                </text>
+                                            </>
+                                        )
+                                    })()}
                                 </g>
                             )
 
@@ -832,6 +841,52 @@ function RelationMiniGraph({
             )}
         </div>
     )
+}
+
+function getGraphNodeTitleParts(
+    node: FormulaGraphNode
+) {
+    const label =
+        getNodeLabel(node)
+
+    if (node.node_type === "formula_code") {
+        const parts =
+            label.split(".")
+
+        if (parts.length >= 2) {
+            return {
+                eyebrow: parts[0],
+                title: parts.slice(1).join(".")
+            }
+        }
+
+        return {
+            eyebrow: "Formula Code",
+            title: label
+        }
+    }
+
+    if (
+        node.node_type === "formula_json" ||
+        node.node_type === "buff_json"
+    ) {
+        return {
+            eyebrow: "JSON Formatted",
+            title: node.ref_id || label
+        }
+    }
+
+    if (node.node_type === "formula_id") {
+        return {
+            eyebrow: "Formula ID",
+            title: node.ref_id || label
+        }
+    }
+
+    return {
+        eyebrow: formatNodeType(node.node_type),
+        title: label
+    }
 }
 
 export default function RelatedFormulaWidget({

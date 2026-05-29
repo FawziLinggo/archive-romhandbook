@@ -2,14 +2,8 @@ import Image from "next/image"
 import Link from "next/link"
 
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
+import RelatedFormulaWidget from "@/components/formulas/RelatedFormulaWidget"
 
-import {
-    Prism as SyntaxHighlighter
-} from "react-syntax-highlighter"
-
-import {
-    oneDark
-} from "react-syntax-highlighter/dist/cjs/styles/prism"
 
 import DetailContainer from "../layout/DetailContainer"
 
@@ -127,45 +121,6 @@ function parseTextList(
         .filter(Boolean)
 }
 
-function parseFormulaJson(
-    value: unknown
-) {
-    let current =
-        value
-
-    for (let i = 0; i < 2; i++) {
-        if (typeof current !== "string") {
-            return current
-        }
-
-        try {
-            current =
-                JSON.parse(current)
-        } catch {
-            return current
-        }
-    }
-
-    return current
-}
-
-function formatFormulaJson(
-    value: unknown
-) {
-    const parsed =
-        parseFormulaJson(value)
-
-    if (typeof parsed === "string") {
-        return parsed
-    }
-
-    return JSON.stringify(
-        parsed,
-        null,
-        2
-    )
-}
-
 function Chip({
     children,
     className = ""
@@ -245,11 +200,7 @@ function TextList({
 }) {
 
     if (items.length === 0) {
-        return (
-            <p className="text-sm text-zinc-600">
-                No data archived.
-            </p>
-        )
+        return null
     }
 
     const dotClass =
@@ -738,88 +689,6 @@ function EquipEffectsSection({
     )
 }
 
-function FormulaBlock({
-    formula,
-    index
-}: {
-    formula: {
-        id: number
-        formula_id: string | null
-        formula_json: string | null
-    }
-    index: number
-}) {
-
-    return (
-
-        <div
-            className="
-                overflow-hidden
-                rounded-2xl
-                border
-                border-zinc-800
-                bg-zinc-950
-            "
-        >
-            <div
-                className="
-                    flex
-                    flex-wrap
-                    items-center
-                    justify-between
-                    gap-2
-                    border-b
-                    border-zinc-800
-                    bg-zinc-900/70
-                    px-4
-                    py-3
-                    text-sm
-                    text-zinc-400
-
-                    sm:px-5
-                "
-            >
-                <span>
-                    Formula #{index + 1}
-                </span>
-
-                {formula.formula_id && (
-                    <span className="text-xs text-zinc-500">
-                        ID {formula.formula_id}
-                    </span>
-                )}
-            </div>
-
-            <SyntaxHighlighter
-                language="json"
-                style={oneDark}
-                wrapLongLines={true}
-                PreTag="div"
-                codeTagProps={{
-                    style: {
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                        overflowWrap: "anywhere",
-                    }
-                }}
-                customStyle={{
-                    margin: 0,
-                    background: "transparent",
-                    fontSize: "12px",
-                    lineHeight: "1.7",
-                    padding: "16px",
-                    overflowX: "hidden",
-                    maxWidth: "100%",
-                }}
-            >
-                {formatFormulaJson(
-                    formula.formula_json
-                )}
-            </SyntaxHighlighter>
-        </div>
-
-    )
-}
 
 export default function EquipmentDetail({
     equipment
@@ -1019,49 +888,34 @@ export default function EquipmentDetail({
                         space-y-6
                     "
                 >
-                    <Section title="Effect">
-                        <TextList
-                            items={effects}
-                            tone="violet"
-                        />
-                    </Section>
-
-                    <Section title="Unlock">
-                        <TextList
-                            items={unlocks}
-                            tone="cyan"
-                        />
-                    </Section>
-
-                    <Section title="Deposit">
-                        <TextList
-                            items={deposits}
-                            tone="emerald"
-                        />
-                    </Section>
-
-                    {jobs.length > 0 && (
-
-                        <Section title="Jobs">
-                            <div className="flex flex-wrap gap-2">
-                                {jobs.map((job, index) => (
-
-                                    <Chip
-                                        key={`${job}-${index}`}
-                                        className="
-                                            border-red-500/30
-                                            bg-red-500/10
-                                            text-red-200
-                                        "
-                                    >
-                                        {job}
-                                    </Chip>
-
-                                ))}
-                            </div>
+                    {effects.length > 0 && (
+                        <Section title="Effect">
+                            <TextList
+                                items={effects}
+                                tone="violet"
+                            />
                         </Section>
-
                     )}
+
+                    {unlocks.length > 0 && (
+                        <Section title="Unlock">
+                            <TextList
+                                items={unlocks}
+                                tone="cyan"
+                            />
+                        </Section>
+                    )}
+
+                    {deposits.length > 0 && (
+                        <Section title="Deposit">
+                            <TextList
+                                items={deposits}
+                                tone="emerald"
+                            />
+                        </Section>
+                    )}
+
+
 
                     <TierSection
                         tiers={equipment.tiers}
@@ -1086,31 +940,31 @@ export default function EquipmentDetail({
                         effects={equipment.equip_effects}
                     />
 
-                    {equipment.formulas.length > 0 && (
+                    <RelatedFormulaWidget
+                        nodeType="equipment"
+                        refId={equipment.id}
+                    />
 
-                        <section className="space-y-4">
-                            <h2
-                                className="
-                                    text-xl
-                                    font-black
-                                    text-white
+                    {jobs.length > 0 && (
 
-                                    sm:text-2xl
-                                "
-                            >
-                                Formulas
-                            </h2>
+                        <Section title="Jobs">
+                            <div className="flex flex-wrap gap-2">
+                                {jobs.map((job, index) => (
 
-                            {equipment.formulas.map((formula, index) => (
+                                    <Chip
+                                        key={`${job}-${index}`}
+                                        className="
+                                            border-red-500/30
+                                            bg-red-500/10
+                                            text-red-200
+                                        "
+                                    >
+                                        {job}
+                                    </Chip>
 
-                                <FormulaBlock
-                                    key={formula.id}
-                                    formula={formula}
-                                    index={index}
-                                />
-
-                            ))}
-                        </section>
+                                ))}
+                            </div>
+                        </Section>
 
                     )}
 
