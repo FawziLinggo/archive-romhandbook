@@ -1,18 +1,13 @@
 import Image from "next/image"
 
-import {
-    Prism as SyntaxHighlighter
-} from "react-syntax-highlighter"
-
-import {
-    oneDark
-} from "react-syntax-highlighter/dist/cjs/styles/prism"
 
 import DetailContainer from "../layout/DetailContainer"
 
 import type {
     HeadwearDetail as HeadwearDetailType
 } from "@/lib/types/Headwear"
+import RelatedFormulaWidget from "../formulas/RelatedFormulaWidget"
+
 
 type Props = {
 
@@ -74,45 +69,6 @@ function qualityClass(
     }
 }
 
-function parseFormulaJson(
-    value: unknown
-) {
-    let current =
-        value
-
-    for (let i = 0; i < 2; i++) {
-
-        if (typeof current !== "string") {
-            return current
-        }
-
-        try {
-            current =
-                JSON.parse(current)
-        } catch {
-            return current
-        }
-    }
-
-    return current
-}
-
-function formatFormulaJson(
-    value: unknown
-) {
-    const parsed =
-        parseFormulaJson(value)
-
-    if (typeof parsed === "string") {
-        return parsed
-    }
-
-    return JSON.stringify(
-        parsed,
-        null,
-        2
-    )
-}
 
 function Chip({
     children,
@@ -281,72 +237,6 @@ function TextSection({
     )
 }
 
-function FormulaBlock({
-    formula,
-    index
-}: {
-    formula: {
-        formula_json: string | null
-    }
-    index: number
-}) {
-
-    return (
-
-        <div
-            className="
-                overflow-hidden
-                rounded-2xl
-                border
-                border-zinc-800
-                bg-zinc-950
-            "
-        >
-            <div
-                className="
-                    border-b
-                    border-zinc-800
-                    bg-zinc-900/70
-                    px-5
-                    py-3
-                    text-sm
-                    text-zinc-400
-                "
-            >
-                Formula #{index + 1}
-            </div>
-
-            <SyntaxHighlighter
-                language="json"
-                style={oneDark}
-                wrapLongLines={true}
-                PreTag="div"
-                codeTagProps={{
-                    style: {
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                        overflowWrap: "anywhere",
-                    }
-                }}
-                customStyle={{
-                    margin: 0,
-                    background: "transparent",
-                    fontSize: "13px",
-                    lineHeight: "1.8",
-                    padding: "24px",
-                    overflowX: "hidden",
-                    maxWidth: "100%",
-                }}
-            >
-                {formatFormulaJson(
-                    formula.formula_json
-                )}
-            </SyntaxHighlighter>
-        </div>
-
-    )
-}
-
 export default function HeadwearDetail({
     headwear
 }: Props) {
@@ -504,11 +394,38 @@ export default function HeadwearDetail({
                                     label="Availability"
                                     value={headwear.availability_date}
                                 />
+                                {jobs.length > 0 && (
 
-                                <InfoBox
-                                    label="Formula ID"
-                                    value={headwear.formula_id}
-                                />
+                                    <section
+                                    >
+
+                                        <div
+                                            className="
+                                    mt-4
+                                    flex
+                                    flex-wrap
+                                    gap-2
+                                    centered
+                                "
+                                        >
+                                            {jobs.map((job, index) => (
+
+                                                <Chip
+                                                    key={index}
+                                                    className="
+                                            border-red-500/30
+                                            bg-red-500/10
+                                            text-red-200
+                                        "
+                                                >
+                                                    {job}
+                                                </Chip>
+
+                                            ))}
+                                        </div>
+                                    </section>
+
+                                )}
                             </div>
                         </div>
                     </div>
@@ -548,85 +465,12 @@ export default function HeadwearDetail({
                         />
                     </div>
 
-                    {jobs.length > 0 && (
 
-                        <section
-                            className="
-                                rounded-2xl
-                                border
-                                border-zinc-800
-                                bg-zinc-950
-                                p-5
-                            "
-                        >
-                            <h2
-                                className="
-                                    text-sm
-                                    font-bold
-                                    uppercase
-                                    tracking-wider
-                                    text-zinc-400
-                                "
-                            >
-                                Jobs
-                            </h2>
 
-                            <div
-                                className="
-                                    mt-4
-                                    flex
-                                    flex-wrap
-                                    gap-2
-                                "
-                            >
-                                {jobs.map((job, index) => (
-
-                                    <Chip
-                                        key={index}
-                                        className="
-                                            border-red-500/30
-                                            bg-red-500/10
-                                            text-red-200
-                                        "
-                                    >
-                                        {job}
-                                    </Chip>
-
-                                ))}
-                            </div>
-                        </section>
-
-                    )}
-
-                    {headwear.formulas.length > 0 && (
-
-                        <section
-                            className="
-                                space-y-4
-                            "
-                        >
-                            <h2
-                                className="
-                                    text-2xl
-                                    font-black
-                                    text-white
-                                "
-                            >
-                                Formulas
-                            </h2>
-
-                            {headwear.formulas.map((formula, index) => (
-
-                                <FormulaBlock
-                                    key={formula.id}
-                                    formula={formula}
-                                    index={index}
-                                />
-
-                            ))}
-                        </section>
-
-                    )}
+                    <RelatedFormulaWidget
+                        nodeType="headwear"
+                        refId={headwear.id}
+                    />
 
                 </main>
 
