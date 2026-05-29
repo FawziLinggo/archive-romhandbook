@@ -34,6 +34,13 @@ INGREDIENT_TYPES = {
     "Seafood",
     "Meat",
     "Spice",
+    
+           "Fruit",
+           "Arrows",
+           "Zeny",
+    "Enhance Equipment",
+    "Redeem Item",
+    "Pet Material"
 }
 
 
@@ -529,6 +536,13 @@ def get_rows(conn, limit):
            OR detected_types LIKE '%Seafood%'
            OR detected_types LIKE '%Meat%'
            OR detected_types LIKE '%Spice%'
+           OR detected_types LIKE '%Fruit%'
+           OR detected_types LIKE '%Arrows%'
+           OR detected_types LIKE '%Zeny%'
+           OR detected_types LIKE '%Enhance Equipment%'
+           OR detected_types LIKE '%Redeem Item%'
+           OR detected_types LIKE '%Pet Material%'
+
         ORDER BY path
     """
 

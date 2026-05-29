@@ -79,10 +79,18 @@ INGREDIENT_TYPES = {
     "Seafood",
     "Meat",
     "Spice",
+    
+           "Fruit",
+           "Arrows",
+           "Zeny",
+    "Enhance Equipment",
+    "Redeem Item",
+    "Pet Material"
 }
 
 PET_HEADWEAR_UNLOCK_TYPES = {
     "Pet Headwear Unlock Item",
+    "Pet Headwear Blueprint",
 }
 
 EQUIPMENT_TYPES = {

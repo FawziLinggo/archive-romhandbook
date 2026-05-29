@@ -200,6 +200,9 @@ def extract_item_type(badges):
     for badge in badges:
         if badge == "Pet Headwear Unlock Item":
             return badge
+        
+        if badge == "Pet Headwear Blueprint":
+            return badge
 
     return None
 
@@ -359,7 +362,7 @@ def parse_pet_headwear_unlock(path, soup, raw_html):
     item_type = extract_item_type(badges)
 
     if not item_type:
-        raise RuntimeError("Pet Headwear Unlock Item badge not found")
+        raise RuntimeError("Pet Headwear Unlock Item or Blueprint badge not found")
 
     name = first_text(
         soup,
@@ -588,7 +591,7 @@ def get_rows(conn, limit):
             detected_name,
             detected_types
         FROM crawl_unknown_links
-        WHERE detected_types LIKE '%Pet Headwear Unlock Item%'
+        WHERE detected_types LIKE '%Pet Headwear Unlock Item%' OR detected_types LIKE '%Pet Headwear Blueprint%'
         ORDER BY path
     """
 
