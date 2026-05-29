@@ -70,3 +70,12 @@ export type FormulaGraph = {
     nodes: FormulaGraphNode[]
     edges: FormulaGraphEdge[]
 }
+
+export type FormulaGraphNodeRelations = {
+    node_type: string
+    ref_id: string
+    depth: number
+    center: FormulaGraphNode
+    nodes: FormulaGraphNode[]
+    edges: FormulaGraphEdge[]
+}

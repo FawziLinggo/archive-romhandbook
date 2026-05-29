@@ -1,13 +1,7 @@
 import RelationSection from "@/components/common/RelationSection"
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
+import RelatedFormulaWidget from "@/components/formulas/RelatedFormulaWidget"
 
-import {
-    Prism as SyntaxHighlighter
-} from "react-syntax-highlighter"
-
-import {
-    oneDark
-} from "react-syntax-highlighter/dist/cjs/styles/prism"
 import DetailContainer from "../layout/DetailContainer"
 
 type Props = {
@@ -465,87 +459,10 @@ export default function CardDetail({
                     </div>
 
 
-                    {/* FORMULAS */}
-                    {formulas.length > 0 && (
-
-                        <div className="mt-10">
-
-                            <div className="space-y-5">
-
-                                {formulas.map(
-                                    (
-                                        formula: any,
-                                        index: number
-                                    ) => (
-
-                                        <div
-                                            key={index}
-                                            className="
-    overflow-hidden
-    rounded-3xl
-    border
-    border-zinc-800
-    bg-gradient-to-b
-    from-zinc-900
-    to-zinc-950
-    shadow-2xl
-    shadow-black/30
-"
-                                        >
-
-                                            <div
-                                                className="
-                                        px-5
-                                        py-3
-                                        border-b
-                                        border-zinc-800
-                                        bg-zinc-900/80
-backdrop-blur
-                                        text-sm
-                                        text-zinc-400
-                                    "
-                                            >
-                                                Formula #{index + 1}
-                                            </div>
-
-                                            <SyntaxHighlighter
-                                                language="json"
-                                                style={oneDark}
-                                                wrapLongLines={true}
-                                                PreTag="div"
-                                                codeTagProps={{
-                                                    style: {
-                                                        whiteSpace: "pre-wrap",
-                                                        wordBreak: "break-word"
-                                                    }
-                                                }}
-                                                customStyle={{
-                                                    margin: 0,
-                                                    background: "transparent",
-                                                    fontSize: "12px",
-                                                    lineHeight: "1.7",
-                                                    padding: "16px",
-                                                    overflowX: "hidden",
-                                                    maxWidth: "100%"
-                                                }}
-                                            >
-
-                                                {formatFormulaJson(
-                                                    formula.formula_json
-                                                )}
-
-                                            </SyntaxHighlighter>
-
-                                        </div>
-
-                                    )
-                                )}
-
-                            </div>
-
-                        </div>
-
-                    )}
+                    <RelatedFormulaWidget
+                        nodeType="card"
+                        refId={card.id}
+                    />
 
                     <RomHtmlViewerToggle
                         html={card.raw_html}

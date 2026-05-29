@@ -266,3 +266,63 @@ func (h *FormulaHandler) GetFormulaGraphSummaryByID(
 		},
 	)
 }
+
+func (h *FormulaHandler) GetFormulaGraphNodeRelations(
+	c *gin.Context,
+) {
+	nodeType :=
+		c.Param("node_type")
+
+	refID :=
+		c.Param("ref_id")
+
+	edgeType :=
+		c.DefaultQuery("edge_type", "")
+
+	nodeTypeFilter :=
+		c.DefaultQuery("node_type", "")
+
+	depth, _ :=
+		strconv.Atoi(
+			c.DefaultQuery("depth", "1"),
+		)
+
+	limit, _ :=
+		strconv.Atoi(
+			c.DefaultQuery("limit", "30"),
+		)
+
+	relations, err :=
+		repositories.GetFormulaGraphNodeRelations(
+			h.DB,
+			nodeType,
+			refID,
+			depth,
+			limit,
+			edgeType,
+			nodeTypeFilter,
+		)
+
+	if err != nil {
+		utils.Error(c, 500, err.Error())
+		return
+	}
+
+	if relations == nil {
+		utils.Error(c, 404, "Graph node relations not found")
+		return
+	}
+
+	utils.Success(
+		c,
+		200,
+		relations,
+		gin.H{
+			"node_type":  nodeType,
+			"ref_id":     refID,
+			"depth":      relations.Depth,
+			"node_count": len(relations.Nodes),
+			"edge_count": len(relations.Edges),
+		},
+	)
+}

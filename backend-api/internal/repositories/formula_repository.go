@@ -1049,3 +1049,258 @@ func GetFormulaGraphSummaryByID(
 		NodeTypes: items,
 	}, nil
 }
+
+func getFormulaGraphNodeByKey(
+	db *sql.DB,
+	nodeKey string,
+) (
+	*models.FormulaGraphNode,
+	error,
+) {
+	var node models.FormulaGraphNode
+
+	err := db.QueryRow(`
+
+		SELECT
+			node_key,
+			node_type,
+			ref_id,
+			label,
+			detail_url,
+			image,
+			meta_json
+
+		FROM formula_graph_nodes
+
+		WHERE node_key = ?
+
+		LIMIT 1
+
+	`, nodeKey).Scan(
+		&node.NodeKey,
+		&node.NodeType,
+		&node.RefID,
+		&node.Label,
+		&node.DetailURL,
+		&node.Image,
+		&node.MetaJSON,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return &node, nil
+}
+
+func GetFormulaGraphNodeRelations(
+	db *sql.DB,
+	nodeType string,
+	refID string,
+	depth int,
+	limit int,
+	edgeType string,
+	nodeTypeFilter string,
+) (
+	*models.FormulaGraphNodeRelations,
+	error,
+) {
+	if nodeType == "" || refID == "" {
+		return nil, nil
+	}
+
+	if depth < 0 {
+		depth = 0
+	}
+
+	if depth > 3 {
+		depth = 3
+	}
+
+	if limit <= 0 {
+		limit = 30
+	}
+
+	if limit > 500 {
+		limit = 500
+	}
+
+	centerKey :=
+		nodeType + ":" + refID
+
+	centerNode, err :=
+		getFormulaGraphNodeByKey(
+			db,
+			centerKey,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if centerNode == nil {
+		return nil, nil
+	}
+
+	filter :=
+		parseGraphNodeTypeFilter(
+			nodeTypeFilter,
+		)
+
+	nodesByKey :=
+		map[string]models.FormulaGraphNode{
+			centerNode.NodeKey: *centerNode,
+		}
+
+	edgesByID :=
+		map[int]models.FormulaGraphEdge{}
+
+	frontier :=
+		map[string]bool{
+			centerNode.NodeKey: true,
+		}
+
+	expanded :=
+		map[string]bool{}
+
+	for level := 0; level < depth; level++ {
+		if len(frontier) == 0 {
+			break
+		}
+
+		active :=
+			map[string]bool{}
+
+		for key := range frontier {
+			if !expanded[key] {
+				active[key] = true
+				expanded[key] = true
+			}
+		}
+
+		if len(active) == 0 {
+			break
+		}
+
+		remaining :=
+			limit - len(edgesByID)
+
+		if remaining <= 0 {
+			break
+		}
+
+		edges, err :=
+			getFormulaGraphEdgesForKeys(
+				db,
+				active,
+				remaining,
+				edgeType,
+				filter,
+			)
+
+		if err != nil {
+			return nil, err
+		}
+
+		missingNodes :=
+			map[string]bool{}
+
+		nextFrontier :=
+			map[string]bool{}
+
+		for _, edge := range edges {
+			edgesByID[edge.ID] = edge
+
+			endpoints :=
+				[]string{
+					edge.FromNodeKey,
+					edge.ToNodeKey,
+				}
+
+			for _, endpoint := range endpoints {
+				if _, exists := nodesByKey[endpoint]; !exists {
+					missingNodes[endpoint] = true
+				}
+
+				if !expanded[endpoint] {
+					nextFrontier[endpoint] = true
+				}
+			}
+		}
+
+		nodes, err :=
+			getFormulaGraphNodesByKeys(
+				db,
+				missingNodes,
+			)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, node := range nodes {
+			nodesByKey[node.NodeKey] = node
+		}
+
+		frontier = nextFrontier
+	}
+
+	nodes :=
+		[]models.FormulaGraphNode{}
+
+	for _, node := range nodesByKey {
+		nodes = append(
+			nodes,
+			node,
+		)
+	}
+
+	sort.Slice(
+		nodes,
+		func(i int, j int) bool {
+			if nodes[i].NodeKey == centerNode.NodeKey {
+				return true
+			}
+
+			if nodes[j].NodeKey == centerNode.NodeKey {
+				return false
+			}
+
+			if nodes[i].NodeType == nodes[j].NodeType {
+				return nodes[i].NodeKey < nodes[j].NodeKey
+			}
+
+			return nodes[i].NodeType < nodes[j].NodeType
+		},
+	)
+
+	edges :=
+		[]models.FormulaGraphEdge{}
+
+	for _, edge := range edgesByID {
+		edges = append(
+			edges,
+			edge,
+		)
+	}
+
+	sort.Slice(
+		edges,
+		func(i int, j int) bool {
+			return edges[i].ID < edges[j].ID
+		},
+	)
+
+	return &models.FormulaGraphNodeRelations{
+		NodeType: nodeType,
+		RefID:    refID,
+		Depth:    depth,
+		Center:   *centerNode,
+		Nodes:    nodes,
+		Edges:    edges,
+	}, nil
+}

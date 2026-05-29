@@ -149,6 +149,11 @@ func SetupRoutes(
 	)
 
 	router.GET(
+		"/api/v1/graph/nodes/:node_type/:ref_id/relations",
+		formulaHandler.GetFormulaGraphNodeRelations,
+	)
+
+	router.GET(
 		"/api/v1/formulas/:slug/graph",
 		formulaHandler.GetFormulaGraphByID,
 	)
@@ -293,5 +298,15 @@ func SetupRoutes(
 	router.GET(
 		"/api/v1/search",
 		searchHandler.GlobalSearch,
+	)
+
+	dataHealthHandler :=
+		handlers.DataHealthHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/data-health/dashboard",
+		dataHealthHandler.GetDataHealthDashboard,
 	)
 }

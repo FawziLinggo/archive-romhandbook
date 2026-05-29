@@ -65,3 +65,17 @@ type FormulaGraphSummary struct {
 
 	NodeTypes []FormulaGraphSummaryItem `json:"node_types"`
 }
+
+type FormulaGraphNodeRelations struct {
+	NodeType string `json:"node_type"`
+
+	RefID string `json:"ref_id"`
+
+	Depth int `json:"depth"`
+
+	Center FormulaGraphNode `json:"center"`
+
+	Nodes []FormulaGraphNode `json:"nodes"`
+
+	Edges []FormulaGraphEdge `json:"edges"`
+}
