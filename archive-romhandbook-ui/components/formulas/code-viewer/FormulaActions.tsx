@@ -1,6 +1,4 @@
 import {
-    Check,
-    Copy,
     Maximize2,
     Minimize2,
     Moon,
@@ -109,9 +107,13 @@ export default function FormulaActions({
 
         <div
             className="
-                flex
-                items-center
-                gap-2
+                        flex
+        w-full
+        flex-wrap
+        items-center
+        gap-2
+        sm:w-auto
+        sm:justify-end
             "
         >
 
@@ -177,11 +179,12 @@ export default function FormulaActions({
             </button>
 
             {/* ASK AI */}
-            <button
+            <span className="hidden sm:inline">
+                <button
 
-                onClick={onToggleAI}
+                    onClick={onToggleAI}
 
-                className={`
+                    className={`
     relative
 
     flex
@@ -202,7 +205,7 @@ export default function FormulaActions({
 
     ${aiOpen
 
-                        ? `
+                            ? `
             bg-gradient-to-r
             from-violet-500
             to-fuchsia-500
@@ -213,36 +216,36 @@ export default function FormulaActions({
             shadow-violet-500/20
         `
 
-                        : `
+                            : `
             border
             border-violet-500/30
 
             ${isLight
 
-                            ? `
+                                ? `
                     bg-violet-50
                     text-violet-700
 
                     hover:bg-violet-100
                 `
 
-                            : `
+                                : `
                     bg-violet-500/10
                     text-violet-300
 
                     hover:bg-violet-500/20
                 `
-                        }
+                            }
         `
-                    }
+                        }
 `}
-            >
+                >
 
-                <Sparkles size={16} />
+                    <Sparkles size={16} />
 
-                AI RUNE
+                    AI RUNE
 
-                {/* <span
+                    {/* <span
                     className="
                         rounded-full
 
@@ -263,9 +266,9 @@ export default function FormulaActions({
 
                 </span> */}
 
-                {/* GLOW */}
-                <div
-                    className="
+                    {/* GLOW */}
+                    <div
+                        className="
                         absolute
                         inset-0
 
@@ -279,16 +282,17 @@ export default function FormulaActions({
 
                         transition-opacity
                     "
-                />
+                    />
 
-            </button>
-
+                </button>
+            </span>
             {/* COPY */}
-            <button
+            <span className="hidden sm:inline">
+                <button
 
-                onClick={onCopy}
+                    onClick={onCopy}
 
-                className={`
+                    className={`
                     flex
                     items-center
                     gap-2
@@ -300,28 +304,34 @@ export default function FormulaActions({
 
                     ${buttonStyle}
                 `}
-            >
+                >
 
-                {copied
+                    {copied
 
-                    ? (
-                        <>
-                            <Check size={16} />
-                            Copied
-                        </>
-                    )
+                        ? (
 
-                    : (
-                        <>
-                            <Copy size={16} />
-                            Copy
-                        </>
-                    )
-                }
+                            <>
 
-            </button>
+                                Copied
+                            </>
 
-        </div>
+                        )
+
+                        : (
+
+                            <>
+
+                                Copy
+                            </>
+
+
+                        )
+                    }
+
+                </button>
+            </span >
+
+        </div >
 
     )
 

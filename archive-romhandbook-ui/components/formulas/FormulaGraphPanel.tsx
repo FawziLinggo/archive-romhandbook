@@ -3,12 +3,13 @@
 import Link from "next/link"
 
 import {
+    ChevronDown,
+    ChevronUp,
     GitBranch,
     Loader2,
     Network,
     RefreshCw
 } from "lucide-react"
-
 import {
     useEffect,
     useMemo,
@@ -25,6 +26,7 @@ import type {
 type Props = {
     formulaId: string
     formulaName: string
+    id?: string
 }
 
 const DEFAULT_NODE_TYPES = [
@@ -73,6 +75,328 @@ function getNodeLabel(
     return node.label || node.ref_id || node.node_key
 }
 
+
+function truncateLabel(
+    value: string,
+    max = 20
+) {
+    if (value.length <= max) {
+        return value
+    }
+
+    return `${value.slice(0, max - 1)}…`
+}
+
+function getNodeColor(
+    nodeType: string
+) {
+    const colors: Record<string, string> = {
+        card: "#a78bfa",
+        equipment: "#34d399",
+        headwear: "#f472b6",
+        monster: "#f87171",
+        buff: "#60a5fa",
+        buff_json: "#818cf8",
+        formula_json: "#c084fc",
+        formula_id: "#fbbf24",
+        crafting_material: "#2dd4bf",
+        furniture: "#fb923c",
+        external_id: "#94a3b8"
+    }
+
+    return colors[nodeType] || "#a1a1aa"
+}
+
+function FormulaGraphCanvas({
+    graph,
+    formulaId,
+    formulaName,
+    isVisible,
+    onToggle,
+}: {
+    graph: FormulaGraph
+    formulaId: string
+    formulaName: string
+    isVisible: boolean
+    onToggle: () => void
+}) {
+    const centerNode =
+        graph.nodes.find((node) =>
+            isCenterNode(node, formulaId)
+        ) || graph.nodes[0]
+
+    const related =
+        graph.nodes
+            .filter((node) => node.node_key !== centerNode?.node_key)
+            .slice(0, 18)
+
+    const width = 900
+    const height = 420
+    const centerX = width / 2
+    const centerY = height / 2
+    const radiusX = 310
+    const radiusY = 145
+
+    const positionedNodes =
+        related.map((node, index) => {
+            const angle =
+                -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(related.length, 1)
+
+            return {
+                node,
+                x: centerX + Math.cos(angle) * radiusX,
+                y: centerY + Math.sin(angle) * radiusY
+            }
+        })
+
+    const visibleNodeKeys =
+        new Set(positionedNodes.map((item) => item.node.node_key))
+
+    const visibleEdges =
+        graph.edges.filter((edge) =>
+            visibleNodeKeys.has(edge.from_node_key) ||
+            visibleNodeKeys.has(edge.to_node_key)
+        )
+
+    return (
+        <div
+            className="
+                mt-6
+                overflow-hidden
+                rounded-2xl
+                border
+                border-zinc-800
+                bg-black
+            "
+        >
+            <button
+                type="button"
+                onClick={onToggle}
+                className="
+        flex
+        w-full
+        items-center
+        justify-between
+        border-b
+        border-zinc-800
+        px-4
+        py-3
+        text-left
+        transition-colors
+        hover:bg-white/[0.03]
+    "
+            >
+                <span className="text-sm font-black text-white">
+                    Graph View
+                </span>
+
+                <span
+                    className="
+            inline-flex
+            items-center
+            gap-3
+            text-xs
+            text-zinc-500
+        "
+                >
+                    Showing {related.length} nodes
+
+                    {isVisible ? (
+                        <ChevronUp size={16} />
+                    ) : (
+                        <ChevronDown size={16} />
+                    )}
+                </span>
+            </button>
+
+            {isVisible && (
+                <svg
+                    viewBox={`0 0 ${width} ${height}`}
+                    className="
+                        h-[280px]
+                        w-full
+                        max-w-full
+                        sm:h-[360px]
+                        md:h-[420px]
+                    "
+                    role="img"
+                >
+                    <defs>
+                        <filter
+                            id="graphGlow"
+                            x="-50%"
+                            y="-50%"
+                            width="200%"
+                            height="200%"
+                        >
+                            <feGaussianBlur
+                                stdDeviation="3"
+                                result="blur"
+                            />
+                            <feMerge>
+                                <feMergeNode in="blur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    {visibleEdges.map((edge) => {
+                        const targetKey =
+                            edge.from_node_key === centerNode?.node_key
+                                ? edge.to_node_key
+                                : edge.from_node_key
+
+                        const target =
+                            positionedNodes.find((item) =>
+                                item.node.node_key === targetKey
+                            )
+
+                        if (!target) {
+                            return null
+                        }
+
+                        return (
+                            <line
+                                key={edge.id}
+                                x1={centerX}
+                                y1={centerY}
+                                x2={target.x}
+                                y2={target.y}
+                                stroke={getNodeColor(target.node.node_type)}
+                                strokeOpacity="0.35"
+                                strokeWidth="1.5"
+                            />
+                        )
+                    })}
+
+                    <g filter="url(#graphGlow)">
+                        <circle
+                            cx={centerX}
+                            cy={centerY}
+                            r="54"
+                            fill="#171022"
+                            stroke="#8b5cf6"
+                            strokeWidth="2"
+                        />
+
+                        <text
+                            x={centerX}
+                            y={centerY - 5}
+                            textAnchor="middle"
+                            fill="#ffffff"
+                            fontSize="14"
+                            fontWeight="800"
+                        >
+                            {truncateLabel(formulaName, 24)}
+                        </text>
+
+                        <text
+                            x={centerX}
+                            y={centerY + 17}
+                            textAnchor="middle"
+                            fill="#a78bfa"
+                            fontSize="11"
+                            fontWeight="700"
+                        >
+                            Formula
+                        </text>
+                    </g>
+
+                    {positionedNodes.map((item) => {
+                        const label =
+                            getNodeLabel(item.node)
+
+                        const href =
+                            getNodeHref(item.node)
+
+                        const color =
+                            getNodeColor(item.node.node_type)
+
+                        const content = (
+                            <g>
+                                <circle
+                                    cx={item.x}
+                                    cy={item.y}
+                                    r="34"
+                                    fill="#050505"
+                                    stroke={color}
+                                    strokeOpacity="0.85"
+                                    strokeWidth="2"
+                                />
+
+                                {item.node.image ? (
+                                    <image
+                                        href={item.node.image}
+                                        x={item.x - 18}
+                                        y={item.y - 18}
+                                        width="36"
+                                        height="36"
+                                        preserveAspectRatio="xMidYMid meet"
+                                    />
+                                ) : (
+                                    <text
+                                        x={item.x}
+                                        y={item.y + 5}
+                                        textAnchor="middle"
+                                        fill={color}
+                                        fontSize="13"
+                                        fontWeight="900"
+                                    >
+                                        {item.node.node_type.slice(0, 2).toUpperCase()}
+                                    </text>
+                                )}
+
+                                <text
+                                    x={item.x}
+                                    y={item.y + 51}
+                                    textAnchor="middle"
+                                    fill="#ffffff"
+                                    fontSize="12"
+                                    fontWeight="800"
+                                >
+                                    {truncateLabel(label, 18)}
+                                </text>
+
+                                <text
+                                    x={item.x}
+                                    y={item.y + 68}
+                                    textAnchor="middle"
+                                    fill={color}
+                                    fontSize="10"
+                                    fontWeight="700"
+                                >
+                                    {formatNodeType(item.node.node_type)}
+                                </text>
+
+                                <title>
+                                    {label} - {formatNodeType(item.node.node_type)}
+                                </title>
+                            </g>
+                        )
+
+                        if (!href) {
+                            return (
+                                <g key={item.node.node_key}>
+                                    {content}
+                                </g>
+                            )
+                        }
+
+                        return (
+                            <a
+                                key={item.node.node_key}
+                                href={href}
+                            >
+                                {content}
+                            </a>
+                        )
+                    })}
+                </svg>
+            )}
+        </div>
+    )
+}
+
 function isCenterNode(
     node: FormulaGraphNode,
     formulaId: string
@@ -85,10 +409,16 @@ function isCenterNode(
 
 export default function FormulaGraphPanel({
     formulaId,
-    formulaName
+    formulaName,
+    id,
 }: Props) {
     const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080"
+
+    const [
+        isGraphVisible,
+        setIsGraphVisible
+    ] = useState(true)
 
     const [
         summary,
@@ -318,15 +648,22 @@ export default function FormulaGraphPanel({
 
     return (
         <section
+            id={id}
             className="
-                mt-8
-                rounded-3xl
-                border
-                border-zinc-800
-                bg-zinc-950/40
-                p-4
-                md:p-6
-            "
+    mt-8
+    w-full
+    max-w-full
+    min-w-0
+    scroll-mt-24
+    overflow-hidden
+    rounded-3xl
+    border
+    border-zinc-800
+    bg-zinc-950/40
+    p-3
+    sm:p-4
+    md:p-6
+"
         >
             <div
                 className="
@@ -548,12 +885,23 @@ export default function FormulaGraphPanel({
                 </div>
             )}
 
+            {graph && graph.nodes.length > 1 && (
+                <FormulaGraphCanvas
+                    graph={graph}
+                    formulaId={formulaId}
+                    formulaName={formulaName}
+                    isVisible={isGraphVisible}
+                    onToggle={() => setIsGraphVisible((value) => !value)}
+                />
+            )}
+
             <div
                 className="
                     mt-6
                     grid
                     gap-4
-                    lg:grid-cols-[280px_1fr]
+                    grid-cols-1
+                    xl:grid-cols-[280px_minmax(0,1fr)]  
                 "
             >
                 <div
@@ -742,7 +1090,8 @@ export default function FormulaGraphPanel({
                             className="
                                 grid
                                 gap-3
-                                sm:grid-cols-2
+                                grid-cols-1
+                                md:grid-cols-2
                                 xl:grid-cols-3
                             "
                         >
@@ -755,6 +1104,7 @@ export default function FormulaGraphPanel({
                                         className="
                                             flex
                                             min-h-[86px]
+                                            min-w-0
                                             gap-3
                                             rounded-2xl
                                             border
@@ -801,10 +1151,10 @@ export default function FormulaGraphPanel({
                                         <div className="min-w-0">
                                             <p
                                                 className="
-                                                    line-clamp-2
-                                                    text-sm
+                                                        text-sm
                                                     font-black
                                                     text-white
+                                                    [overflow-wrap:anywhere]
                                                 "
                                             >
                                                 {getNodeLabel(node)}
@@ -891,21 +1241,26 @@ export default function FormulaGraphPanel({
                                 <div
                                     key={edge.id}
                                     className="
-                                        rounded-xl
-                                        border
-                                        border-zinc-800
-                                        bg-zinc-950
-                                        px-3
-                                        py-2
-                                        text-xs
-                                        text-zinc-400
-                                    "
+        flex
+        flex-wrap
+        gap-x-2
+        gap-y-1
+        rounded-xl
+        border
+        border-zinc-800
+        bg-zinc-950
+        px-3
+        py-2
+        text-xs
+        text-zinc-400
+        [overflow-wrap:anywhere]
+    "
                                 >
                                     <span className="font-semibold text-zinc-200">
                                         {fromNode ? getNodeLabel(fromNode) : edge.from_node_key}
                                     </span>
 
-                                    <span className="mx-2 text-violet-300">
+                                    <span className="break-all text-violet-300">
                                         {edge.edge_type}
                                     </span>
 

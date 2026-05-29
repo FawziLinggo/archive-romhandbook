@@ -67,22 +67,27 @@ export default function FormulaToolbar({
 
         <div
             className="
-                flex
-                items-center
-                justify-between
-
-                px-5
-                py-4
-            "
+        flex
+        min-w-0
+        flex-col
+        gap-3
+        px-4
+        py-4
+        sm:flex-row
+        sm:items-center
+        sm:justify-between
+        sm:px-5
+    "
         >
 
             {/* LEFT */}
             <div
                 className="
-                    flex
-                    items-center
-                    gap-4
-                "
+        flex
+        min-w-0
+        items-center
+        gap-4
+    "
             >
 
                 {/* WINDOW DOTS */}
@@ -120,6 +125,8 @@ export default function FormulaToolbar({
                 {/* FILE NAME */}
                 <span
                     className={`
+                        min-w-0
+                        truncate
                         text-sm
 
                         ${isLight
