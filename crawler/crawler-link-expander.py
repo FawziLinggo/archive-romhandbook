@@ -916,6 +916,10 @@ def process_path(conn, session, path, source_table, source_id, dry_run):
     if path.startswith("/things/"):
         table, detected_type, badges = classify_thing(soup)
 
+        # skip if badges null or empty
+        if not badges:
+            return "skip" 
+
         if not table:
             name = first_text(
                 soup,
