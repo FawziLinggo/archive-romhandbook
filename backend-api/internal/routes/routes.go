@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend-api/configs"
-	adminapp "backend-api/internal/app/admin"
 	"backend-api/internal/app/auth"
 	"backend-api/internal/app/comments"
+	"backend-api/internal/app/points"
 	"backend-api/internal/app/profile"
 	"backend-api/internal/app/reports"
 	"backend-api/internal/handlers"
@@ -372,10 +372,23 @@ func SetupRoutes(
 		dataHealthHandler.GetDataHealthDashboard,
 	)
 
-	reportHandler :=
-		reports.NewHandler(
-			appDB,
+	pointRepository :=
+		points.NewRepository(appDB)
+
+	pointService :=
+		points.NewService(pointRepository)
+
+	reportRepository :=
+		reports.NewRepository(appDB)
+
+	reportService :=
+		reports.NewService(
+			reportRepository,
+			pointService,
 		)
+
+	reportHandler :=
+		reports.NewHandler(reportService)
 
 	api.GET(
 		"/me/reports",
@@ -402,17 +415,14 @@ func SetupRoutes(
 		reportHandler.DeleteReport,
 	)
 
-	adminReportHandler :=
-		adminapp.NewReportsHandler(appDB)
-
 	api.GET(
 		"/admin/reports",
-		adminReportHandler.ListReports,
+		reportHandler.ListAdminReports,
 	)
 
 	api.PATCH(
 		"/admin/reports/:id/status",
-		adminReportHandler.UpdateReportStatus,
+		reportHandler.UpdateAdminReportStatus,
 	)
 
 	commentHandler :=

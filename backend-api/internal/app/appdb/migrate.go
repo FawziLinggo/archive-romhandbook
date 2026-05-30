@@ -152,6 +152,61 @@ func Migrate(db *sql.DB) error {
 			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
 		);
 		`,
+
+		`
+			CREATE TABLE IF NOT EXISTS point_rules (
+				code TEXT PRIMARY KEY,
+				label TEXT NOT NULL,
+				points INTEGER NOT NULL,
+				enabled INTEGER NOT NULL DEFAULT 1,
+				created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+			);
+			`,
+
+		`
+			INSERT OR IGNORE INTO point_rules (
+				code,
+				label,
+				points
+			)
+			VALUES
+				('comment_activity', 'Comment activity', 1),
+				('bug_report_accepted', 'Accepted bug report', 10),
+				('bug_report_fixed', 'Fixed confirmed issue', 25),
+				('feature_request_accepted', 'Accepted feature request', 10);
+			`,
+
+		`
+			CREATE UNIQUE INDEX IF NOT EXISTS idx_user_points_ledger_unique_source
+			ON user_points_ledger(user_id, reason, source_type, source_id);
+			`,
+
+		`
+		CREATE TABLE IF NOT EXISTS rank_rules (
+			rank_name TEXT PRIMARY KEY,
+			min_points INTEGER NOT NULL,
+			sort_order INTEGER NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		`,
+
+		`
+		INSERT OR IGNORE INTO rank_rules (
+			rank_name,
+			min_points,
+			sort_order
+		)
+		VALUES
+			('Novice', 0, 1),
+			('Adventurer', 25, 2),
+			('Guardian', 100, 3),
+			('Scholar', 250, 4),
+			('Archivist', 500, 5),
+			('Rune Keeper', 1000, 6),
+			('Legend', 2000, 7);
+		`,
 	}
 
 	for _, statement := range statements {

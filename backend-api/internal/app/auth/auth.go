@@ -441,13 +441,11 @@ func (handler *Handler) upsertDiscordUser(
 			UPDATE users
 			SET
 				email = ?,
-				display_name = ?,
 				avatar_url = ?,
 				updated_at = CURRENT_TIMESTAMP
 			WHERE id = ?
 			`,
 			emailValue,
-			displayName,
 			avatarValue,
 			userID,
 		)
