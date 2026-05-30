@@ -2,8 +2,9 @@ import { notFound } from "next/navigation"
 
 import MonsterDetail from "@/components/monsters/MonsterDetail"
 
+import ApiErrorState from "@/components/common/ApiErrorState"
+import { serverApiFetch } from "@/lib/server-api"
 import type {
-    ApiResponse,
     MonsterDetail as MonsterDetailType
 } from "@/lib/types/Monster"
 
@@ -21,29 +22,22 @@ export default async function MonsterDetailPage({
     const { slug } =
         await params
 
-    const API_URL =
-        process.env.NEXT_PUBLIC_API_URL
-
-    const res =
-        await fetch(
-            `${API_URL}/api/v1/monsters/${slug}`,
-            {
-                next: {
-                    revalidate: 60
-                }
-            }
+    const result =
+        await serverApiFetch<MonsterDetailType>(
+            `/api/v1/monsters/${slug}`
         )
 
-    if (!res.ok) {
-
-        notFound()
+    if (result.error || !result.data) {
+        return (
+            <ApiErrorState
+                error={result.error || "server_error"}
+                backHref="/monsters"
+            />
+        )
     }
 
-    const response =
-        await res.json() as ApiResponse<MonsterDetailType>
-
     const monster =
-        response.data
+        result.data
 
     if (!monster) {
 

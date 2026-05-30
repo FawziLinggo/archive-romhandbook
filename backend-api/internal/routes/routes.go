@@ -306,7 +306,6 @@ func SetupRoutes(
 	router.GET(
 		"/api/v1/graph/nodes/:node_type/:ref_id/relations",
 		graphLimit,
-		requireAuth(appDB),
 		formulaHandler.GetFormulaGraphNodeRelations,
 	)
 

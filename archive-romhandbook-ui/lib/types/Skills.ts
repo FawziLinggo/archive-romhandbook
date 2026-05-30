@@ -1,5 +1,4 @@
 export type Skill = {
-
     id: string
 
     detail_url: string
@@ -19,6 +18,8 @@ export type Skill = {
     range_value: string | null
 
     cast_time: string | null
+
+    fixed_cast_time: string | null
 
     description: string | null
 }
@@ -51,3 +52,11 @@ export type SkillLevel = {
 
     raw_tags: string | null
 }
+
+export type SkillDetail =
+    Skill & {
+        aesir_raw: string | null
+        formula_raw: string | null
+        raw_html: string | null
+        levels: SkillLevel[]
+    }

@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation"
 
 import type {
     PetDetail
@@ -12,7 +11,9 @@ import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 
 import DetailContainer from "@/components/layout/DetailContainer"
 
+import ApiErrorState from "@/components/common/ApiErrorState"
 import PetSkills from "@/components/pets/PetSkills"
+import { serverApiFetch } from "@/lib/server-api"
 
 export default async function PetDetailPage({
 
@@ -38,40 +39,23 @@ export default async function PetDetailPage({
     // API
     // =====================
 
-    const API_URL =
-        process.env.NEXT_PUBLIC_API_URL
 
-    // =====================
-    // FETCH
-    // =====================
-
-    const res =
-        await fetch(
-
-            `${API_URL}/api/v1/pets/${slug}`,
-
-            {
-                next: {
-
-                    revalidate: 60
-                }
-            }
+    const result =
+        await serverApiFetch<PetDetail>(
+            `/api/v1/pets/${slug}`
         )
 
-    // =====================
-    // NOT FOUND
-    // =====================
-
-    if (!res.ok) {
-
-        notFound()
+    if (result.error || !result.data) {
+        return (
+            <ApiErrorState
+                error={result.error || "server_error"}
+                backHref="/pets"
+            />
+        )
     }
 
-    const response =
-        await res.json()
-
     const pet =
-        response.data as PetDetail
+        result.data
 
     // =====================
     // PARSE SKILLS

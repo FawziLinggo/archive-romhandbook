@@ -13,12 +13,12 @@ import {
     notFound
 } from "next/navigation"
 
+import ApiErrorState from "@/components/common/ApiErrorState"
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 import DetailContainer from "@/components/layout/DetailContainer"
-import {
-    apiFetch
-} from "@/lib/api"
+import { serverApiFetch } from "@/lib/server-api"
 import type {
+    SkillDetail,
     SkillLevel
 } from "@/lib/types/Skills"
 import { assetUrl } from "@/lib/utils"
@@ -52,24 +52,29 @@ export default async function SkillDetailPage({
     // GET SKILL
     // =====================
 
-    let skill = null
 
-    try {
 
-        const response =
-            await apiFetch<any>(
+    const result =
+        await serverApiFetch<SkillDetail>(
+            `/api/v1/skills/${slug}`
+        )
 
-                `/api/v1/skills/${slug}`
-
-            )
-
-        skill =
-            response.data
-
-    } catch {
-
+    if (result.error === "not_found") {
         notFound()
     }
+
+    if (result.error || !result.data) {
+        return (
+            <ApiErrorState
+                error={result.error || "server_error"}
+                backHref="/skills"
+            />
+        )
+    }
+
+    const skill =
+        result.data
+
 
     // =====================
     // NOT FOUND

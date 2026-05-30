@@ -36,9 +36,12 @@ import type {
     MountDetail as MountDetailType
 } from "@/lib/types/Mount"
 
+import ApiErrorState from "@/components/common/ApiErrorState"
+import { serverApiFetchEnvelope } from "@/lib/server-api"
 import type {
     PetEgg
 } from "@/lib/types/Pets"
+import { notFound } from "next/dist/client/components/navigation"
 
 type ThingResponse<T> = {
 
@@ -67,30 +70,26 @@ export default async function ThingPage({
     const id =
         slug.split("-").pop() || ""
 
-    const API_URL =
-        process.env.NEXT_PUBLIC_API_URL
-
-    const thingRes =
-        await fetch(
-            `${API_URL}/api/v1/things/${id}`,
-            {
-                next: {
-                    revalidate: 60
-                }
-            }
+    const result =
+        await serverApiFetchEnvelope<ThingResponse<unknown>>(
+            `/api/v1/things/${id}`
         )
 
-    if (!thingRes.ok) {
+    if (result.error === "not_found") {
+        notFound()
+    }
 
+    if (result.error || !result.data) {
         return (
-            <div>
-                Not Found
-            </div>
+            <ApiErrorState
+                error={result.error || "server_error"}
+                backHref="/"
+            />
         )
     }
 
     const thingResponse =
-        await thingRes.json() as ThingResponse<unknown>
+        result.data
 
     switch (thingResponse.type) {
 

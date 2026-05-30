@@ -2,8 +2,9 @@ import { notFound } from "next/navigation"
 
 import BuffDetail from "@/components/buffs/BuffDetail"
 
+import ApiErrorState from "@/components/common/ApiErrorState"
+import { serverApiFetch } from "@/lib/server-api"
 import type {
-    ApiResponse,
     BuffDetail as BuffDetailType
 } from "@/lib/types/Buff"
 
@@ -21,29 +22,23 @@ export default async function BuffPage({
     const { slug } =
         await params
 
-    const API_URL =
-        process.env.NEXT_PUBLIC_API_URL
 
-    const res =
-        await fetch(
-            `${API_URL}/api/v1/buffs/${slug}`,
-            {
-                next: {
-                    revalidate: 60
-                }
-            }
+    const result =
+        await serverApiFetch<BuffDetailType>(
+            `/api/v1/buffs/${slug}`
         )
 
-    if (!res.ok) {
-
-        notFound()
+    if (result.error || !result.data) {
+        return (
+            <ApiErrorState
+                error={result.error || "server_error"}
+                backHref="/buffs"
+            />
+        )
     }
 
-    const response =
-        await res.json() as ApiResponse<BuffDetailType>
-
     const buff =
-        response.data
+        result.data
 
     if (!buff) {
 

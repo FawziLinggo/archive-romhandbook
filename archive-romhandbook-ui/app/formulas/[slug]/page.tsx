@@ -5,9 +5,10 @@ import { notFound } from "next/navigation"
 
 
 
+import ApiErrorState from "@/components/common/ApiErrorState"
 import FormulaGraphJumpButton from "@/components/formulas/FormulaGraphJumpButton"
+import { serverApiFetch } from "@/lib/server-api"
 import type {
-    ApiResponse,
     Formula
 } from "@/lib/types/Formula"
 
@@ -30,26 +31,26 @@ export default async function FormulaDetailPage(
     const API_URL =
         process.env.NEXT_PUBLIC_API_URL
 
-    const res =
-        await fetch(
-            `${API_URL}/api/v1/formulas/${slug}`,
-            {
-                next: {
-                    revalidate: 60
-                }
-            }
+    const result =
+        await serverApiFetch<Formula>(
+            `/api/v1/formulas/${slug}`
         )
 
-    if (!res.ok) {
-
+    if (result.error === "not_found") {
         notFound()
     }
 
-    const response =
-        await res.json() as ApiResponse<Formula>
+    if (result.error || !result.data) {
+        return (
+            <ApiErrorState
+                error={result.error || "server_error"}
+                backHref="/formulas"
+            />
+        )
+    }
 
     const formula =
-        response.data
+        result.data
 
     if (!formula) {
 

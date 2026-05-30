@@ -1,10 +1,10 @@
 import Link from "next/link"
-import { notFound } from "next/navigation"
 
 import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 
+import ApiErrorState from "@/components/common/ApiErrorState"
+import { serverApiFetch } from "@/lib/server-api"
 import type {
-    ApiResponse,
     JobDetail,
     JobRelation,
     JobRune,
@@ -418,29 +418,22 @@ export default async function JobDetailPage({
         slug
     } = await params
 
-    const API_URL =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "http://127.0.0.1:8080"
-
-    const res =
-        await fetch(
-            `${API_URL}/api/v1/jobs/${slug}`,
-            {
-                next: {
-                    revalidate: 60
-                }
-            }
+    const result =
+        await serverApiFetch<JobDetail>(
+            `/api/v1/jobs/${slug}`
         )
 
-    if (!res.ok) {
-        notFound()
+    if (result.error || !result.data) {
+        return (
+            <ApiErrorState
+                error={result.error || "server_error"}
+                backHref="/jobs"
+            />
+        )
     }
 
-    const response =
-        await res.json() as ApiResponse<JobDetail>
-
     const job =
-        response.data
+        result.data
 
     const previous =
         job.relations.filter(
