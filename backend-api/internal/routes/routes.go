@@ -12,8 +12,23 @@ import (
 	"backend-api/internal/app/points"
 	"backend-api/internal/app/profile"
 	"backend-api/internal/app/reports"
+	"backend-api/internal/app/session"
 	"backend-api/internal/handlers"
 )
+
+func requireAuth(appDB *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_, ok :=
+			session.RequireUserID(c, appDB)
+
+		if !ok {
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func SetupRoutes(
 	router *gin.Engine,
@@ -198,11 +213,13 @@ func SetupRoutes(
 
 	router.GET(
 		"/api/v1/graph/meta",
+		requireAuth(appDB),
 		formulaHandler.GetFormulaGraphMeta,
 	)
 
 	router.GET(
 		"/api/v1/graph/search/nodes",
+		requireAuth(appDB),
 		formulaHandler.SearchFormulaGraphNodes,
 	)
 
@@ -370,6 +387,7 @@ func SetupRoutes(
 
 	router.GET(
 		"/api/v1/data-health/dashboard",
+		requireAuth(appDB),
 		dataHealthHandler.GetDataHealthDashboard,
 	)
 

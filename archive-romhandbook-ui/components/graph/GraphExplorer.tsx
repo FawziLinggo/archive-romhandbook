@@ -2,23 +2,32 @@
 
 import Link from "next/link"
 
+
 import {
     ExternalLink,
     GitBranch,
     Loader2,
+    Lock,
+    LogIn,
     Plus,
     RefreshCw,
     Search,
     X
 } from "lucide-react"
 
-
-
 import {
+    useCallback,
     useEffect,
     useMemo,
     useState
 } from "react"
+
+import {
+    useAuth
+} from "@/contexts/AuthContext"
+
+
+
 
 import {
     Background,
@@ -637,6 +646,55 @@ export default function GraphExplorer() {
     const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080"
 
+    const {
+        loginWithDiscord
+    } = useAuth()
+
+    const [
+        authRequired,
+        setAuthRequired
+    ] = useState(false)
+
+    const [
+        graphError,
+        setGraphError
+    ] = useState<string | null>(null)
+
+    const readGraphResponse =
+        useCallback(
+            async <T,>(
+                response: Response
+            ): Promise<T | null> => {
+                const json =
+                    await response
+                        .json()
+                        .catch(
+                            () => null
+                        )
+
+                if (response.status === 401) {
+                    setAuthRequired(true)
+                    setGraphError(null)
+
+                    return null
+                }
+
+                if (!response.ok) {
+                    setAuthRequired(false)
+
+                    throw new Error(
+                        json?.message || "Graph request failed"
+                    )
+                }
+
+                setAuthRequired(false)
+                setGraphError(null)
+
+                return json as T
+            },
+            []
+        )
+
     const [
         expandNodeFilter,
         setExpandNodeFilter
@@ -744,20 +802,41 @@ export default function GraphExplorer() {
 
     useEffect(() => {
         async function loadMeta() {
-            const response =
-                await fetch(`${API_URL}/api/v1/graph/meta`)
+            try {
+                const response =
+                    await fetch(
+                        `${API_URL}/api/v1/graph/meta`,
+                        {
+                            credentials: "include"
+                        }
+                    )
 
-            const json =
-                await response.json() as ApiResponse<GraphMeta>
+                const json =
+                    await readGraphResponse<ApiResponse<GraphMeta>>(
+                        response
+                    )
 
-            setMeta(json.data)
+                if (!json) {
+                    return
+                }
+
+                setMeta(
+                    json.data
+                )
+            } catch (error) {
+                setGraphError(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to load graph metadata"
+                )
+            }
         }
 
         loadMeta()
     }, [
-        API_URL
+        API_URL,
+        readGraphResponse
     ])
-
     useEffect(() => {
         const timer =
             window.setTimeout(async () => {
@@ -778,21 +857,50 @@ export default function GraphExplorer() {
                     params.set("node_type", searchType)
                 }
 
-                const response =
-                    await fetch(`${API_URL}/api/v1/graph/search/nodes?${params.toString()}`)
+                try {
+                    const response =
+                        await fetch(
+                            `${API_URL}/api/v1/graph/search/nodes?${params.toString()}`,
+                            {
+                                credentials: "include"
+                            }
+                        )
 
-                const json =
-                    await response.json() as ApiResponse<FormulaGraphNode[]>
+                    const json =
+                        await readGraphResponse<ApiResponse<FormulaGraphNode[]>>(
+                            response
+                        )
 
-                setSearchResults(json.data)
-                setIsSearching(false)
+                    if (!json) {
+                        setSearchResults([])
+
+                        return
+                    }
+
+                    setSearchResults(
+                        Array.isArray(json.data)
+                            ? json.data
+                            : []
+                    )
+                } catch (error) {
+                    setSearchResults([])
+
+                    setGraphError(
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to search graph nodes"
+                    )
+                } finally {
+                    setIsSearching(false)
+                }
             }, 250)
 
         return () => window.clearTimeout(timer)
     }, [
         API_URL,
         query,
-        searchType
+        searchType,
+        readGraphResponse
     ])
 
     const nodes =
@@ -860,11 +968,22 @@ export default function GraphExplorer() {
 
         const response =
             await fetch(
-                `${API_URL}/api/v1/graph/nodes/${encodeURIComponent(node.node_type)}/${encodeURIComponent(node.ref_id)}/relations?${params.toString()}`
+                `${API_URL}/api/v1/graph/nodes/${encodeURIComponent(node.node_type)}/${encodeURIComponent(node.ref_id)}/relations?${params.toString()}`,
+                {
+                    credentials: "include"
+                }
             )
 
         const json =
-            await response.json() as ApiResponse<FormulaGraphNodeRelations>
+            await readGraphResponse<ApiResponse<FormulaGraphNodeRelations>>(
+                response
+            )
+
+        if (!json) {
+            setIsExpanding(false)
+
+            return
+        }
 
         const nextNodes =
             reset ? {} : { ...nodesByKey }
@@ -903,9 +1022,48 @@ export default function GraphExplorer() {
         setGraphHistory([])
     }
 
+    if (authRequired) {
+        return (
+            <div className="mx-auto flex min-h-[70vh] max-w-3xl items-center justify-center px-4">
+                <div className="w-full rounded-3xl border border-violet-500/30 bg-black p-6 shadow-2xl shadow-violet-950/20 sm:p-8">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-500/30 bg-violet-500/10 text-violet-200">
+                        <Lock size={24} />
+                    </div>
+
+                    <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-xs font-black text-violet-200">
+                        <GitBranch size={14} />
+                        Formula Graph Explorer
+                    </div>
+
+                    <h1 className="mt-5 text-3xl font-black leading-tight text-white sm:text-5xl">
+                        Login Required
+                    </h1>
+
+                    <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
+                        Graph Explorer is only available to authenticated users.
+                        Please login with your Discord account to access the graph data and start exploring the relations between formulas, skills, cards, equipment, buffs, and more.
+                    </p>
+
+                    <button
+                        type="button"
+                        onClick={loginWithDiscord}
+                        className="mt-7 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-violet-500/40 bg-violet-500/15 px-5 text-sm font-black text-violet-100 transition-colors hover:bg-violet-500/25 sm:w-auto"
+                    >
+                        <LogIn size={17} />
+                        Login Discord
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     return (
+
+
         <div className="mx-auto max-w-[1600px] space-y-6">
             <section className="rounded-3xl border border-zinc-800 bg-black p-4 sm:p-6">
+
+
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                         <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-xs font-black text-violet-200">
@@ -931,6 +1089,13 @@ export default function GraphExplorer() {
                         Reset Graph
                     </button>
                 </div>
+
+
+                {graphError && !authRequired && (
+                    <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-semibold text-red-100">
+                        {graphError}
+                    </div>
+                )}
 
                 <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px]">
                     <div className="relative">
@@ -963,7 +1128,7 @@ export default function GraphExplorer() {
                     </select>
                 </div>
 
-                {(isSearching || searchResults.length > 0) && (
+                {(isSearching || (searchResults?.length ?? 0) > 0) && (
                     <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
                         {isSearching && (
                             <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 text-sm text-zinc-400">
@@ -971,7 +1136,7 @@ export default function GraphExplorer() {
                             </div>
                         )}
 
-                        {searchResults.map((node) => (
+                        {(searchResults ?? []).map((node) => (
                             <button
                                 key={node.node_key}
                                 type="button"
