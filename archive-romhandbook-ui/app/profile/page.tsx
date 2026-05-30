@@ -475,6 +475,20 @@ export default function ProfilePage() {
                                 <span className="text-xs font-black text-emerald-300">
                                     +1
                                 </span>
+
+                            </div>
+
+                            <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-black px-3 py-2">
+
+
+                                <span className="text-xs font-bold text-zinc-400">
+                                    Deleting comments
+                                </span>
+
+                                <span className="text-xs font-black text-red-500">
+                                    -1
+                                </span>
+
                             </div>
 
                             <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-black px-3 py-2">

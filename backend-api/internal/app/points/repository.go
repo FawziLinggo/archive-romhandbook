@@ -74,18 +74,25 @@ func (repository *Repository) AddUserPoints(userID string, points int) error {
 
 	defer tx.Rollback()
 
-	var totalPoints int
+	var currentPoints int
 
 	err =
 		tx.QueryRow(`
-			SELECT points_total + ?
+			SELECT points_total
 			FROM user_profiles
 			WHERE user_id = ?
 			LIMIT 1
-		`, points, userID).Scan(&totalPoints)
+		`, userID).Scan(&currentPoints)
 
 	if err != nil {
 		return err
+	}
+
+	totalPoints :=
+		currentPoints + points
+
+	if totalPoints < 0 {
+		totalPoints = 0
 	}
 
 	var rankName string
@@ -137,4 +144,57 @@ func (repository *Repository) GetRankNameByPoints(points int) (string, error) {
 	}
 
 	return rankName, nil
+}
+
+func (repository *Repository) HasLedger(userID string, reason string, sourceType string, sourceID string) (bool, error) {
+	var total int
+
+	err :=
+		repository.DB.QueryRow(`
+			SELECT COUNT(*)
+			FROM user_points_ledger
+			WHERE user_id = ?
+			AND reason = ?
+			AND source_type = ?
+			AND source_id = ?
+		`, userID, reason, sourceType, sourceID).Scan(&total)
+
+	if err != nil {
+		return false, err
+	}
+
+	return total > 0, nil
+}
+
+func (repository *Repository) InsertLedgerWithReason(
+	userID string,
+	reason string,
+	sourceType string,
+	sourceID string,
+	points int,
+) (bool, error) {
+	result, err :=
+		repository.DB.Exec(`
+			INSERT OR IGNORE INTO user_points_ledger (
+				user_id,
+				points,
+				reason,
+				source_type,
+				source_id
+			)
+			VALUES (?, ?, ?, ?, ?)
+		`, userID, points, reason, sourceType, sourceID)
+
+	if err != nil {
+		return false, err
+	}
+
+	affected, err :=
+		result.RowsAffected()
+
+	if err != nil {
+		return false, err
+	}
+
+	return affected > 0, nil
 }

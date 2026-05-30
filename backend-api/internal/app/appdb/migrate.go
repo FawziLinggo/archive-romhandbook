@@ -192,6 +192,9 @@ func Migrate(db *sql.DB) error {
 		);
 		`,
 
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_user_points_ledger_unique_source
+ON user_points_ledger(user_id, reason, source_type, source_id);`,
+
 		`
 		INSERT OR IGNORE INTO rank_rules (
 			rank_name,

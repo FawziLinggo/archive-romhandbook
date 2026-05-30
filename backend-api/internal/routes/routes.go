@@ -425,8 +425,17 @@ func SetupRoutes(
 		reportHandler.UpdateAdminReportStatus,
 	)
 
+	commentRepository :=
+		comments.NewRepository(appDB)
+
+	commentService :=
+		comments.NewService(
+			commentRepository,
+			pointService,
+		)
+
 	commentHandler :=
-		comments.NewHandler(appDB)
+		comments.NewHandler(commentService)
 
 	api.GET(
 		"/comments",
