@@ -38,6 +38,7 @@ import type {
     FormulaGraphNode,
     FormulaGraphSummary
 } from "@/lib/types/Formula"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
     formulaId: string
@@ -176,7 +177,7 @@ function FormulaFlowNode({
             >
                 {node.image ? (
                     <img
-                        src={node.image}
+                        src={assetUrl(node.image)}
                         alt={getNodeLabel(node)}
                         className="h-8 w-8 object-contain"
                     />
@@ -1328,7 +1329,7 @@ export default function FormulaGraphPanel({
                                         >
                                             {node.image ? (
                                                 <img
-                                                    src={node.image}
+                                                    src={assetUrl(node.image)}
                                                     alt={getNodeLabel(node)}
                                                     className="
                                                         h-8

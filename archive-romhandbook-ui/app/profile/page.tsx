@@ -30,6 +30,7 @@ import type {
     PaginatedApiResponse,
     Profile
 } from "@/lib/types/Profile"
+import { assetUrl } from "@/lib/utils"
 
 function emptyToNull(value: string) {
     const trimmed =
@@ -57,17 +58,6 @@ function rankProgressPercent(
     )
 }
 
-function classImageUrl(image: string | null) {
-    if (!image) {
-        return null
-    }
-
-    if (image.startsWith("http")) {
-        return image
-    }
-
-    return image
-}
 
 export default function ProfilePage() {
     const API_URL =
@@ -464,7 +454,7 @@ export default function ProfilePage() {
                         <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950">
                             {profile.avatar_url ? (
                                 <img
-                                    src={profile.avatar_url}
+                                    src={assetUrl(profile.avatar_url)}
                                     alt={profile.display_name}
                                     className="h-full w-full object-cover"
                                 />
@@ -520,7 +510,7 @@ export default function ProfilePage() {
                             <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-zinc-800 bg-black">
                                 {profile.class_image ? (
                                     <img
-                                        src={classImageUrl(profile.class_image) || ""}
+                                        src={assetUrl(profile.class_image) || ""}
                                         alt={profile.class_name || "Class"}
                                         className="h-9 w-9 object-contain"
                                     />
@@ -734,7 +724,7 @@ export default function ProfilePage() {
                                     <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-black">
                                         {selectedJob.image ? (
                                             <img
-                                                src={classImageUrl(selectedJob.image) || ""}
+                                                src={assetUrl(selectedJob.image) || ""}
                                                 alt={selectedJob.name}
                                                 className="h-8 w-8 object-contain"
                                             />

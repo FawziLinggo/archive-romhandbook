@@ -11,6 +11,7 @@ import type {
     PetHeadwearUnlockItemDetail,
     ThingRelation
 } from "@/lib/types/Thing"
+import { assetUrl } from "@/lib/utils"
 
 type ArchiveThingType =
     | "furniture"
@@ -27,16 +28,6 @@ type ArchiveThingDetail =
 type Props = {
     type: ArchiveThingType
     detail: ArchiveThingDetail
-}
-
-function normalizeImage(image: string | null) {
-    if (!image) {
-        return "/placeholder.png"
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
 }
 
 function normalizeHref(href: string | null) {
@@ -191,7 +182,7 @@ function RelationCard({
                 "
             >
                 <img
-                    src={normalizeImage(relation.related_image)}
+                    src={assetUrl(relation.related_image)}
                     alt={relation.related_name || "Related item"}
                     className="
                         h-full
@@ -442,7 +433,7 @@ export default function ArchiveThingDetail({
                             "
                         >
                             <img
-                                src={normalizeImage(detail.image)}
+                                src={assetUrl(detail.image)}
                                 alt={detail.name}
                                 className="
                                     h-full

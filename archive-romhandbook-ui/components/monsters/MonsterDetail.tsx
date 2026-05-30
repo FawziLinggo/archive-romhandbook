@@ -7,6 +7,7 @@ import DetailContainer from "@/components/layout/DetailContainer"
 import type {
     MonsterDetail as MonsterDetailType
 } from "@/lib/types/Monster"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -24,19 +25,6 @@ type StatPair = {
     rightValue: string | number | null
 }
 
-function normalizeImage(
-    image: string | null
-) {
-
-    if (!image) {
-
-        return "/placeholder.png"
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
-}
 
 function displayValue(
     value: string | number | null
@@ -326,7 +314,7 @@ export default function MonsterDetail({
                         "
                     >
                         <Image
-                            src={normalizeImage(monster.image)}
+                            src={assetUrl(monster.image)}
                             alt={monster.name}
                             fill
                             sizes="160px"

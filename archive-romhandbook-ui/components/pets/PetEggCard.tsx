@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -85,7 +86,7 @@ export default function PetEggCard({
                     {pet.egg_image && (
 
                         <Image
-                            src={pet.egg_image}
+                            src={assetUrl(pet.egg_image)}
                             alt={pet.egg_name}
                             fill
                             sizes="80px"

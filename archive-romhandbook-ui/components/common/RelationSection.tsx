@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/utils"
 import Link from "next/link"
 
 type RelationItem = {
@@ -117,7 +118,7 @@ export default function RelationSection({
 
                                 {/* IMAGE */}
                                 <img
-                                    src={image}
+                                    src={assetUrl(image)}
                                     alt={name}
                                     className="
                                         w-10

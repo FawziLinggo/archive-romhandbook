@@ -3,6 +3,7 @@
 import {
     useSidebar
 } from "@/contexts/SidebarContext"
+import { assetUrl } from "@/lib/utils"
 
 import Link from "next/link"
 
@@ -360,7 +361,7 @@ export default function Navbar() {
                             </span>
 
                             <img
-                                src="/assets/items/item_100-80252528704f2cc2b9aac6d5a2c57ed219277038faab8648dbb7d73bd33894ec.png"
+                                src={assetUrl("/assets/items/item_100-80252528704f2cc2b9aac6d5a2c57ed219277038faab8648dbb7d73bd33894ec.png")}
                                 alt="Zeny"
                                 className="
                                     h-4

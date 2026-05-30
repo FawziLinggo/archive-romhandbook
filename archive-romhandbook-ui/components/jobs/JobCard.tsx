@@ -3,6 +3,7 @@ import Link from "next/link"
 import type {
     Job
 } from "@/lib/types/Job"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -54,7 +55,7 @@ export default function JobCard({
                 {job.image ? (
 
                     <img
-                        src={job.image}
+                        src={assetUrl(job.image)}
                         alt={job.name}
                         className="
                             h-8

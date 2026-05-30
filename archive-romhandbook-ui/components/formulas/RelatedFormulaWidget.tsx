@@ -43,6 +43,7 @@ import type {
     FormulaGraphNode,
     FormulaGraphNodeRelations
 } from "@/lib/types/Formula"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
     nodeType: string
@@ -404,7 +405,7 @@ function RelationFlowNode({
             >
                 {node.image ? (
                     <img
-                        src={node.image}
+                        src={assetUrl(node.image)}
                         alt={getNodeLabel(node)}
                         className="h-8 w-8 object-contain"
                     />

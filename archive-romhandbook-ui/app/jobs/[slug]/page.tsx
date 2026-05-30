@@ -10,6 +10,7 @@ import type {
     JobRune,
     JobSkill
 } from "@/lib/types/Job"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -156,7 +157,7 @@ function SkillCard({
                     {skill.skill_image && (
 
                         <img
-                            src={skill.skill_image}
+                            src={assetUrl(skill.skill_image)}
                             alt={skill.skill_name || "Skill"}
                             className="
                                 h-8
@@ -320,7 +321,7 @@ function RuneCard({
                     {rune.rune_image && (
 
                         <img
-                            src={rune.rune_image}
+                            src={assetUrl(rune.rune_image)}
                             alt={rune.rune_name || "Rune"}
                             className="
                                 h-8
@@ -506,7 +507,7 @@ export default async function JobDetailPage({
                         {job.image && (
 
                             <img
-                                src={job.image}
+                                src={assetUrl(job.image)}
                                 alt={job.name}
                                 className="
                                     h-11

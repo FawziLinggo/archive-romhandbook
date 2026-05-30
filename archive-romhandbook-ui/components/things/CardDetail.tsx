@@ -4,6 +4,10 @@ import RelatedFormulaWidget from "@/components/formulas/RelatedFormulaWidget"
 
 import DetailContainer from "../layout/DetailContainer"
 
+import {
+    assetUrl
+} from "@/lib/utils"
+
 type Props = {
     card: any
     formulas: any[]
@@ -162,7 +166,7 @@ export default function CardDetail({
     "
                         >
                             <img
-                                src={card.image || "/placeholder.png"}
+                                src={assetUrl(card.image)}
                                 alt={card.name}
                                 className="
             aspect-square

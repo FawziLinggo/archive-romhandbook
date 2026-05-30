@@ -1,6 +1,7 @@
 import type {
     Mount
 } from "@/lib/types/Mount"
+import { assetUrl } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -145,8 +146,7 @@ export default function MountCard({
 
                         <Image
                             src={
-                                mount.image ||
-                                "/placeholder.png"
+                                assetUrl(mount.image)
                             }
                             alt={mount.name}
                             fill

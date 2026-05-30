@@ -6,6 +6,7 @@ import type {
 } from "@/lib/types/Equipment"
 
 import {
+    assetUrl,
     slugify
 } from "@/lib/utils"
 
@@ -36,17 +37,6 @@ function parseJsonArray(
     }
 }
 
-function normalizeImage(
-    image: string | null
-) {
-    if (!image) {
-        return "/placeholder.png"
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
-}
 
 function qualityClass(
     quality: string | null
@@ -177,7 +167,7 @@ export default function EquipmentCard({
                     "
                 >
                     <Image
-                        src={normalizeImage(equipment.image)}
+                        src={assetUrl(equipment.image)}
                         alt={equipment.name}
                         fill
                         sizes="64px"

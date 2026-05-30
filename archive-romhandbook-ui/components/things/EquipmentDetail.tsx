@@ -14,23 +14,12 @@ import type {
     EquipmentRelation,
     EquipmentTier
 } from "@/lib/types/Equipment"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
     equipment: EquipmentDetailType
 
-}
-
-function normalizeImage(
-    image: string | null
-) {
-    if (!image) {
-        return "/placeholder.png"
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
 }
 
 function slugify(
@@ -304,7 +293,7 @@ function RelationCard({
                 "
             >
                 <Image
-                    src={normalizeImage(relation.related_image)}
+                    src={assetUrl(relation.related_image)}
                     alt={relation.related_name || "Related item"}
                     fill
                     sizes="40px"
@@ -413,7 +402,7 @@ function CompactRelationGroup({
                             "
                         >
                             <Image
-                                src={normalizeImage(relation.related_image)}
+                                src={assetUrl(relation.related_image)}
                                 alt={relation.related_name || "Related item"}
                                 fill
                                 sizes="28px"
@@ -599,7 +588,7 @@ function EquipEffectItem({
                 "
             >
                 <Image
-                    src={normalizeImage(item.item_image)}
+                    src={assetUrl(item.item_image)}
                     alt={item.item_name || "Equip effect item"}
                     fill
                     sizes="28px"
@@ -779,7 +768,7 @@ export default function EquipmentDetail({
                                 "
                             >
                                 <Image
-                                    src={normalizeImage(equipment.image)}
+                                    src={assetUrl(equipment.image)}
                                     alt={equipment.name}
                                     fill
                                     sizes="176px"

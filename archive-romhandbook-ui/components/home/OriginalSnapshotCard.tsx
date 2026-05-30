@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 
 
+import { assetUrl } from "@/lib/utils"
 import {
     useEffect,
     useState
@@ -299,7 +300,7 @@ export default function OriginalSnapshotCard({
                         <div className="flex gap-4">
 
                             <img
-                                src={snapshot?.image}
+                                src={assetUrl(snapshot?.image)}
                                 alt={snapshot?.name}
                                 className="
                     h-24

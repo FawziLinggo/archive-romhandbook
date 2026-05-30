@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -211,7 +212,7 @@ export default function SkillCard({
                 >
 
                     <Image
-                        src={skill.image}
+                        src={assetUrl(skill.image)}
                         alt={skill.name}
                         fill
 

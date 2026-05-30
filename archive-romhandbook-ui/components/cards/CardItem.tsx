@@ -1,4 +1,4 @@
-import { slugify } from "@/lib/utils"
+import { assetUrl, slugify } from "@/lib/utils"
 import Link from "next/link"
 
 import type {
@@ -102,7 +102,7 @@ export default function CardItem({ card }: CardItemProps) {
                     >
 
                         <img
-                            src={card.image || "/placeholder.png"}
+                            src={assetUrl(card.image)}
                             alt={card.name}
                             className="
                             w-full

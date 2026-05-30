@@ -12,6 +12,7 @@ import {
 } from "react"
 
 import useDebounce from "@/components/search/useDebounce"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -40,18 +41,6 @@ type ApiResponse<T> = {
     meta: unknown
 }
 
-function normalizeImage(
-    image: string | null
-) {
-
-    if (!image) {
-        return null
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
-}
 
 export default function HomeGlobalSearch({
     onSearchActiveChange
@@ -273,7 +262,7 @@ export default function HomeGlobalSearch({
                                 {result.image ? (
 
                                     <img
-                                        src={normalizeImage(result.image) || ""}
+                                        src={assetUrl(result.image)}
                                         alt={result.label}
                                         className="
                                             h-8

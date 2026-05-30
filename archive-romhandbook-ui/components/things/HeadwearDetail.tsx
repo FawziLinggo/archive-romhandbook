@@ -6,6 +6,7 @@ import DetailContainer from "../layout/DetailContainer"
 import type {
     HeadwearDetail as HeadwearDetailType
 } from "@/lib/types/Headwear"
+import { assetUrl } from "@/lib/utils"
 import RelatedFormulaWidget from "../formulas/RelatedFormulaWidget"
 
 
@@ -34,18 +35,6 @@ function parseJsonArray(
     } catch {
         return []
     }
-}
-
-function normalizeImage(
-    image: string | null
-) {
-    if (!image) {
-        return "/placeholder.png"
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
 }
 
 function qualityClass(
@@ -312,7 +301,7 @@ export default function HeadwearDetail({
                                 "
                             >
                                 <Image
-                                    src={normalizeImage(headwear.image)}
+                                    src={assetUrl(headwear.image)}
                                     alt={headwear.name}
                                     fill
                                     sizes="160px"

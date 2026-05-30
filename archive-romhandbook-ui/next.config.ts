@@ -1,7 +1,22 @@
-import type { NextConfig } from "next";
+import type {
+  NextConfig
+} from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "assets.galauit.com"
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.discordapp.com"
+      }
+    ],
 
-export default nextConfig;
+    unoptimized: true
+  }
+}
+
+export default nextConfig

@@ -6,6 +6,7 @@ import type {
 } from "@/lib/types/Headwear"
 
 import {
+    assetUrl,
     slugify
 } from "@/lib/utils"
 
@@ -34,18 +35,6 @@ function parseJsonArray(
     } catch {
         return []
     }
-}
-
-function normalizeImage(
-    image: string | null
-) {
-    if (!image) {
-        return "/placeholder.png"
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
 }
 
 function qualityClass(
@@ -179,7 +168,7 @@ export default function HeadwearCard({
                     "
                 >
                     <Image
-                        src={normalizeImage(headwear.image)}
+                        src={assetUrl(headwear.image)}
                         alt={headwear.name}
                         fill
                         sizes="64px"

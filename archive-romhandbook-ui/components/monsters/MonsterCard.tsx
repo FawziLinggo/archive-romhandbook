@@ -4,6 +4,7 @@ import Link from "next/link"
 import type {
     Monster
 } from "@/lib/types/Monster"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -34,20 +35,6 @@ function elementClass(
         default:
             return "border-zinc-700 bg-zinc-900 text-zinc-300"
     }
-}
-
-function normalizeImage(
-    image: string | null
-) {
-
-    if (!image) {
-
-        return "/placeholder.png"
-    }
-
-    return image
-        .replace("https://romhandbook.com", "")
-        .replace("http://romhandbook.com", "")
 }
 
 function CompactStat({
@@ -177,7 +164,7 @@ export default function MonsterCard({
                         "
                     >
                         <Image
-                            src={normalizeImage(monster.image)}
+                            src={assetUrl(monster.image)}
                             alt={monster.name}
                             fill
                             sizes="64px"

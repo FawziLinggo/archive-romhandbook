@@ -8,6 +8,7 @@ import DetailContainer from "../layout/DetailContainer"
 import type {
     PetEgg
 } from "@/lib/types/Pets"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -77,7 +78,7 @@ export default function PetEggDetail({
                     >
 
                         <Image
-                            src={egg.image}
+                            src={assetUrl(egg.image)}
                             alt={egg.name}
                             fill
                             sizes="56px"
@@ -356,7 +357,7 @@ export default function PetEggDetail({
                                         >
 
                                             <Image
-                                                src={egg.pet_image}
+                                                src={assetUrl(egg.pet_image)}
                                                 alt={egg.pet_name || egg.name}
                                                 fill
                                                 sizes="56px"

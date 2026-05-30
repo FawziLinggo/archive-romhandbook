@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/utils"
 import Image from "next/image"
 
 const porings = [
@@ -91,7 +92,7 @@ export default function FloatingPorings() {
                     >
 
                         <Image
-                            src={poring.src}
+                            src={assetUrl(poring.src)}
                             alt="Poring"
                             fill
                             loading="eager"

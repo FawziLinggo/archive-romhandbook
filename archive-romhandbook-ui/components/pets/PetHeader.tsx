@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -126,7 +127,7 @@ export default function PetHeader({
                 >
 
                     <Image
-                        src={pet.image}
+                        src={assetUrl(pet.image)}
                         alt={pet.name}
                         fill
                         sizes="96px"
@@ -332,9 +333,9 @@ export default function PetHeader({
 
                                     <Image
                                         src={
-                                            pet.egg_image
+                                            assetUrl(pet.egg_image)
                                             ||
-                                            pet.image
+                                            assetUrl(pet.image)
                                         }
                                         alt={pet.egg_name}
                                         fill

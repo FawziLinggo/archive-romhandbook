@@ -4,6 +4,10 @@ import FormulaViewer from "@/components/common/FormulaViewer"
 import RomHtmlViewerToggle from "../common/RomHtmlViewerToggle"
 import DetailContainer from "../layout/DetailContainer"
 
+import {
+    assetUrl
+} from "@/lib/utils"
+
 type Props = {
 
     buff: any
@@ -62,10 +66,7 @@ export default function BuffDetail({
                     >
 
                         <Image
-                            src={
-                                buff.image ||
-                                "/placeholder.png"
-                            }
+                            src={assetUrl(buff.image)}
                             alt={buff.name}
                             fill
                             sizes="64px"

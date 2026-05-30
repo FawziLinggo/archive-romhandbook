@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { Buff } from "@/lib/types/Buff"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -124,7 +125,7 @@ export default function BuffCard({
                         {buff.image ? (
 
                             <Image
-                                src={buff.image}
+                                src={assetUrl(buff.image)}
                                 alt={buff.name}
                                 fill
                                 sizes="64px"

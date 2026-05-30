@@ -6,6 +6,7 @@ import DetailContainer from "../layout/DetailContainer"
 import type {
     MountDetail
 } from "@/lib/types/Mount"
+import { assetUrl } from "@/lib/utils"
 
 type Props = {
 
@@ -129,10 +130,7 @@ export default function MountDetail({
                     >
 
                         <Image
-                            src={
-                                mount.image ||
-                                "/placeholder.png"
-                            }
+                            src={assetUrl(mount.image)}
                             alt={mount.name}
                             fill
                             sizes="128px"

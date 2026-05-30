@@ -57,6 +57,7 @@ import type {
     FormulaGraphNode,
     FormulaGraphNodeRelations
 } from "@/lib/types/Formula"
+import { assetUrl } from "@/lib/utils"
 
 type GraphMeta = {
     node_types: {
@@ -390,7 +391,7 @@ function ArchiveGraphNode({
             >
                 {node.image ? (
                     <img
-                        src={node.image}
+                        src={assetUrl(node.image)}
                         alt={getNodeLabel(node)}
                         className="h-8 w-8 object-contain"
                     />
@@ -1145,7 +1146,7 @@ export default function GraphExplorer() {
                             >
                                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-800 bg-black">
                                     {node.image ? (
-                                        <img src={node.image} alt={getNodeLabel(node)} className="h-7 w-7 object-contain" />
+                                        <img src={assetUrl(node.image)} alt={getNodeLabel(node)} className="h-7 w-7 object-contain" />
                                     ) : (
                                         <span className="text-xs font-black text-violet-300">
                                             {nodeInitial(node.node_type)}
@@ -1220,7 +1221,7 @@ export default function GraphExplorer() {
                             <div className="flex items-center gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950">
                                     {selectedNode.image ? (
-                                        <img src={selectedNode.image} alt={getNodeLabel(selectedNode)} className="h-9 w-9 object-contain" />
+                                        <img src={assetUrl(selectedNode.image)} alt={getNodeLabel(selectedNode)} className="h-9 w-9 object-contain" />
                                     ) : (
                                         <span className="font-black text-violet-300">
                                             {nodeInitial(selectedNode.node_type)}

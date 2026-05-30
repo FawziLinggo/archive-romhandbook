@@ -2,6 +2,9 @@ type Props = {
     html: string
 }
 
+import {
+    assetUrl
+} from "@/lib/utils"
 export default function RomHtmlViewer({
     html
 }: Props) {
@@ -17,17 +20,17 @@ export default function RomHtmlViewer({
 
 <link
     rel="stylesheet"
-    href="/assets/romhandbook/application.css"
+href="${assetUrl("/assets/romhandbook/application.css")}"
 />
 
 <link
     rel="stylesheet"
-    href="/assets/romhandbook/tailwind.css"
+    href="${assetUrl("/assets/romhandbook/tailwind.css")}"
 />
 
 <link
     rel="stylesheet"
-    href="/assets/romhandbook/inter-font.css"
+    href="${assetUrl("/assets/romhandbook/romhandbook.css")}"
 />
 
                 <style>

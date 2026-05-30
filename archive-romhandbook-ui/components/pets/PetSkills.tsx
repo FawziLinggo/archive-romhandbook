@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -97,7 +98,7 @@ export default function PetSkills({
                         >
 
                             <Image
-                                src={skill.image}
+                                src={assetUrl(skill.image)}
                                 alt={skill.name}
                                 fill
                                 sizes="32px"

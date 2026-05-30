@@ -21,6 +21,7 @@ import {
 import type {
     SkillLevel
 } from "@/lib/types/Skills"
+import { assetUrl } from "@/lib/utils"
 
 
 type Props = {
@@ -121,7 +122,7 @@ export default async function SkillDetailPage({
 
                     {/* IMAGE */}
                     <img
-                        src={skill.image}
+                        src={assetUrl(skill.image) || ""}
                         alt={skill.name}
                         className="
                             h-24

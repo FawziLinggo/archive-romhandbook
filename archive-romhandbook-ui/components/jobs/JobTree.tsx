@@ -4,6 +4,7 @@ import type {
     Job
 } from "@/lib/types/Job"
 
+import { assetUrl } from "@/lib/utils"
 import {
     jobTrees,
     specialJobs
@@ -68,7 +69,7 @@ function JobNode({
                 {job.image && (
 
                     <img
-                        src={job.image}
+                        src={assetUrl(job.image)}
                         alt={job.name}
                         className="
                             h-6

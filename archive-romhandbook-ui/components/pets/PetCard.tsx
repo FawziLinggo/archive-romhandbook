@@ -4,6 +4,7 @@ import Link from "next/link"
 import type {
     Pet
 } from "@/lib/types/Pets"
+import { assetUrl } from "@/lib/utils"
 
 type PetSkill = {
 
@@ -95,7 +96,7 @@ export default function PetCard({
                     {pet.image && (
 
                         <Image
-                            src={pet.image}
+                            src={assetUrl(pet.image)}
                             alt={pet.name}
                             fill
                             sizes="80px"
@@ -272,7 +273,7 @@ export default function PetCard({
                         {pet.egg_image && (
 
                             <Image
-                                src={pet.egg_image}
+                                src={assetUrl(pet.egg_image)}
                                 alt={pet.egg_name || "Egg"}
                                 fill
                                 sizes="40px"
@@ -441,7 +442,7 @@ export default function PetCard({
                                         {skill.image && (
 
                                             <Image
-                                                src={skill.image}
+                                                src={assetUrl(skill.image)}
                                                 alt={skill.name}
                                                 fill
                                                 sizes="24px"
