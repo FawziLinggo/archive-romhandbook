@@ -11,6 +11,8 @@ import EquipmentDetail from "@/components/things/EquipmentDetail"
 
 import ArchiveThingDetail from "@/components/things/ArchiveThingDetail"
 
+import CommentsPanel from "@/components/comments/CommentsPanel"
+
 import type {
     CookingIngredientDetail,
     CraftingMaterialDetail,
@@ -107,10 +109,17 @@ export default async function ThingPage({
             }
 
             return (
-                <CardDetail
-                    card={card}
-                    formulas={card.formulas}
-                />
+                <>
+                    <CardDetail
+                        card={card}
+                        formulas={card.formulas}
+                    />
+
+                    <CommentsPanel
+                        targetType="card"
+                        targetId={card.id}
+                    />
+                </>
             )
         }
 
@@ -129,9 +138,16 @@ export default async function ThingPage({
             }
 
             return (
-                <PetEggDetail
-                    egg={egg}
-                />
+                <>
+                    <PetEggDetail
+                        egg={egg}
+                    />
+
+                    <CommentsPanel
+                        targetType="pet_egg"
+                        targetId={egg.id}
+                    />
+                </>
             )
         }
 
@@ -150,9 +166,16 @@ export default async function ThingPage({
             }
 
             return (
-                <MountDetail
-                    mount={mount}
-                />
+                <>
+                    <MountDetail
+                        mount={mount}
+                    />
+
+                    <CommentsPanel
+                        targetType="mount"
+                        targetId={mount.id}
+                    />
+                </>
             )
         }
 
@@ -171,9 +194,16 @@ export default async function ThingPage({
             }
 
             return (
-                <HeadwearDetail
-                    headwear={headwear}
-                />
+                <>
+                    <HeadwearDetail
+                        headwear={headwear}
+                    />
+
+                    <CommentsPanel
+                        targetType="headwear"
+                        targetId={headwear.id}
+                    />
+                </>
             )
         }
 
@@ -192,9 +222,16 @@ export default async function ThingPage({
             }
 
             return (
-                <EquipmentDetail
-                    equipment={equipment}
-                />
+                <>
+                    <EquipmentDetail
+                        equipment={equipment}
+                    />
+
+                    <CommentsPanel
+                        targetType="equipment"
+                        targetId={equipment.id}
+                    />
+                </>
             )
         }
 
@@ -212,10 +249,17 @@ export default async function ThingPage({
             }
 
             return (
-                <ArchiveThingDetail
-                    type="furniture"
-                    detail={furniture}
-                />
+                <>
+                    <ArchiveThingDetail
+                        type="furniture"
+                        detail={furniture}
+                    />
+
+                    <CommentsPanel
+                        targetType="furniture"
+                        targetId={furniture.id}
+                    />
+                </>
             )
         }
 
@@ -233,10 +277,17 @@ export default async function ThingPage({
             }
 
             return (
-                <ArchiveThingDetail
-                    type="cooking_ingredient"
-                    detail={ingredient}
-                />
+                <>
+                    <ArchiveThingDetail
+                        type="cooking_ingredient"
+                        detail={ingredient}
+                    />
+
+                    <CommentsPanel
+                        targetType="cooking_ingredient"
+                        targetId={ingredient.id}
+                    />
+                </>
             )
         }
 
@@ -254,10 +305,17 @@ export default async function ThingPage({
             }
 
             return (
-                <ArchiveThingDetail
-                    type="pet_headwear_unlock_item"
-                    detail={item}
-                />
+                <>
+                    <ArchiveThingDetail
+                        type="pet_headwear_unlock_item"
+                        detail={item}
+                    />
+
+                    <CommentsPanel
+                        targetType="pet_headwear_unlock_item"
+                        targetId={item.id}
+                    />
+                </>
             )
         }
 
@@ -275,10 +333,17 @@ export default async function ThingPage({
             }
 
             return (
-                <ArchiveThingDetail
-                    type="crafting_material"
-                    detail={material}
-                />
+                <>
+                    <ArchiveThingDetail
+                        type="crafting_material"
+                        detail={material}
+                    />
+
+                    <CommentsPanel
+                        targetType="crafting_material"
+                        targetId={material.id}
+                    />
+                </>
             )
         }
         default:

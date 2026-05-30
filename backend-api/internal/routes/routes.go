@@ -8,6 +8,7 @@ import (
 	"backend-api/configs"
 	adminapp "backend-api/internal/app/admin"
 	"backend-api/internal/app/auth"
+	"backend-api/internal/app/comments"
 	"backend-api/internal/app/profile"
 	"backend-api/internal/app/reports"
 	"backend-api/internal/handlers"
@@ -412,5 +413,28 @@ func SetupRoutes(
 	api.PATCH(
 		"/admin/reports/:id/status",
 		adminReportHandler.UpdateReportStatus,
+	)
+
+	commentHandler :=
+		comments.NewHandler(appDB)
+
+	api.GET(
+		"/comments",
+		commentHandler.ListComments,
+	)
+
+	api.POST(
+		"/comments",
+		commentHandler.CreateComment,
+	)
+
+	api.PATCH(
+		"/comments/:id",
+		commentHandler.UpdateComment,
+	)
+
+	api.DELETE(
+		"/comments/:id",
+		commentHandler.DeleteComment,
 	)
 }
