@@ -113,7 +113,8 @@ export default function ProfileReportsPage() {
     const {
         isLoading: isAuthLoading,
         isAuthenticated,
-        loginWithDiscord
+        loginWithDiscord,
+
     } = useAuth()
 
     const [
@@ -446,7 +447,6 @@ export default function ProfileReportsPage() {
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm font-bold text-zinc-300 hover:text-white"
                         >
                             <RefreshCw size={15} />
-                            Refresh
                         </button>
                     </div>
 

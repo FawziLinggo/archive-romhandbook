@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend-api/configs"
+	adminapp "backend-api/internal/app/admin"
 	"backend-api/internal/app/auth"
 	"backend-api/internal/app/profile"
 	"backend-api/internal/app/reports"
@@ -398,5 +399,18 @@ func SetupRoutes(
 	api.DELETE(
 		"/me/reports/:id",
 		reportHandler.DeleteReport,
+	)
+
+	adminReportHandler :=
+		adminapp.NewReportsHandler(appDB)
+
+	api.GET(
+		"/admin/reports",
+		adminReportHandler.ListReports,
+	)
+
+	api.PATCH(
+		"/admin/reports/:id/status",
+		adminReportHandler.UpdateReportStatus,
 	)
 }

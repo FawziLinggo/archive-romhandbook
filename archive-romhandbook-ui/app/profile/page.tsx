@@ -56,7 +56,8 @@ export default function ProfilePage() {
         process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080"
 
     const {
-        refreshUser
+        refreshUser,
+        user,
     } = useAuth()
 
     const [
@@ -296,6 +297,16 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
+
+                        {user?.role?.toLowerCase() === "admin" && (
+                            <Link
+                                href="/admin/reports"
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-violet-500/30 bg-violet-500/10 px-4 text-sm font-bold text-violet-200 hover:bg-violet-500/20"
+                            >
+                                <Shield size={15} />
+                                Review Bug
+                            </Link>
+                        )}
                         <Link
                             href="/profile/reports"
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 text-sm font-bold text-red-200 hover:bg-red-500/20"
@@ -310,7 +321,6 @@ export default function ProfilePage() {
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm font-bold text-zinc-300 hover:text-white"
                         >
                             <RefreshCw size={15} />
-                            Refresh
                         </button>
                     </div>
                 </div>
