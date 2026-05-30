@@ -10,6 +10,7 @@ import {
 
 import {
     Bug,
+    Lightbulb,
     Loader2,
     RefreshCw,
     Save,
@@ -313,32 +314,126 @@ export default function ProfilePage() {
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-3 sm:items-end">
+                        {user?.role === "admin" && (
+                            <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
+                                <Link
+                                    href="/admin/reports"
+                                    className="
+                    inline-flex
+                    h-10
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-2xl
+                    border
+                    border-violet-500/30
+                    bg-violet-500/10
+                    px-4
+                    text-sm
+                    font-bold
+                    text-violet-200
+                    hover:bg-violet-500/20
+                "
+                                >
+                                    <Shield size={15} />
+                                    Review Bugs
+                                </Link>
 
-                        {user?.role?.toLowerCase() === "admin" && (
-                            <Link
-                                href="/admin/reports"
-                                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-violet-500/30 bg-violet-500/10 px-4 text-sm font-bold text-violet-200 hover:bg-violet-500/20"
-                            >
-                                <Shield size={15} />
-                                Review Bug
-                            </Link>
+                                <Link
+                                    href="/admin/requests"
+                                    className="
+                    inline-flex
+                    h-10
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-2xl
+                    border
+                    border-cyan-500/30
+                    bg-cyan-500/10
+                    px-4
+                    text-sm
+                    font-bold
+                    text-cyan-200
+                    hover:bg-cyan-500/20
+                "
+                                >
+                                    <Lightbulb size={15} />
+                                    Review Requests
+                                </Link>
+                            </div>
                         )}
-                        <Link
-                            href="/profile/reports"
-                            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 text-sm font-bold text-red-200 hover:bg-red-500/20"
-                        >
-                            <Bug size={15} />
-                            Report Bug
-                        </Link>
 
-                        <button
-                            type="button"
-                            onClick={loadProfile}
-                            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm font-bold text-zinc-300 hover:text-white"
-                        >
-                            <RefreshCw size={15} />
-                        </button>
+                        <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
+                            <Link
+                                href="/profile/reports"
+                                className="
+                inline-flex
+                h-10
+                items-center
+                justify-center
+                gap-2
+                rounded-2xl
+                border
+                border-red-500/30
+                bg-red-500/10
+                px-4
+                text-sm
+                font-bold
+                text-red-200
+                hover:bg-red-500/20
+            "
+                            >
+                                <Bug size={15} />
+                                Report Bug
+                            </Link>
+
+                            <Link
+                                href="/profile/requests"
+                                className="
+                inline-flex
+                h-10
+                items-center
+                justify-center
+                gap-2
+                rounded-2xl
+                border
+                border-violet-500/30
+                bg-violet-500/10
+                px-4
+                text-sm
+                font-bold
+                text-violet-200
+                hover:bg-violet-500/20
+            "
+                            >
+                                <Lightbulb size={15} />
+                                Request Feature
+                            </Link>
+
+                            <button
+                                type="button"
+                                onClick={loadProfile}
+                                className="
+                inline-flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-2xl
+                border
+                border-zinc-800
+                bg-zinc-950
+                text-zinc-300
+                hover:text-white
+            "
+                                aria-label="Refresh profile"
+                                title="Refresh profile"
+                            >
+                                <RefreshCw size={15} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>

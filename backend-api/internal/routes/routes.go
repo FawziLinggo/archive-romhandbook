@@ -8,6 +8,7 @@ import (
 	"backend-api/configs"
 	"backend-api/internal/app/auth"
 	"backend-api/internal/app/comments"
+	featureRequests "backend-api/internal/app/feature_requests"
 	"backend-api/internal/app/points"
 	"backend-api/internal/app/profile"
 	"backend-api/internal/app/reports"
@@ -378,6 +379,18 @@ func SetupRoutes(
 	pointService :=
 		points.NewService(pointRepository)
 
+	featureRequestRepository :=
+		featureRequests.NewRepository(appDB)
+
+	featureRequestService :=
+		featureRequests.NewService(
+			featureRequestRepository,
+			pointService,
+		)
+
+	featureRequestHandler :=
+		featureRequests.NewHandler(featureRequestService)
+
 	reportRepository :=
 		reports.NewRepository(appDB)
 
@@ -455,5 +468,40 @@ func SetupRoutes(
 	api.DELETE(
 		"/comments/:id",
 		commentHandler.DeleteComment,
+	)
+
+	api.GET(
+		"/me/feature-requests",
+		featureRequestHandler.ListUser,
+	)
+
+	api.POST(
+		"/me/feature-requests",
+		featureRequestHandler.Create,
+	)
+
+	api.GET(
+		"/me/feature-requests/:id",
+		featureRequestHandler.GetUser,
+	)
+
+	api.PATCH(
+		"/me/feature-requests/:id",
+		featureRequestHandler.Update,
+	)
+
+	api.DELETE(
+		"/me/feature-requests/:id",
+		featureRequestHandler.Delete,
+	)
+
+	api.GET(
+		"/admin/feature-requests",
+		featureRequestHandler.ListAdmin,
+	)
+
+	api.PATCH(
+		"/admin/feature-requests/:id/status",
+		featureRequestHandler.UpdateAdminStatus,
 	)
 }
