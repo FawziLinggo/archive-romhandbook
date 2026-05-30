@@ -5,14 +5,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"backend-api/configs"
+	"backend-api/internal/app/auth"
 	"backend-api/internal/handlers"
 )
 
 func SetupRoutes(
-
 	router *gin.Engine,
 	db *sql.DB,
-
+	appDB *sql.DB,
+	config *configs.Config,
 ) {
 
 	skillHandler :=
@@ -34,6 +36,35 @@ func SetupRoutes(
 		}
 
 	api := router.Group("/api/v1")
+
+	authHandler := auth.NewHandler(
+		appDB, auth.Config{
+			FrontendURL:  config.FrontendURL,
+			ClientID:     config.DiscordClientID,
+			ClientSecret: config.DiscordClientSecret,
+			RedirectURL:  config.DiscordRedirectURL,
+		},
+	)
+
+	api.GET(
+		"/auth/discord/login",
+		authHandler.DiscordLogin,
+	)
+
+	api.GET(
+		"/auth/discord/callback",
+		authHandler.DiscordCallback,
+	)
+
+	api.GET(
+		"/auth/me",
+		authHandler.Me,
+	)
+
+	api.POST(
+		"/auth/logout",
+		authHandler.Logout,
+	)
 
 	{
 		api.GET(

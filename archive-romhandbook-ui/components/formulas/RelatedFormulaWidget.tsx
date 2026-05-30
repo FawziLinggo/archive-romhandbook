@@ -1,5 +1,11 @@
 "use client"
 
+import {
+    useEffect,
+    useMemo,
+    useState
+} from "react"
+
 import Link from "next/link"
 
 import {
@@ -17,10 +23,20 @@ import {
     X
 } from "lucide-react"
 
+
 import {
-    useEffect,
-    useState
-} from "react"
+    Background,
+    Controls,
+    Handle,
+    MarkerType,
+    MiniMap,
+    Position,
+    ReactFlow,
+    useEdgesState,
+    useNodesState,
+    type Edge as FlowEdge,
+    type Node as FlowNode
+} from "@xyflow/react"
 
 import type {
     ApiResponse,
@@ -329,6 +345,171 @@ function getFullGraphHref(
     return `${href}#formula-graph`
 }
 
+function RelationFlowNode({
+    data
+}: any) {
+    const node =
+        data.node as FormulaGraphNode
+
+    const isCenter =
+        Boolean(data.isCenter)
+
+    const onOpenJsonNode =
+        data.onOpenJsonNode as (node: FormulaGraphNode) => void
+
+    const color =
+        isCenter
+            ? "#8b5cf6"
+            : getGraphColor(node.node_type)
+
+    const href =
+        getNodeHref(node)
+
+    const parts =
+        getGraphNodeTitleParts(node)
+
+    const content = (
+        <div
+            className={`
+                relative
+                flex
+                min-h-[78px]
+                w-[230px]
+                items-center
+                gap-3
+                rounded-2xl
+                border
+                bg-zinc-950
+                p-3
+                shadow-2xl
+                shadow-black/40
+
+                ${isCenter
+                    ? "border-violet-500 bg-violet-500/10"
+                    : "border-zinc-800"
+                }
+            `}
+        >
+            <Handle
+                type="target"
+                position={Position.Left}
+                className="!h-2.5 !w-2.5 !border-0 !bg-zinc-500"
+            />
+
+            <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border bg-black"
+                style={{
+                    borderColor: color
+                }}
+            >
+                {node.image ? (
+                    <img
+                        src={node.image}
+                        alt={getNodeLabel(node)}
+                        className="h-8 w-8 object-contain"
+                    />
+                ) : (
+                    <span
+                        className="text-xs font-black"
+                        style={{
+                            color
+                        }}
+                    >
+                        {getNodeInitial(node.node_type)}
+                    </span>
+                )}
+            </div>
+
+            <div className="min-w-0">
+                <div
+                    className="truncate text-xs font-black"
+                    style={{
+                        color
+                    }}
+                >
+                    {isCenter ? formatNodeType(node.node_type) : parts.eyebrow}
+                </div>
+
+                <div className="mt-1 truncate text-sm font-black text-white">
+                    {isCenter ? getNodeLabel(node) : parts.title}
+                </div>
+            </div>
+
+            <Handle
+                type="source"
+                position={Position.Right}
+                className="!h-2.5 !w-2.5 !border-0 !bg-zinc-500"
+            />
+        </div>
+    )
+
+    if (canOpenJson(node)) {
+        return (
+            <button
+                type="button"
+                onClick={() => onOpenJsonNode(node)}
+                className="nodrag text-left"
+            >
+                {content}
+            </button>
+        )
+    }
+
+    if (href && !isCenter) {
+        return (
+            <Link
+                href={href}
+                className="nodrag block"
+            >
+                {content}
+            </Link>
+        )
+    }
+
+    return content
+}
+
+function buildRelationPositions(
+    center: FormulaGraphNode,
+    relatedNodes: FormulaGraphNode[]
+) {
+    const positions: Record<string, { x: number; y: number }> = {}
+
+    positions[center.node_key] = {
+        x: 0,
+        y: 0
+    }
+
+    const left =
+        relatedNodes.filter((_, index) => index % 2 === 0)
+
+    const right =
+        relatedNodes.filter((_, index) => index % 2 !== 0)
+
+    function placeColumn(
+        items: FormulaGraphNode[],
+        x: number
+    ) {
+        const gapY =
+            108
+
+        const startY =
+            -((items.length - 1) * gapY) / 2
+
+        items.forEach((node, index) => {
+            positions[node.node_key] = {
+                x,
+                y: startY + index * gapY
+            }
+        })
+    }
+
+    placeColumn(left, -330)
+    placeColumn(right, 330)
+
+    return positions
+}
+
 function RelationMiniGraph({
     relations,
     selectedNodeType,
@@ -345,158 +526,254 @@ function RelationMiniGraph({
     onLimitChange: (value: number) => void
     onReset: () => void
     onOpenJsonNode: (node: FormulaGraphNode) => void
-
 }) {
     const center =
         relations.center
 
-
     const relatedNodes =
-        relations.nodes
-            .filter((node) => node.node_key !== center.node_key)
-            .slice(0, 6)
+        useMemo(() => {
+            return relations.nodes
+                .filter((node) => node.node_key !== center.node_key)
+                .slice(0, 8)
+        }, [
+            relations.nodes,
+            center.node_key
+        ])
 
     const fullGraphHref =
         getFullGraphHref(relations)
 
-    const markerId =
-        `related-arrow-${center.node_key.replace(/[^a-zA-Z0-9_-]/g, "-")}`
+    const [
+        flowNodes,
+        setFlowNodes,
+        onNodesChange
+    ] = useNodesState<FlowNode>([])
 
-    const width = 900
-    const height = 420
-    const centerX = 450
-    const centerY = 220
+    const [
+        flowEdges,
+        setFlowEdges,
+        onEdgesChange
+    ] = useEdgesState<FlowEdge>([])
 
-    const positions = [
-        {
-            x: 190,
-            y: 105
-        },
-        {
-            x: 190,
-            y: 315
-        },
-        {
-            x: 710,
-            y: 105
-        },
-        {
-            x: 710,
-            y: 315
-        },
-        {
-            x: 450,
-            y: 70
-        },
-        {
-            x: 450,
-            y: 360
-        }
-    ]
+    const nodeTypes =
+        useMemo(
+            () => ({
+                relationNode: RelationFlowNode
+            }),
+            []
+        )
 
-    const positionedNodes =
-        relatedNodes.map((node, index) => ({
-            node,
-            ...positions[index]
-        }))
+    const visibleNodes =
+        useMemo(() => {
+            return [
+                center,
+                ...relatedNodes
+            ]
+        }, [
+            center,
+            relatedNodes
+        ])
+
+    const visibleKeys =
+        useMemo(() => {
+            return new Set(
+                visibleNodes.map((node) => node.node_key)
+            )
+        }, [
+            visibleNodes
+        ])
+
+    const nodeLookup =
+        useMemo(() => {
+            const map =
+                new Map<string, FormulaGraphNode>()
+
+            visibleNodes.forEach((node) => {
+                map.set(node.node_key, node)
+            })
+
+            return map
+        }, [
+            visibleNodes
+        ])
+
+    useEffect(() => {
+        setFlowNodes((current) => {
+            const previousPositions =
+                new Map(
+                    current.map((node) => [
+                        node.id,
+                        node.position
+                    ])
+                )
+
+            const generated =
+                buildRelationPositions(
+                    center,
+                    relatedNodes
+                )
+
+            return visibleNodes.map((node) => ({
+                id: node.node_key,
+                type: "relationNode",
+                position:
+                    previousPositions.get(node.node_key) ||
+                    generated[node.node_key] ||
+                    {
+                        x: 0,
+                        y: 0
+                    },
+                data: {
+                    node,
+                    isCenter: node.node_key === center.node_key,
+                    onOpenJsonNode
+                },
+                draggable: true
+            }))
+        })
+    }, [
+        center,
+        relatedNodes,
+        visibleNodes,
+        onOpenJsonNode,
+        setFlowNodes
+    ])
+
+    useEffect(() => {
+        setFlowEdges(
+            relations.edges
+                .filter((edge) => {
+                    return visibleKeys.has(edge.from_node_key) &&
+                        visibleKeys.has(edge.to_node_key)
+                })
+                .map((edge) => {
+                    const target =
+                        nodeLookup.get(edge.to_node_key)
+
+                    const color =
+                        getGraphColor(target?.node_type || "")
+
+                    return {
+                        id: String(edge.id),
+                        source: edge.from_node_key,
+                        target: edge.to_node_key,
+                        type: "smoothstep",
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color
+                        },
+                        style: {
+                            stroke: color,
+                            strokeOpacity: 0.5,
+                            strokeWidth: 1.8
+                        }
+                    }
+                })
+        )
+    }, [
+        relations.edges,
+        visibleKeys,
+        nodeLookup,
+        setFlowEdges
+    ])
 
     return (
         <div
             className="
-            mt-6
-            overflow-hidden
-            rounded-3xl
-            border
-            border-zinc-800
-            bg-black
-        "
+                mt-6
+                overflow-hidden
+                rounded-3xl
+                border
+                border-zinc-800
+                bg-black
+            "
         >
             <div
                 className="
-                border-b
-                border-zinc-800
-                p-4
+                    border-b
+                    border-zinc-800
+                    p-4
 
-                sm:p-5
-            "
+                    sm:p-5
+                "
             >
                 <div
                     className="
-        flex
-        flex-col
-        gap-5
+                        flex
+                        flex-col
+                        gap-5
 
-        xl:flex-row
-        xl:items-start
-        xl:justify-between
-    "
+                        xl:flex-row
+                        xl:items-start
+                        xl:justify-between
+                    "
                 >
                     <div className="min-w-0">
                         <h3
                             className="
-                text-xl
-                font-black
-                leading-tight
-                text-white
+                                text-xl
+                                font-black
+                                leading-tight
+                                text-white
 
-                sm:text-2xl
-            "
+                                sm:text-2xl
+                            "
                         >
                             Formula Graph
                         </h3>
 
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-                            Click a node to view its JSON payload. Use the filters to explore different relations.
+                            Drag nodes to organize the graph. Click JSON nodes to inspect their payload.
                         </p>
                     </div>
 
                     <div
                         className="
-            flex
-            w-full
-            flex-col
-            gap-3
+                            flex
+                            w-full
+                            flex-col
+                            gap-3
 
-            xl:w-auto
-            xl:items-end
-        "
+                            xl:w-auto
+                            xl:items-end
+                        "
                     >
                         <div
                             className="
-                flex
-                w-full
-                flex-col
-                gap-2
+                                flex
+                                w-full
+                                flex-col
+                                gap-2
 
-                sm:flex-row
-                sm:flex-wrap
-                sm:items-center
-                xl:justify-end
-            "
+                                sm:flex-row
+                                sm:flex-wrap
+                                sm:items-center
+                                xl:justify-end
+                            "
                         >
                             <select
                                 value={selectedNodeType}
                                 onChange={(event) => onSelectNodeType(event.target.value)}
                                 className="
-                    h-11
-                    w-full
-                    rounded-2xl
-                    border
-                    border-zinc-800
-                    bg-black
-                    px-4
-                    text-sm
-                    font-bold
-                    text-zinc-200
-                    outline-none
-                    transition-colors
+                                    h-11
+                                    w-full
+                                    rounded-2xl
+                                    border
+                                    border-zinc-800
+                                    bg-black
+                                    px-4
+                                    text-sm
+                                    font-bold
+                                    text-zinc-200
+                                    outline-none
+                                    transition-colors
 
-                    focus:border-violet-500
-                    focus:ring-2
-                    focus:ring-violet-500/20
+                                    focus:border-violet-500
+                                    focus:ring-2
+                                    focus:ring-violet-500/20
 
-                    sm:w-[190px]
-                "
+                                    sm:w-[190px]
+                                "
                             >
                                 {FILTERS.map((filter) => (
                                     <option
@@ -508,44 +785,42 @@ function RelationMiniGraph({
                                 ))}
                             </select>
 
-
-
                             <button
                                 type="button"
                                 onClick={onReset}
                                 className="
-                    inline-flex
-                    h-11
-                    items-center
-                    justify-center
-                    gap-2
-                    rounded-2xl
-                    border
-                    border-zinc-800
-                    bg-zinc-950
-                    px-4
-                    text-sm
-                    font-bold
-                    text-zinc-300
-                    transition-colors
-                    hover:border-violet-500/50
-                    hover:text-white
-                "
+                                    inline-flex
+                                    h-11
+                                    items-center
+                                    justify-center
+                                    gap-2
+                                    rounded-2xl
+                                    border
+                                    border-zinc-800
+                                    bg-zinc-950
+                                    px-4
+                                    text-sm
+                                    font-bold
+                                    text-zinc-300
+                                    transition-colors
+                                    hover:border-violet-500/50
+                                    hover:text-white
+                                "
                             >
                                 <RefreshCw size={15} />
                             </button>
 
                             <div
                                 className="
-                    inline-flex
-                    h-11
-                    w-fit
-                    rounded-2xl
-                    border
-                    border-zinc-800
-                    bg-black
-                    p-1
-                "
+                                    inline-flex
+                                    h-11
+                                    w-fit
+                                    rounded-2xl
+                                    border
+                                    border-zinc-800
+                                    bg-black
+                                    p-1
+                                "
                             >
                                 {LIMITS.map((item) => (
                                     <button
@@ -553,19 +828,19 @@ function RelationMiniGraph({
                                         type="button"
                                         onClick={() => onLimitChange(item)}
                                         className={`
-                            h-9
-                            min-w-10
-                            rounded-xl
-                            px-3
-                            text-xs
-                            font-black
-                            transition-colors
+                                            h-9
+                                            min-w-10
+                                            rounded-xl
+                                            px-3
+                                            text-xs
+                                            font-black
+                                            transition-colors
 
-                            ${limit === item
+                                            ${limit === item
                                                 ? "bg-emerald-500/20 text-emerald-200"
                                                 : "text-zinc-500 hover:bg-white/5 hover:text-white"
                                             }
-                        `}
+                                        `}
                                     >
                                         {item}
                                     </button>
@@ -576,33 +851,30 @@ function RelationMiniGraph({
                                 <Link
                                     href={fullGraphHref}
                                     className="
-                        inline-flex
-                        h-11
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-2xl
-                        border
-                        border-zinc-800
-                        bg-zinc-950
-                        px-4
-                        text-sm
-                        font-bold
-                        text-zinc-300
-                        transition-colors
-                        hover:border-violet-500/50
-                        hover:text-white
-                    "
+                                        inline-flex
+                                        h-11
+                                        items-center
+                                        justify-center
+                                        gap-2
+                                        rounded-2xl
+                                        border
+                                        border-zinc-800
+                                        bg-zinc-950
+                                        px-4
+                                        text-sm
+                                        font-bold
+                                        text-zinc-300
+                                        transition-colors
+                                        hover:border-violet-500/50
+                                        hover:text-white
+                                    "
                                 >
                                     <ExternalLink size={15} />
                                 </Link>
                             )}
                         </div>
-
                     </div>
                 </div>
-
-
             </div>
 
             {relatedNodes.length === 0 ? (
@@ -610,233 +882,71 @@ function RelationMiniGraph({
                     No relations for this filter. Try selecting All.
                 </div>
             ) : (
-                <div className="overflow-hidden">
-                    <svg
-                        viewBox={`0 0 ${width} ${height}`}
-                        preserveAspectRatio="xMidYMid meet"
-                        className="
-                        h-[320px]
-                        w-full
-                        max-w-full
-
-                        sm:h-[390px]
-                        lg:h-[430px]
-                    "
-                        role="img"
+                <div className="h-[360px] w-full sm:h-[430px] lg:h-[500px]">
+                    <ReactFlow
+                        nodes={flowNodes}
+                        edges={flowEdges}
+                        nodeTypes={nodeTypes}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        fitView
+                        fitViewOptions={{
+                            padding: 0.22
+                        }}
+                        minZoom={0.2}
+                        maxZoom={1.5}
+                        nodesDraggable
+                        nodesConnectable={false}
+                        elementsSelectable
+                        proOptions={{
+                            hideAttribution: true
+                        }}
                     >
-                        <defs>
-                            <marker
-                                id={markerId}
-                                markerWidth="8"
-                                markerHeight="8"
-                                refX="6"
-                                refY="3"
-                                orient="auto"
-                                markerUnits="strokeWidth"
-                            >
-                                <path
-                                    d="M0,0 L0,6 L7,3 z"
-                                    fill="#52525b"
-                                />
-                            </marker>
-                        </defs>
+                        <Background
+                            color="#3f3f46"
+                            gap={22}
+                        />
 
-                        {positionedNodes.map((item) => {
-                            const color =
-                                getGraphColor(item.node.node_type)
+                        <MiniMap
+                            pannable
+                            zoomable
+                            nodeColor={(node) => {
+                                const data =
+                                    node.data as {
+                                        node: FormulaGraphNode
+                                        isCenter: boolean
+                                    }
 
-                            return (
-                                <g key={`edge-${item.node.node_key}`}>
-                                    <path
-                                        d={`M ${centerX} ${centerY} C ${centerX} ${item.y}, ${item.x} ${centerY}, ${item.x} ${item.y}`}
-                                        fill="none"
-                                        stroke={color}
-                                        strokeOpacity="0.45"
-                                        strokeWidth="2"
-                                        strokeDasharray="5 6"
-                                        markerEnd={`url(#${markerId})`}
-                                    />
-                                </g>
-                            )
-                        })}
+                                return data.isCenter
+                                    ? "#8b5cf6"
+                                    : getGraphColor(data.node.node_type)
+                            }}
+                            maskColor="rgba(0,0,0,0.72)"
+                            className="!hidden !bg-zinc-950 !border !border-zinc-800 md:!block"
+                        />
 
-                        <g>
-                            <rect
-                                x={centerX - 68}
-                                y={centerY - 74}
-                                width="136"
-                                height="148"
-                                rx="20"
-                                fill="#100818"
-                                stroke="#8b5cf6"
-                                strokeWidth="2"
-                            />
+                        <Controls
+                            className="
+                                !overflow-hidden
+                                !rounded-2xl
+                                !border
+                                !border-violet-500/40
+                                !bg-zinc-950
+                                !shadow-2xl
+                                !shadow-black/50
 
-                            {center.image ? (
-                                <image
-                                    href={center.image}
-                                    x={centerX - 28}
-                                    y={centerY - 48}
-                                    width="56"
-                                    height="56"
-                                    preserveAspectRatio="xMidYMid meet"
-                                />
-                            ) : (
-                                <circle
-                                    cx={centerX}
-                                    cy={centerY - 20}
-                                    r="30"
-                                    fill="#261247"
-                                />
-                            )}
+                                [&_button]:!h-9
+                                [&_button]:!w-9
+                                [&_button]:!border-zinc-800
+                                [&_button]:!bg-zinc-950
+                                [&_button]:!text-violet-200
+                                [&_button:hover]:!bg-violet-500/15
+                                [&_button:hover]:!text-white
 
-                            <text
-                                x={centerX}
-                                y={centerY + 34}
-                                textAnchor="middle"
-                                fill="#ffffff"
-                                fontSize="13"
-                                fontWeight="900"
-                            >
-                                {truncateText(getNodeLabel(center), 15)}
-                            </text>
-
-                            <text
-                                x={centerX}
-                                y={centerY + 54}
-                                textAnchor="middle"
-                                fill="#a78bfa"
-                                fontSize="11"
-                                fontWeight="800"
-                            >
-                                {center.ref_id}
-                            </text>
-                        </g>
-
-                        {positionedNodes.map((item) => {
-                            const color =
-                                getGraphColor(item.node.node_type)
-
-                            const href =
-                                getNodeHref(item.node)
-
-                            const content = (
-                                <g>
-                                    <rect
-                                        x={item.x - 112}
-                                        y={item.y - 36}
-                                        width="224"
-                                        height="72"
-                                        rx="16"
-                                        fill="#09090b"
-                                        stroke="#27272a"
-                                    />
-
-                                    <rect
-                                        x={item.x - 98}
-                                        y={item.y - 22}
-                                        width="44"
-                                        height="44"
-                                        rx="12"
-                                        fill="#050505"
-                                        stroke={color}
-                                        strokeOpacity="0.6"
-                                    />
-
-                                    {item.node.image ? (
-                                        <image
-                                            href={item.node.image}
-                                            x={item.x - 92}
-                                            y={item.y - 16}
-                                            width="32"
-                                            height="32"
-                                            preserveAspectRatio="xMidYMid meet"
-                                        />
-                                    ) : (
-                                        <text
-                                            x={item.x - 76}
-                                            y={item.y + 5}
-                                            textAnchor="middle"
-                                            fill={color}
-                                            fontSize="13"
-                                            fontWeight="900"
-                                        >
-                                            {getNodeInitial(item.node.node_type)}
-                                        </text>
-                                    )}
-
-                                    {(() => {
-                                        const parts =
-                                            getGraphNodeTitleParts(item.node)
-
-                                        return (
-                                            <>
-                                                <text
-                                                    x={item.x - 42}
-                                                    y={item.y - 7}
-                                                    fill={color}
-                                                    fontSize="11"
-                                                    fontWeight="800"
-                                                >
-                                                    {truncateText(parts.eyebrow, 20)}
-                                                </text>
-
-                                                <text
-                                                    x={item.x - 42}
-                                                    y={item.y + 14}
-                                                    fill="#ffffff"
-                                                    fontSize="13"
-                                                    fontWeight="900"
-                                                >
-                                                    {truncateText(parts.title, 18)}
-                                                </text>
-                                            </>
-                                        )
-                                    })()}
-                                </g>
-                            )
-
-                            if (canOpenJson(item.node)) {
-                                return (
-                                    <g
-                                        key={item.node.node_key}
-                                        role="button"
-                                        tabIndex={0}
-                                        className="cursor-pointer"
-                                        onClick={() => onOpenJsonNode(item.node)}
-                                        onKeyDown={(event) => {
-                                            if (event.key === "Enter" || event.key === " ") {
-                                                onOpenJsonNode(item.node)
-                                            }
-                                        }}
-                                    >
-                                        {content}
-
-                                        <title>
-                                            Open JSON
-                                        </title>
-                                    </g>
-                                )
-                            }
-
-                            if (!href) {
-                                return (
-                                    <g key={item.node.node_key}>
-                                        {content}
-                                    </g>
-                                )
-                            }
-
-                            return (
-                                <a
-                                    key={item.node.node_key}
-                                    href={href}
-                                >
-                                    {content}
-                                </a>
-                            )
-                        })}
-                    </svg>
+                                [&_svg]:!stroke-current
+                            "
+                        />
+                    </ReactFlow>
                 </div>
             )}
         </div>

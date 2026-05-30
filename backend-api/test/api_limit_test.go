@@ -52,6 +52,19 @@ func setupTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 			"rom.db",
 		)
 
+	appDBPath :=
+		filepath.Join(
+			backendRoot,
+			"storage",
+			"app.db",
+		)
+
+	dbapp, err :=
+		sql.Open(
+			"sqlite",
+			appDBPath,
+		)
+
 	db, err :=
 		sql.Open(
 			"sqlite",
@@ -74,6 +87,8 @@ func setupTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 	routes.SetupRoutes(
 		router,
 		db,
+		dbapp,
+		nil,
 	)
 
 	return router, db

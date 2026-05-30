@@ -65,6 +65,19 @@ func setupCardTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 		t.Fatalf("failed to open test database %s: %v", dbPath, err)
 	}
 
+	appDBPath :=
+		filepath.Join(
+			backendRoot,
+			"storage",
+			"app.db",
+		)
+
+	dbapp, err :=
+		sql.Open(
+			"sqlite",
+			appDBPath,
+		)
+
 	gin.SetMode(gin.TestMode)
 
 	router :=
@@ -73,6 +86,8 @@ func setupCardTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 	routes.SetupRoutes(
 		router,
 		db,
+		dbapp,
+		nil,
 	)
 
 	return router, db

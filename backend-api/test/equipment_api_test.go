@@ -66,6 +66,22 @@ func setupEquipmentTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 		t.Fatalf("failed to open test database %s: %v", dbPath, err)
 	}
 
+	appDBPath :=
+		filepath.Join(
+			backendRoot,
+			"storage",
+			"app.db",
+		)
+
+	dbapp, err :=
+		sql.Open(
+			"sqlite",
+			appDBPath,
+		)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	gin.SetMode(gin.TestMode)
 
 	router :=
@@ -74,6 +90,8 @@ func setupEquipmentTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 	routes.SetupRoutes(
 		router,
 		db,
+		dbapp,
+		nil,
 	)
 
 	return router, db

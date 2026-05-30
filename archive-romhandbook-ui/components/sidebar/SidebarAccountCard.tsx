@@ -1,42 +1,102 @@
+"use client"
+
+import {
+    useEffect,
+    useState
+} from "react"
+
+import {
+    Loader2,
+    LogIn,
+    LogOut,
+    Shield,
+    User
+} from "lucide-react"
+
+import {
+    useAuth
+} from "@/contexts/AuthContext"
+
 type Props = {
-
     collapsed: boolean
+}
 
+function getInitial(
+    value?: string | null
+) {
+    if (!value) {
+        return "?"
+    }
+
+    return value
+        .trim()
+        .charAt(0)
+        .toUpperCase()
 }
 
 export default function SidebarAccountCard({
-
     collapsed
-
 }: Props) {
+    const {
+        user,
+        isLoading,
+        isAuthenticated,
+        loginWithDiscord,
+        logout
+    } = useAuth()
 
-    // =====================
-    // COLLAPSED
-    // =====================
+    const [
+        mounted,
+        setMounted
+    ] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const showLoading =
+        mounted && isLoading
+
+    const showAuthenticated =
+        mounted && isAuthenticated
+
+    const currentUser =
+        showAuthenticated ? user : null
+
+    const displayName =
+        currentUser?.display_name || "Guest Adventurer"
+
+    const rankName =
+        currentUser?.rank_name || "Novice"
+
+    const pointsTotal =
+        currentUser?.points_total || 0
 
     if (collapsed) {
-
         return (
-
             <div
                 className="
-                    px-3
-                    pb-3
-
                     flex
                     justify-center
+                    px-3
+                    pb-3
                 "
             >
-
                 <button
+                    type="button"
+                    onClick={() => {
+                        if (!showAuthenticated) {
+                            loginWithDiscord()
+                        }
+                    }}
                     className="
                         flex
                         h-14
                         w-14
-
                         items-center
                         justify-center
 
+                        overflow-hidden
                         rounded-2xl
 
                         border
@@ -44,300 +104,338 @@ export default function SidebarAccountCard({
 
                         bg-zinc-900/80
 
-                        text-xl
+                        text-sm
+                        font-black
+                        text-violet-200
 
                         transition-all
 
                         hover:border-violet-500/30
                         hover:bg-violet-500/10
                     "
-                    title="
-Authentication system coming soon
-                    "
+                    title={
+                        showAuthenticated
+                            ? displayName
+                            : "Login with Discord"
+                    }
                 >
-                    👤
+                    {showLoading ? (
+                        <Loader2
+                            size={18}
+                            className="animate-spin"
+                        />
+                    ) : currentUser?.avatar_url ? (
+                        <img
+                            src={currentUser.avatar_url}
+                            alt={displayName}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : showAuthenticated ? (
+                        getInitial(displayName)
+                    ) : (
+                        <User size={18} />
+                    )}
                 </button>
-
             </div>
-
         )
-
     }
 
-    // =====================
-    // EXPANDED
-    // =====================
-
     return (
-
         <div
             className="
                 px-3
                 pb-3
             "
         >
+            <div
+                className="
+                    relative
+                    overflow-hidden
 
-            {collapsed ? (
+                    rounded-2xl
+
+                    border
+                    border-white/5
+
+                    bg-zinc-900/80
+
+                    p-3
+
+                    shadow-xl
+                    shadow-black/20
+                "
+            >
+                <div
+                    className="
+                        pointer-events-none
+                        absolute
+                        inset-0
+
+                        bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.08),transparent_45%)]
+
+                        opacity-80
+                    "
+                />
 
                 <div
                     className="
-            px-3
-            pb-4
-        "
+                        relative
+                        z-10
+                    "
                 >
-
-                    <button
+                    <div
                         className="
-                flex
-                h-14
-                w-14
-
-                items-center
-                justify-center
-
-                rounded-2xl
-
-                border
-                border-white/5
-
-                bg-zinc-900/80
-
-                text-xl
-
-                transition-all
-
-                hover:border-violet-500/30
-                hover:bg-violet-500/10
-            "
+                            flex
+                            items-center
+                            gap-2.5
+                        "
                     >
-                        👤
-                    </button>
+                        <div
+                            className="
+                                flex
+                                h-10
+                                w-10
+                                shrink-0
+                                items-center
+                                justify-center
 
-                </div>
+                                overflow-hidden
+                                rounded-xl
 
-            ) : (
-                <div
-                    className="
-        px-3
-        pb-3
-    "
-                >
+                                border
+                                border-white/5
+
+                                bg-black/40
+
+                                text-sm
+                                font-black
+                                text-violet-200
+                            "
+                        >
+                            {showLoading ? (
+                                <Loader2
+                                    size={17}
+                                    className="animate-spin"
+                                />
+                            ) : currentUser?.avatar_url ? (
+                                <img
+                                    src={currentUser.avatar_url}
+                                    alt={displayName}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : showAuthenticated ? (
+                                getInitial(displayName)
+                            ) : (
+                                <User size={17} />
+                            )}
+                        </div>
+
+                        <div
+                            className="
+                                min-w-0
+                                flex-1
+                            "
+                        >
+                            <div
+                                className="
+                                    flex
+                                    items-center
+                                    gap-2
+                                "
+                            >
+                                <div
+                                    className={`
+                                        h-1.5
+                                        w-1.5
+                                        rounded-full
+
+                                        ${showAuthenticated
+                                            ? "bg-emerald-400"
+                                            : "bg-zinc-600"
+                                        }
+                                    `}
+                                />
+
+                                <p
+                                    className="
+                                        truncate
+                                        text-sm
+                                        font-bold
+                                        text-white
+                                    "
+                                >
+                                    {displayName}
+                                </p>
+                            </div>
+
+                            <div
+                                className="
+                                    mt-1
+                                    flex
+                                    min-w-0
+                                    items-center
+                                    gap-1.5
+                                "
+                            >
+                                {showAuthenticated ? (
+                                    <>
+                                        <span
+                                            className="
+                                                inline-flex
+                                                max-w-[92px]
+                                                items-center
+                                                gap-1
+                                                truncate
+                                                rounded-full
+                                                border
+                                                border-violet-500/30
+                                                bg-violet-500/10
+                                                px-2
+                                                py-0.5
+                                                text-[10px]
+                                                font-black
+                                                text-violet-200
+                                            "
+                                        >
+                                            <Shield size={10} />
+                                            {rankName}
+                                        </span>
+
+                                        {currentUser?.class_name && (
+                                            <span
+                                                className="
+                                                    truncate
+                                                    rounded-full
+                                                    border
+                                                    border-cyan-500/30
+                                                    bg-cyan-500/10
+                                                    px-2
+                                                    py-0.5
+                                                    text-[10px]
+                                                    font-black
+                                                    text-cyan-200
+                                                "
+                                            >
+                                                {currentUser.class_name}
+                                            </span>
+                                        )}
+                                    </>
+                                ) : (
+                                    <span
+                                        className="
+                                            text-[11px]
+                                            text-zinc-500
+                                        "
+                                    >
+                                        Login with Discord
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
 
                     <div
                         className="
-            relative
-
-            overflow-hidden
-
-            rounded-2xl
-
-            border
-            border-white/5
-
-            bg-zinc-900/80
-
-            backdrop-blur-xl
-
-            p-3
-
-            shadow-xl
-            shadow-black/20
-        "
-                    >
-
-                        {/* SUBTLE GLOW */}
-
-                        <div
-                            className="
-                pointer-events-none
-
-                absolute
-                inset-0
-
-                bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.06),transparent_45%)]
-
-                opacity-70
-            "
-                        />
-
-                        {/* CONTENT */}
-
-                        <div
-                            className="
-                relative
-                z-10
-            "
-                        >
-
-                            {/* TOP */}
-
-                            <div
-                                className="
-                    flex
-                    items-center
-                    gap-2.5
-                "
-                            >
-
-                                {/* AVATAR */}
-
-                                <div
-                                    className="
-                        flex
-                        h-10
-                        w-10
-                        shrink-0
-
-                        items-center
-                        justify-center
-
-                        rounded-xl
-
-                        border
-                        border-white/5
-
-                        bg-black/30
-
-                        text-sm
-                    "
-                                >
-                                    👤
-                                </div>
-
-                                {/* INFO */}
-
-                                <div
-                                    className="
-                        min-w-0
-                        flex-1
-                    "
-                                >
-
-                                    <div
-                                        className="
-                            flex
-                            items-center
+                            mt-3
+                            grid
+                            grid-cols-1
                             gap-2
                         "
-                                    >
-
-                                        <div
-                                            className="
-                                h-1.5
-                                w-1.5
-
-                                rounded-full
-
-                                bg-emerald-400
-
-                                animate-pulse
-                            "
-                                        />
-
-                                        <p
-                                            className="
-                                truncate
-
-                                text-sm
-                                font-medium
-
-                                text-white
-                            "
-                                        >
-                                            Guest Adventurer
-                                        </p>
-
-                                    </div>
-
-                                    <p
-                                        className="
-                            mt-0.5
-
-                            text-[11px]
-
-                            text-zinc-500
-                        "
-                                    >
-                                        Login system coming soon
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                            {/* BUTTONS */}
-
-                            <div
+                    >
+                        {showAuthenticated ? (
+                            <button
+                                type="button"
+                                onClick={logout}
                                 className="
-                    mt-3
+                                    inline-flex
+                                    h-9
+                                    items-center
+                                    justify-center
+                                    gap-2
 
-                    grid
-                    grid-cols-2
+                                    rounded-xl
 
-                    gap-2
-                "
+                                    border
+                                    border-zinc-700/70
+
+                                    bg-zinc-950/70
+
+                                    text-xs
+                                    font-bold
+                                    text-zinc-300
+
+                                    transition-colors
+
+                                    hover:border-red-500/40
+                                    hover:bg-red-500/10
+                                    hover:text-red-200
+                                "
                             >
+                                <LogOut size={14} />
+                                Logout
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                disabled={showLoading}
+                                onClick={loginWithDiscord}
+                                className="
+                                    inline-flex
+                                    h-9
+                                    items-center
+                                    justify-center
+                                    gap-2
 
-                                <button
-                                    disabled
-                                    className="
-                        h-9
+                                    rounded-xl
 
-                        rounded-xl
+                                    border
+                                    border-indigo-500/30
 
-                        border
-                        border-white/5
+                                    bg-indigo-500/10
 
-                        bg-zinc-800/70
+                                    text-xs
+                                    font-black
+                                    text-indigo-200
 
-                        text-xs
-                        font-medium
+                                    transition-colors
 
-                        text-zinc-300
+                                    hover:border-indigo-400/50
+                                    hover:bg-indigo-500/20
+                                    hover:text-white
 
-                        opacity-60
-                        cursor-not-allowed
-                    "
-                                >
-                                    Login
-                                </button>
+                                    disabled:cursor-not-allowed
+                                    disabled:opacity-60
+                                "
+                            >
+                                {showLoading ? (
+                                    <Loader2
+                                        size={14}
+                                        className="animate-spin"
+                                    />
+                                ) : (
+                                    <LogIn size={14} />
+                                )}
 
-                                <button
-                                    disabled
-                                    className="
-                        h-9
-
-                        rounded-xl
-
-                        border
-                        border-cyan-500/10
-
-                        bg-cyan-500/5
-
-                        text-xs
-                        font-medium
-
-                        text-cyan-200
-
-                        opacity-60
-                        cursor-not-allowed
-                    "
-                                >
-                                    Register
-                                </button>
-
-                            </div>
-
-                        </div>
-
+                                Login Discord
+                            </button>
+                        )}
                     </div>
 
+                    {showAuthenticated && (
+                        <div
+                            className="
+                                mt-2
+                                text-center
+                                text-[10px]
+                                font-medium
+                                text-zinc-500
+                            "
+                        >
+                            {pointsTotal} contribution points
+                        </div>
+                    )}
                 </div>
-
-            )}
-
+            </div>
         </div>
-
     )
-
 }

@@ -587,7 +587,7 @@ function GraphCanvas({
                     }}
                 >
                     <Background
-                        color="#27272a"
+                        color="#3f3f46"
                         gap={24}
                     />
 
@@ -605,7 +605,25 @@ function GraphCanvas({
                     />
 
                     <Controls
-                        className="!border !border-zinc-800 !bg-zinc-950"
+                        className="
+        !overflow-hidden
+        !rounded-2xl
+        !border
+        !border-violet-500/40
+        !bg-zinc-950
+        !shadow-2xl
+        !shadow-black/50
+
+        [&_button]:!h-9
+        [&_button]:!w-9
+        [&_button]:!border-zinc-800
+        [&_button]:!bg-zinc-950
+        [&_button]:!text-violet-200
+        [&_button:hover]:!bg-violet-500/15
+        [&_button:hover]:!text-white
+
+        [&_svg]:!stroke-current
+    "
                     />
                 </ReactFlow>
             </div>

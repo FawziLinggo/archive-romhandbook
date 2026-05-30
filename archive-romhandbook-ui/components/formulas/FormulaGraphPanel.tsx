@@ -3,6 +3,22 @@
 import Link from "next/link"
 
 import {
+    Background,
+    Controls,
+    Handle,
+    MarkerType,
+    MiniMap,
+    Position,
+    ReactFlow,
+    useEdgesState,
+    useNodesState,
+    type Edge as FlowEdge,
+    type Node as FlowNode
+} from "@xyflow/react"
+
+
+
+import {
     ChevronDown,
     ChevronUp,
     GitBranch,
@@ -107,6 +123,167 @@ function getNodeColor(
     return colors[nodeType] || "#a1a1aa"
 }
 
+function FormulaFlowNode({
+    data
+}: any) {
+    const node =
+        data.node as FormulaGraphNode
+
+    const isCenter =
+        Boolean(data.isCenter)
+
+    const color =
+        isCenter
+            ? "#8b5cf6"
+            : getNodeColor(node.node_type)
+
+    const href =
+        getNodeHref(node)
+
+    return (
+        <div
+            className={`
+                relative
+                flex
+                min-h-[78px]
+                w-[230px]
+                items-center
+                gap-3
+                rounded-2xl
+                border
+                bg-zinc-950
+                p-3
+                shadow-2xl
+                shadow-black/40
+
+                ${isCenter
+                    ? "border-violet-500 bg-violet-500/10"
+                    : "border-zinc-800"
+                }
+            `}
+        >
+            <Handle
+                type="target"
+                position={Position.Left}
+                className="!h-2.5 !w-2.5 !border-0 !bg-zinc-500"
+            />
+
+            <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border bg-black"
+                style={{
+                    borderColor: color
+                }}
+            >
+                {node.image ? (
+                    <img
+                        src={node.image}
+                        alt={getNodeLabel(node)}
+                        className="h-8 w-8 object-contain"
+                    />
+                ) : (
+                    <span
+                        className="text-xs font-black"
+                        style={{
+                            color
+                        }}
+                    >
+                        {node.node_type
+                            .split("_")
+                            .map((item) => item.charAt(0))
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                    </span>
+                )}
+            </div>
+
+            <div className="min-w-0">
+                {href && !isCenter ? (
+                    <Link
+                        href={href}
+                        className="nodrag block truncate text-sm font-black text-white hover:text-violet-200"
+                    >
+                        {getNodeLabel(node)}
+                    </Link>
+                ) : (
+                    <div className="truncate text-sm font-black text-white">
+                        {getNodeLabel(node)}
+                    </div>
+                )}
+
+                <div
+                    className="mt-1 text-xs font-black"
+                    style={{
+                        color
+                    }}
+                >
+                    {isCenter ? "Formula Code" : formatNodeType(node.node_type)}
+                </div>
+            </div>
+
+            <Handle
+                type="source"
+                position={Position.Right}
+                className="!h-2.5 !w-2.5 !border-0 !bg-zinc-500"
+            />
+        </div>
+    )
+}
+
+function buildFormulaPanelPositions(
+    graph: FormulaGraph,
+    centerNode: FormulaGraphNode
+) {
+    const positions: Record<string, { x: number; y: number }> = {}
+
+    positions[centerNode.node_key] = {
+        x: 0,
+        y: 0
+    }
+
+    const related =
+        graph.nodes
+            .filter((node) => node.node_key !== centerNode.node_key)
+            .slice(0, 24)
+
+    const grouped =
+        new Map<string, FormulaGraphNode[]>()
+
+    related.forEach((node) => {
+        const list =
+            grouped.get(node.node_type) || []
+
+        list.push(node)
+        grouped.set(node.node_type, list)
+    })
+
+    Array.from(grouped.entries()).forEach(([, items], groupIndex) => {
+        const side =
+            groupIndex % 2 === 0 ? -1 : 1
+
+        const ring =
+            Math.floor(groupIndex / 2) + 1
+
+        const x =
+            side * ring * 330
+
+        const gapY =
+            105
+
+        const startY =
+            -((items.length - 1) * gapY) / 2
+
+        items.forEach((node, index) => {
+            positions[node.node_key] = {
+                x,
+                y: startY + index * gapY
+            }
+        })
+    })
+
+    return positions
+}
+
 function FormulaGraphCanvas({
     graph,
     formulaId,
@@ -121,42 +298,177 @@ function FormulaGraphCanvas({
     onToggle: () => void
 }) {
     const centerNode =
-        graph.nodes.find((node) =>
-            isCenterNode(node, formulaId)
-        ) || graph.nodes[0]
+        useMemo(() => {
+            return graph.nodes.find((node) =>
+                isCenterNode(node, formulaId)
+            ) || graph.nodes[0]
+        }, [
+            graph.nodes,
+            formulaId
+        ])
 
     const related =
-        graph.nodes
-            .filter((node) => node.node_key !== centerNode?.node_key)
-            .slice(0, 18)
-
-    const width = 900
-    const height = 420
-    const centerX = width / 2
-    const centerY = height / 2
-    const radiusX = 310
-    const radiusY = 145
-
-    const positionedNodes =
-        related.map((node, index) => {
-            const angle =
-                -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(related.length, 1)
-
-            return {
-                node,
-                x: centerX + Math.cos(angle) * radiusX,
-                y: centerY + Math.sin(angle) * radiusY
+        useMemo(() => {
+            if (!centerNode) {
+                return []
             }
-        })
 
-    const visibleNodeKeys =
-        new Set(positionedNodes.map((item) => item.node.node_key))
+            return graph.nodes
+                .filter((node) => node.node_key !== centerNode.node_key)
+                .slice(0, 24)
+        }, [
+            graph.nodes,
+            centerNode
+        ])
 
-    const visibleEdges =
-        graph.edges.filter((edge) =>
-            visibleNodeKeys.has(edge.from_node_key) ||
-            visibleNodeKeys.has(edge.to_node_key)
+    const visibleGraphNodes =
+        useMemo(() => {
+            if (!centerNode) {
+                return []
+            }
+
+            const relatedKeys =
+                new Set(
+                    related.map((node) => node.node_key)
+                )
+
+            return graph.nodes.filter((node) => {
+                return node.node_key === centerNode.node_key ||
+                    relatedKeys.has(node.node_key)
+            })
+        }, [
+            graph.nodes,
+            centerNode,
+            related
+        ])
+
+    const [
+        flowNodes,
+        setFlowNodes,
+        onNodesChange
+    ] = useNodesState<FlowNode>([])
+
+    const [
+        flowEdges,
+        setFlowEdges,
+        onEdgesChange
+    ] = useEdgesState<FlowEdge>([])
+
+    const nodeTypes =
+        useMemo(
+            () => ({
+                formulaNode: FormulaFlowNode
+            }),
+            []
         )
+
+    const nodesByKey =
+        useMemo(() => {
+            const map =
+                new Map<string, FormulaGraphNode>()
+
+            graph.nodes.forEach((node) => {
+                map.set(node.node_key, node)
+            })
+
+            return map
+        }, [
+            graph.nodes
+        ])
+
+    useEffect(() => {
+        if (!centerNode) {
+            setFlowNodes([])
+            return
+        }
+
+        setFlowNodes((current) => {
+            const previousPositions =
+                new Map(
+                    current.map((node) => [
+                        node.id,
+                        node.position
+                    ])
+                )
+
+            const generated =
+                buildFormulaPanelPositions(
+                    graph,
+                    centerNode
+                )
+
+            return visibleGraphNodes.map((node) => ({
+                id: node.node_key,
+                type: "formulaNode",
+                position:
+                    previousPositions.get(node.node_key) ||
+                    generated[node.node_key] ||
+                    {
+                        x: 0,
+                        y: 0
+                    },
+                data: {
+                    node: {
+                        ...node,
+                        label: isCenterNode(node, formulaId)
+                            ? formulaName
+                            : node.label
+                    },
+                    isCenter: isCenterNode(node, formulaId)
+                },
+                draggable: true
+            }))
+        })
+    }, [
+        centerNode,
+        formulaId,
+        formulaName,
+        visibleGraphNodes,
+        setFlowNodes
+    ])
+
+    useEffect(() => {
+        const visibleKeys =
+            new Set(
+                flowNodes.map((node) => node.id)
+            )
+
+        setFlowEdges(
+            graph.edges
+                .filter((edge) => {
+                    return visibleKeys.has(edge.from_node_key) &&
+                        visibleKeys.has(edge.to_node_key)
+                })
+                .map((edge) => {
+                    const target =
+                        nodesByKey.get(edge.to_node_key)
+
+                    const color =
+                        getNodeColor(target?.node_type || "")
+
+                    return {
+                        id: String(edge.id),
+                        source: edge.from_node_key,
+                        target: edge.to_node_key,
+                        type: "smoothstep",
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color
+                        },
+                        style: {
+                            stroke: color,
+                            strokeOpacity: 0.45,
+                            strokeWidth: 1.5
+                        }
+                    }
+                })
+        )
+    }, [
+        flowNodes,
+        graph.edges,
+        nodesByKey,
+        setFlowEdges
+    ])
 
     return (
         <div
@@ -173,18 +485,18 @@ function FormulaGraphCanvas({
                 type="button"
                 onClick={onToggle}
                 className="
-        flex
-        w-full
-        items-center
-        justify-between
-        border-b
-        border-zinc-800
-        px-4
-        py-3
-        text-left
-        transition-colors
-        hover:bg-white/[0.03]
-    "
+                    flex
+                    w-full
+                    items-center
+                    justify-between
+                    border-b
+                    border-zinc-800
+                    px-4
+                    py-3
+                    text-left
+                    transition-colors
+                    hover:bg-white/[0.03]
+                "
             >
                 <span className="text-sm font-black text-white">
                     Graph View
@@ -192,12 +504,12 @@ function FormulaGraphCanvas({
 
                 <span
                     className="
-            inline-flex
-            items-center
-            gap-3
-            text-xs
-            text-zinc-500
-        "
+                        inline-flex
+                        items-center
+                        gap-3
+                        text-xs
+                        text-zinc-500
+                    "
                 >
                     Showing {related.length} nodes
 
@@ -210,188 +522,72 @@ function FormulaGraphCanvas({
             </button>
 
             {isVisible && (
-                <svg
-                    viewBox={`0 0 ${width} ${height}`}
-                    className="
-                        h-[280px]
-                        w-full
-                        max-w-full
-                        sm:h-[360px]
-                        md:h-[420px]
-                    "
-                    role="img"
-                >
-                    <defs>
-                        <filter
-                            id="graphGlow"
-                            x="-50%"
-                            y="-50%"
-                            width="200%"
-                            height="200%"
-                        >
-                            <feGaussianBlur
-                                stdDeviation="3"
-                                result="blur"
-                            />
-                            <feMerge>
-                                <feMergeNode in="blur" />
-                                <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                        </filter>
-                    </defs>
-
-                    {visibleEdges.map((edge) => {
-                        const targetKey =
-                            edge.from_node_key === centerNode?.node_key
-                                ? edge.to_node_key
-                                : edge.from_node_key
-
-                        const target =
-                            positionedNodes.find((item) =>
-                                item.node.node_key === targetKey
-                            )
-
-                        if (!target) {
-                            return null
-                        }
-
-                        return (
-                            <line
-                                key={edge.id}
-                                x1={centerX}
-                                y1={centerY}
-                                x2={target.x}
-                                y2={target.y}
-                                stroke={getNodeColor(target.node.node_type)}
-                                strokeOpacity="0.35"
-                                strokeWidth="1.5"
-                            />
-                        )
-                    })}
-
-                    <g filter="url(#graphGlow)">
-                        <circle
-                            cx={centerX}
-                            cy={centerY}
-                            r="54"
-                            fill="#171022"
-                            stroke="#8b5cf6"
-                            strokeWidth="2"
+                <div className="h-[360px] w-full sm:h-[460px] lg:h-[520px]">
+                    <ReactFlow
+                        nodes={flowNodes}
+                        edges={flowEdges}
+                        nodeTypes={nodeTypes}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        fitView
+                        fitViewOptions={{
+                            padding: 0.25
+                        }}
+                        minZoom={0.2}
+                        maxZoom={1.5}
+                        nodesDraggable
+                        nodesConnectable={false}
+                        elementsSelectable
+                        proOptions={{
+                            hideAttribution: true
+                        }}
+                    >
+                        <Background
+                            color="#3f3f46"
+                            gap={22}
                         />
 
-                        <text
-                            x={centerX}
-                            y={centerY - 5}
-                            textAnchor="middle"
-                            fill="#ffffff"
-                            fontSize="14"
-                            fontWeight="800"
-                        >
-                            {truncateLabel(formulaName, 24)}
-                        </text>
+                        <MiniMap
+                            pannable
+                            zoomable
+                            nodeColor={(node) => {
+                                const data =
+                                    node.data as {
+                                        node: FormulaGraphNode
+                                        isCenter: boolean
+                                    }
 
-                        <text
-                            x={centerX}
-                            y={centerY + 17}
-                            textAnchor="middle"
-                            fill="#a78bfa"
-                            fontSize="11"
-                            fontWeight="700"
-                        >
-                            Formula
-                        </text>
-                    </g>
+                                return data.isCenter
+                                    ? "#8b5cf6"
+                                    : getNodeColor(data.node.node_type)
+                            }}
+                            maskColor="rgba(0,0,0,0.72)"
+                            className="!hidden !bg-zinc-950 !border !border-zinc-800 md:!block"
+                        />
 
-                    {positionedNodes.map((item) => {
-                        const label =
-                            getNodeLabel(item.node)
+                        <Controls
+                            className="
+        !overflow-hidden
+        !rounded-2xl
+        !border
+        !border-violet-500/40
+        !bg-zinc-950
+        !shadow-2xl
+        !shadow-black/50
 
-                        const href =
-                            getNodeHref(item.node)
+        [&_button]:!h-9
+        [&_button]:!w-9
+        [&_button]:!border-zinc-800
+        [&_button]:!bg-zinc-950
+        [&_button]:!text-violet-200
+        [&_button:hover]:!bg-violet-500/15
+        [&_button:hover]:!text-white
 
-                        const color =
-                            getNodeColor(item.node.node_type)
-
-                        const content = (
-                            <g>
-                                <circle
-                                    cx={item.x}
-                                    cy={item.y}
-                                    r="34"
-                                    fill="#050505"
-                                    stroke={color}
-                                    strokeOpacity="0.85"
-                                    strokeWidth="2"
-                                />
-
-                                {item.node.image ? (
-                                    <image
-                                        href={item.node.image}
-                                        x={item.x - 18}
-                                        y={item.y - 18}
-                                        width="36"
-                                        height="36"
-                                        preserveAspectRatio="xMidYMid meet"
-                                    />
-                                ) : (
-                                    <text
-                                        x={item.x}
-                                        y={item.y + 5}
-                                        textAnchor="middle"
-                                        fill={color}
-                                        fontSize="13"
-                                        fontWeight="900"
-                                    >
-                                        {item.node.node_type.slice(0, 2).toUpperCase()}
-                                    </text>
-                                )}
-
-                                <text
-                                    x={item.x}
-                                    y={item.y + 51}
-                                    textAnchor="middle"
-                                    fill="#ffffff"
-                                    fontSize="12"
-                                    fontWeight="800"
-                                >
-                                    {truncateLabel(label, 18)}
-                                </text>
-
-                                <text
-                                    x={item.x}
-                                    y={item.y + 68}
-                                    textAnchor="middle"
-                                    fill={color}
-                                    fontSize="10"
-                                    fontWeight="700"
-                                >
-                                    {formatNodeType(item.node.node_type)}
-                                </text>
-
-                                <title>
-                                    {label} - {formatNodeType(item.node.node_type)}
-                                </title>
-                            </g>
-                        )
-
-                        if (!href) {
-                            return (
-                                <g key={item.node.node_key}>
-                                    {content}
-                                </g>
-                            )
-                        }
-
-                        return (
-                            <a
-                                key={item.node.node_key}
-                                href={href}
-                            >
-                                {content}
-                            </a>
-                        )
-                    })}
-                </svg>
+        [&_svg]:!stroke-current
+    "
+                        />
+                    </ReactFlow>
+                </div>
             )}
         </div>
     )

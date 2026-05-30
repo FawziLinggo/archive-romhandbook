@@ -61,6 +61,22 @@ func setupFormulaTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 		t.Fatal(err)
 	}
 
+	appDBPath :=
+		filepath.Join(
+			backendRoot,
+			"storage",
+			"app.db",
+		)
+
+	dbapp, err :=
+		sql.Open(
+			"sqlite",
+			appDBPath,
+		)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if err := db.Ping(); err != nil {
 		t.Fatalf("failed to open test database %s: %v", dbPath, err)
 	}
@@ -73,6 +89,8 @@ func setupFormulaTestRouter(t *testing.T) (*gin.Engine, *sql.DB) {
 	routes.SetupRoutes(
 		router,
 		db,
+		dbapp,
+		nil,
 	)
 
 	return router, db

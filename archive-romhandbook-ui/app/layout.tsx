@@ -1,4 +1,5 @@
 import MagicCursorTrail from "@/components/effects/MagicCursorTrail"
+import { AuthProvider } from "@/contexts/AuthContext"
 import "@xyflow/react/dist/style.css"
 import "./globals.css"
 
@@ -21,49 +22,53 @@ export default function RootLayout({
 
       <body
         className="
-                    bg-black
-                    text-white
-                "
+                bg-black
+                text-white
+            "
       >
 
         <SidebarProvider>
 
-          <Navbar />
+          <AuthProvider>
 
-          <div
-            className="
+            <Navbar />
+
+            <div
+              className="
                             flex
                             min-h-[calc(100vh-4rem)]
                         "
-          >
-
-            <Sidebar />
-
-            <main
-              className="
-        min-w-0
-        flex-1
-
-        px-5
-        py-6
-
-        sm:px-6
-        sm:py-7
-
-        lg:px-8
-        lg:py-8
-    "
             >
-              {children}
-            </main>
 
-          </div>
+              <Sidebar />
 
-          <AIAssistant />
+              <main
+                className="
+                                min-w-0
+                                flex-1
 
-          <div className="hidden md:block">
-            <MagicCursorTrail />
-          </div>
+                                px-5
+                                py-6
+
+                                sm:px-6
+                                sm:py-7
+
+                                lg:px-8
+                                lg:py-8
+                            "
+              >
+                {children}
+              </main>
+
+            </div>
+
+            <AIAssistant />
+
+            <div className="hidden md:block">
+              <MagicCursorTrail />
+            </div>
+
+          </AuthProvider>
 
         </SidebarProvider>
 
