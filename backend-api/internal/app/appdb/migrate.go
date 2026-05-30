@@ -41,6 +41,15 @@ func Migrate(db *sql.DB) error {
 				FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 			);
 		`,
+		`
+		CREATE INDEX IF NOT EXISTS idx_reports_user_id
+		ON reports(user_id, created_at);
+		`,
+
+		`
+		CREATE INDEX IF NOT EXISTS idx_reports_status
+		ON reports(status);
+		`,
 
 		`
 		CREATE TABLE IF NOT EXISTS user_sessions (

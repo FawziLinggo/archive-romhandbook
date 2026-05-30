@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+
 import {
     useEffect,
     useMemo,
@@ -7,6 +9,7 @@ import {
 } from "react"
 
 import {
+    Bug,
     Loader2,
     RefreshCw,
     Save,
@@ -292,14 +295,24 @@ export default function ProfilePage() {
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={loadProfile}
-                        className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm font-bold text-zinc-300 hover:text-white"
-                    >
-                        <RefreshCw size={15} />
-                        Refresh
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                        <Link
+                            href="/profile/reports"
+                            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 text-sm font-bold text-red-200 hover:bg-red-500/20"
+                        >
+                            <Bug size={15} />
+                            Report Bug
+                        </Link>
+
+                        <button
+                            type="button"
+                            onClick={loadProfile}
+                            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-sm font-bold text-zinc-300 hover:text-white"
+                        >
+                            <RefreshCw size={15} />
+                            Refresh
+                        </button>
+                    </div>
                 </div>
             </section>
 

@@ -8,6 +8,7 @@ import (
 	"backend-api/configs"
 	"backend-api/internal/app/auth"
 	"backend-api/internal/app/profile"
+	"backend-api/internal/app/reports"
 	"backend-api/internal/handlers"
 )
 
@@ -367,5 +368,35 @@ func SetupRoutes(
 	router.GET(
 		"/api/v1/data-health/dashboard",
 		dataHealthHandler.GetDataHealthDashboard,
+	)
+
+	reportHandler :=
+		reports.NewHandler(
+			appDB,
+		)
+
+	api.GET(
+		"/me/reports",
+		reportHandler.ListReports,
+	)
+
+	api.POST(
+		"/me/reports",
+		reportHandler.CreateReport,
+	)
+
+	api.GET(
+		"/me/reports/:id",
+		reportHandler.GetReport,
+	)
+
+	api.PATCH(
+		"/me/reports/:id",
+		reportHandler.UpdateReport,
+	)
+
+	api.DELETE(
+		"/me/reports/:id",
+		reportHandler.DeleteReport,
 	)
 }
