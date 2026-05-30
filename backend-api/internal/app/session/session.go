@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,22 +12,20 @@ import (
 
 const CookieName = "rom_session"
 
-func RequireUserID(
+var ErrMissingSession = errors.New("missing session")
+
+func LookupUserID(
 	c *gin.Context,
 	db *sql.DB,
 ) (
 	string,
-	bool,
+	error,
 ) {
 	sessionToken, err :=
 		c.Cookie(CookieName)
 
 	if err != nil || sessionToken == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Unauthenticated",
-		})
-		return "", false
+		return "", ErrMissingSession
 	}
 
 	var userID string
@@ -45,6 +44,31 @@ func RequireUserID(
 		`,
 		hashToken(sessionToken),
 	).Scan(&userID)
+
+	if err != nil {
+		return "", err
+	}
+
+	return userID, nil
+}
+
+func RequireUserID(
+	c *gin.Context,
+	db *sql.DB,
+) (
+	string,
+	bool,
+) {
+	userID, err :=
+		LookupUserID(c, db)
+
+	if errors.Is(err, ErrMissingSession) {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Unauthenticated",
+		})
+		return "", false
+	}
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{

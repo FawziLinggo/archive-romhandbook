@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"backend-api/internal/middleware"
 	"database/sql"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -36,6 +38,75 @@ func SetupRoutes(
 	appDB *sql.DB,
 	config *configs.Config,
 ) {
+
+	rateLimiter :=
+		middleware.NewRateLimiter()
+
+	apiGlobalLimit :=
+		rateLimiter.LimitPathPrefix(
+			"/api/v1",
+			"api_global",
+			120,
+			time.Minute,
+			middleware.IdentityIP,
+			nil,
+		)
+
+	authLimit :=
+		rateLimiter.Limit(
+			"auth",
+			10,
+			time.Minute,
+			middleware.IdentityIP,
+			nil,
+		)
+
+	commentWriteLimit :=
+		rateLimiter.Limit(
+			"comment_write",
+			10,
+			time.Minute,
+			middleware.IdentityUser,
+			appDB,
+		)
+
+	reportWriteLimit :=
+		rateLimiter.Limit(
+			"report_write",
+			10,
+			time.Minute,
+			middleware.IdentityUser,
+			appDB,
+		)
+
+	featureRequestWriteLimit :=
+		rateLimiter.Limit(
+			"feature_request_write",
+			10,
+			time.Minute,
+			middleware.IdentityUser,
+			appDB,
+		)
+
+	graphLimit :=
+		rateLimiter.Limit(
+			"graph",
+			20,
+			time.Minute,
+			middleware.IdentityUser,
+			appDB,
+		)
+
+	adminLimit :=
+		rateLimiter.Limit(
+			"admin",
+			60,
+			time.Minute,
+			middleware.IdentityAdmin,
+			appDB,
+		)
+
+	router.Use(apiGlobalLimit)
 
 	skillHandler :=
 		handlers.SkillHandler{
@@ -84,11 +155,13 @@ func SetupRoutes(
 
 	api.GET(
 		"/auth/discord/login",
+		authLimit,
 		authHandler.DiscordLogin,
 	)
 
 	api.GET(
 		"/auth/discord/callback",
+		authLimit,
 		authHandler.DiscordCallback,
 	)
 
@@ -213,12 +286,14 @@ func SetupRoutes(
 
 	router.GET(
 		"/api/v1/graph/meta",
+		graphLimit,
 		requireAuth(appDB),
 		formulaHandler.GetFormulaGraphMeta,
 	)
 
 	router.GET(
 		"/api/v1/graph/search/nodes",
+		graphLimit,
 		requireAuth(appDB),
 		formulaHandler.SearchFormulaGraphNodes,
 	)
@@ -230,6 +305,8 @@ func SetupRoutes(
 
 	router.GET(
 		"/api/v1/graph/nodes/:node_type/:ref_id/relations",
+		graphLimit,
+		requireAuth(appDB),
 		formulaHandler.GetFormulaGraphNodeRelations,
 	)
 
@@ -387,6 +464,7 @@ func SetupRoutes(
 
 	router.GET(
 		"/api/v1/data-health/dashboard",
+		adminLimit,
 		requireAuth(appDB),
 		dataHealthHandler.GetDataHealthDashboard,
 	)
@@ -428,6 +506,7 @@ func SetupRoutes(
 
 	api.POST(
 		"/me/reports",
+		reportWriteLimit,
 		reportHandler.CreateReport,
 	)
 
@@ -438,21 +517,25 @@ func SetupRoutes(
 
 	api.PATCH(
 		"/me/reports/:id",
+		reportWriteLimit,
 		reportHandler.UpdateReport,
 	)
 
 	api.DELETE(
 		"/me/reports/:id",
+		reportWriteLimit,
 		reportHandler.DeleteReport,
 	)
 
 	api.GET(
 		"/admin/reports",
+		adminLimit,
 		reportHandler.ListAdminReports,
 	)
 
 	api.PATCH(
 		"/admin/reports/:id/status",
+		adminLimit,
 		reportHandler.UpdateAdminReportStatus,
 	)
 
@@ -475,16 +558,19 @@ func SetupRoutes(
 
 	api.POST(
 		"/comments",
+		commentWriteLimit,
 		commentHandler.CreateComment,
 	)
 
 	api.PATCH(
 		"/comments/:id",
+		commentWriteLimit,
 		commentHandler.UpdateComment,
 	)
 
 	api.DELETE(
 		"/comments/:id",
+		commentWriteLimit,
 		commentHandler.DeleteComment,
 	)
 
@@ -495,6 +581,7 @@ func SetupRoutes(
 
 	api.POST(
 		"/me/feature-requests",
+		featureRequestWriteLimit,
 		featureRequestHandler.Create,
 	)
 
@@ -505,21 +592,25 @@ func SetupRoutes(
 
 	api.PATCH(
 		"/me/feature-requests/:id",
+		featureRequestWriteLimit,
 		featureRequestHandler.Update,
 	)
 
 	api.DELETE(
 		"/me/feature-requests/:id",
+		featureRequestWriteLimit,
 		featureRequestHandler.Delete,
 	)
 
 	api.GET(
 		"/admin/feature-requests",
+		adminLimit,
 		featureRequestHandler.ListAdmin,
 	)
 
 	api.PATCH(
 		"/admin/feature-requests/:id/status",
+		adminLimit,
 		featureRequestHandler.UpdateAdminStatus,
 	)
 }
