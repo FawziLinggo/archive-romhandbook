@@ -10,6 +10,58 @@ import AIAssistant from "@/components/ai-assistant/AIAssistant"
 
 import { SidebarProvider } from "@/contexts/SidebarContext"
 
+
+import type {
+  Metadata
+} from "next"
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://rom.galauit.com"),
+
+  title: {
+    default: "ROM Handbook Archive",
+    template: "%s | ROM Handbook Archive"
+  },
+
+  description:
+    "Preserving ROM Handbook data: cards, equipments, headwears, monsters, skills, formulas, pets, mounts, and archive graph relations.",
+
+  applicationName: "ROM Handbook Archive",
+
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png"
+  },
+
+  openGraph: {
+    type: "website",
+    url: "https://rom.galauit.com",
+    siteName: "ROM Handbook Archive",
+    title: "ROM Handbook Archive",
+    description:
+      "Browse archived ROM Handbook cards, equipments, monsters, skills, formulas, and graph relations.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ROM Handbook Archive"
+      }
+    ]
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "ROM Handbook Archive",
+    description:
+      "Browse archived ROM Handbook cards, equipments, monsters, skills, formulas, and graph relations.",
+    images: [
+      "/og-image.png"
+    ]
+  }
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{

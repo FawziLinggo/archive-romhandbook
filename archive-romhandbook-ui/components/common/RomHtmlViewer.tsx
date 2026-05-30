@@ -5,6 +5,44 @@ type Props = {
 import {
     assetUrl
 } from "@/lib/utils"
+
+
+function rewriteArchiveAssetUrls(
+    html: string
+) {
+    const assetBaseUrl =
+        process.env.NEXT_PUBLIC_ASSET_BASE_URL
+
+    if (!assetBaseUrl) {
+        return html
+    }
+
+    const normalizedBaseUrl =
+        assetBaseUrl.replace(
+            /\/$/,
+            ""
+        )
+
+    return html
+        .replaceAll(
+            'src="/assets/',
+            `src="${normalizedBaseUrl}/assets/`
+        )
+        .replaceAll(
+            "src='/assets/",
+            `src='${normalizedBaseUrl}/assets/`
+        )
+        .replaceAll(
+            'href="/assets/',
+            `href="${normalizedBaseUrl}/assets/`
+        )
+        .replaceAll(
+            "href='/assets/",
+            `href='${normalizedBaseUrl}/assets/`
+        )
+}
+
+
 export default function RomHtmlViewer({
     html
 }: Props) {
@@ -12,6 +50,10 @@ export default function RomHtmlViewer({
     // =========================
     // FULL HTML
     // =========================
+
+
+    const rewrittenHtml =
+        rewriteArchiveAssetUrls(html)
 
     const fullHtml = `
                 <html>
@@ -53,12 +95,13 @@ href="${assetUrl("/assets/romhandbook/application.css")}"
 
                 <body>
 
-                ${html}
+                ${rewrittenHtml}
 
                 </body>
 
                 </html>
 `
+
 
     return (
 
