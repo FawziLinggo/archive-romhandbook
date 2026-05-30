@@ -108,8 +108,7 @@ export default function HomeGlobalSearch({
                 setResults(response.data)
 
             } catch (err) {
-
-                console.error(err)
+                setResults([])
 
             } finally {
 

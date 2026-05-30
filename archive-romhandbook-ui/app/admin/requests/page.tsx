@@ -24,6 +24,7 @@ import {
 import {
     useAuth
 } from "@/contexts/AuthContext"
+import { getApiErrorMessage } from "@/lib/api-client"
 
 type FeatureRequest = {
     id: string
@@ -227,11 +228,8 @@ export default function AdminRequestsPage() {
 
             setRequests(json.data)
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to load feature requests"
-            )
+            setError(getApiErrorMessage(err))
+
         } finally {
             setIsLoading(false)
         }
@@ -277,11 +275,8 @@ export default function AdminRequestsPage() {
 
             setMessage(`Feature request marked as ${nextStatus}.`)
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to update feature request"
-            )
+            setError(getApiErrorMessage(err))
+
         } finally {
             setUpdatingID(null)
         }

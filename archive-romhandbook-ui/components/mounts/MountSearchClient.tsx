@@ -103,8 +103,7 @@ export default function MountSearchClient({
                 setMounts(response.data)
 
             } catch (err) {
-
-                console.error(err)
+                setMounts([])
 
             } finally {
 

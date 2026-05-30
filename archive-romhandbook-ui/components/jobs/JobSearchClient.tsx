@@ -116,8 +116,7 @@ export default function JobSearchClient({
                 setSearchHasNext(response.meta.has_next)
 
             } catch (err) {
-
-                console.error(err)
+                setJobs([])
 
             } finally {
 

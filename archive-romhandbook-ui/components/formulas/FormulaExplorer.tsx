@@ -148,8 +148,7 @@ export default function FormulaExplorer({
                 setSearchHasNext(response.meta.has_next)
 
             } catch (err) {
-
-                console.error(err)
+                setFormulas([])
 
             } finally {
 

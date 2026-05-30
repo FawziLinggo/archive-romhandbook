@@ -9,6 +9,10 @@ import {
 import Link from "next/link"
 
 import {
+    getApiErrorMessage
+} from "@/lib/api-client"
+
+import {
     ArrowLeft,
     Bug,
     Edit3,
@@ -231,11 +235,7 @@ export default function ProfileReportsPage() {
 
             setReports(json.data)
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to load reports"
-            )
+            setError(getApiErrorMessage(err))
         } finally {
             setIsLoading(false)
         }
@@ -289,11 +289,7 @@ export default function ProfileReportsPage() {
             resetForm()
             await loadReports()
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to save report"
-            )
+            setError(getApiErrorMessage(err))
         } finally {
             setIsSaving(false)
         }
@@ -336,11 +332,7 @@ export default function ProfileReportsPage() {
             setMessage("Report deleted.")
             await loadReports()
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to delete report"
-            )
+            setError(getApiErrorMessage(err))
         }
     }
 

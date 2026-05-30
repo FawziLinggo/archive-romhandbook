@@ -148,8 +148,7 @@ export default function SkillSearchClient({
                 )
 
             } catch (err) {
-
-                console.error(err)
+                setSkills([])
 
             } finally {
 

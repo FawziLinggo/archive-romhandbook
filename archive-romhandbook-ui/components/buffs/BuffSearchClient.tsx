@@ -130,9 +130,7 @@ export default function BuffSearchClient({
                 setSearchHasNext(response.meta.has_next)
 
             } catch (err) {
-
-                console.error(err)
-
+                setBuffs([])
             } finally {
 
                 setLoading(false)

@@ -182,8 +182,7 @@ export default function CardSearchClient({
                 setSearchHasNext(response.meta.has_next)
 
             } catch (err) {
-
-                console.error(err)
+                setCards([])
 
             } finally {
 

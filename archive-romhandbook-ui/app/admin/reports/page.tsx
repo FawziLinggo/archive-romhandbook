@@ -24,6 +24,7 @@ import {
 import {
     useAuth
 } from "@/contexts/AuthContext"
+import { getApiErrorMessage } from "@/lib/api-client"
 
 type AdminReport = {
     id: string
@@ -232,11 +233,8 @@ export default function AdminReportsPage() {
 
             setReports(json.data)
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to load admin reports"
-            )
+            setError(getApiErrorMessage(err))
+
         } finally {
             setIsLoading(false)
         }
@@ -282,11 +280,8 @@ export default function AdminReportsPage() {
 
             setMessage(`Report marked as ${nextStatus}.`)
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to update report"
-            )
+            setError(getApiErrorMessage(err))
+
         } finally {
             setUpdatingID(null)
         }

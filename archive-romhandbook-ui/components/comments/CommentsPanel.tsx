@@ -1,6 +1,9 @@
 "use client"
 
 import {
+    getApiErrorMessage
+} from "@/lib/api-client"
+import {
     useEffect,
     useMemo,
     useState
@@ -585,11 +588,8 @@ export default function CommentsPanel({
 
             setComments(json.data)
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to load comments"
-            )
+            setError(getApiErrorMessage(err))
+
         } finally {
             setIsLoading(false)
         }
@@ -631,11 +631,7 @@ export default function CommentsPanel({
 
             await loadComments()
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to save comment"
-            )
+            setError(getApiErrorMessage(err))
         } finally {
             setIsSaving(false)
         }
@@ -673,11 +669,7 @@ export default function CommentsPanel({
 
             await loadComments()
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to update comment"
-            )
+            setError(getApiErrorMessage(err))
         } finally {
             setIsSaving(false)
         }
@@ -713,11 +705,7 @@ export default function CommentsPanel({
 
             await loadComments()
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to delete comment"
-            )
+            setError(getApiErrorMessage(err))
         } finally {
             setIsSaving(false)
         }

@@ -159,8 +159,7 @@ export default function MonsterSearchClient({
                 setSearchHasNext(response.meta.has_next)
 
             } catch (err) {
-
-                console.error(err)
+                setMonsters([])
 
             } finally {
 

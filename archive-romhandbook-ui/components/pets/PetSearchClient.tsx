@@ -112,8 +112,7 @@ export default function PetSearchClient({
                 )
 
             } catch (err) {
-
-                console.error(err)
+                setPets([])
 
             } finally {
 

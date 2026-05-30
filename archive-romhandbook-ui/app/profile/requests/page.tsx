@@ -23,6 +23,7 @@ import {
 import {
     useAuth
 } from "@/contexts/AuthContext"
+import { getApiErrorMessage } from "@/lib/api-client"
 
 type FeatureRequest = {
     id: string
@@ -192,11 +193,8 @@ export default function ProfileRequestsPage() {
 
             setRequests(json.data)
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to load feature requests"
-            )
+            setError(getApiErrorMessage(err))
+
         } finally {
             setIsLoading(false)
         }
@@ -247,11 +245,8 @@ export default function ProfileRequestsPage() {
             resetForm()
             await loadRequests()
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to save feature request"
-            )
+            setError(getApiErrorMessage(err))
+
         } finally {
             setIsSaving(false)
         }
@@ -292,11 +287,8 @@ export default function ProfileRequestsPage() {
             setMessage("Feature request deleted.")
             await loadRequests()
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to delete feature request"
-            )
+            setError(getApiErrorMessage(err))
+
         }
     }
 

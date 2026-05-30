@@ -38,6 +38,7 @@ import {
     type Node as FlowNode
 } from "@xyflow/react"
 
+import { getApiErrorMessage } from "@/lib/api-client"
 import type {
     ApiResponse,
     FormulaGraphNode,
@@ -1075,11 +1076,8 @@ export default function RelatedFormulaWidget({
                 }
             } catch (err) {
                 if (!ignore) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Failed to load related formulas"
-                    )
+                    setError(getApiErrorMessage(err))
+
                 }
             } finally {
                 if (!ignore) {

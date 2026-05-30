@@ -23,6 +23,7 @@ import {
     useAuth
 } from "@/contexts/AuthContext"
 
+import { getApiErrorMessage } from "@/lib/api-client"
 import type {
     DataHealthDashboard,
     DataHealthTableMetric
@@ -243,11 +244,7 @@ export default function DataHealthDashboardPage() {
                 setAuthRequired(false)
                 setHealth(json.data)
             } catch (err) {
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : "Failed to load data health dashboard"
-                )
+                setError(getApiErrorMessage(err))
             } finally {
                 setIsLoading(false)
             }

@@ -32,6 +32,7 @@ import {
     useState
 } from "react"
 
+import { getApiErrorMessage } from "@/lib/api-client"
 import type {
     ApiResponse,
     FormulaGraph,
@@ -698,11 +699,8 @@ export default function FormulaGraphPanel({
                 )
             } catch (err) {
                 if (!ignore) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Failed to load graph summary"
-                    )
+                    setError(getApiErrorMessage(err))
+
                 }
             } finally {
                 if (!ignore) {
@@ -758,11 +756,8 @@ export default function FormulaGraphPanel({
                 }
             } catch (err) {
                 if (!ignore) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Failed to load formula graph"
-                    )
+                    setError(getApiErrorMessage(err))
+
                 }
             } finally {
                 if (!ignore) {
