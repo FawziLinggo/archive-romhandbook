@@ -7,6 +7,7 @@ import (
 
 	"backend-api/configs"
 	"backend-api/internal/app/auth"
+	"backend-api/internal/app/profile"
 	"backend-api/internal/handlers"
 )
 
@@ -44,6 +45,22 @@ func SetupRoutes(
 			ClientSecret: config.DiscordClientSecret,
 			RedirectURL:  config.DiscordRedirectURL,
 		},
+	)
+
+	profileHandler :=
+		profile.NewHandler(
+			appDB,
+			db,
+		)
+
+	api.GET(
+		"/me/profile",
+		profileHandler.GetProfile,
+	)
+
+	api.PATCH(
+		"/me/profile",
+		profileHandler.UpdateProfile,
 	)
 
 	api.GET(

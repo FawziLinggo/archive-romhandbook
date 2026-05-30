@@ -1,16 +1,18 @@
 "use client"
-
+import Link from "next/link"
 import {
     useEffect,
     useState
 } from "react"
+
 
 import {
     Loader2,
     LogIn,
     LogOut,
     Shield,
-    User
+    User,
+    UserRound
 } from "lucide-react"
 
 import {
@@ -119,22 +121,24 @@ export default function SidebarAccountCard({
                             : "Login with Discord"
                     }
                 >
-                    {showLoading ? (
-                        <Loader2
-                            size={18}
-                            className="animate-spin"
-                        />
-                    ) : currentUser?.avatar_url ? (
-                        <img
-                            src={currentUser.avatar_url}
-                            alt={displayName}
-                            className="h-full w-full object-cover"
-                        />
-                    ) : showAuthenticated ? (
-                        getInitial(displayName)
-                    ) : (
-                        <User size={18} />
-                    )}
+                    <Link href="/profile">
+                        {showLoading ? (
+                            <Loader2
+                                size={18}
+                                className="animate-spin"
+                            />
+                        ) : currentUser?.avatar_url ? (
+                            <img
+                                src={currentUser.avatar_url}
+                                alt={displayName}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : showAuthenticated ? (
+                            getInitial(displayName)
+                        ) : (
+                            <User size={18} />
+                        )}
+                    </Link>
                 </button>
             </div>
         )
@@ -343,37 +347,76 @@ export default function SidebarAccountCard({
                         "
                     >
                         {showAuthenticated ? (
-                            <button
-                                type="button"
-                                onClick={logout}
+                            <div
                                 className="
-                                    inline-flex
-                                    h-9
-                                    items-center
-                                    justify-center
-                                    gap-2
-
-                                    rounded-xl
-
-                                    border
-                                    border-zinc-700/70
-
-                                    bg-zinc-950/70
-
-                                    text-xs
-                                    font-bold
-                                    text-zinc-300
-
-                                    transition-colors
-
-                                    hover:border-red-500/40
-                                    hover:bg-red-500/10
-                                    hover:text-red-200
-                                "
+            grid
+            grid-cols-2
+            gap-2
+        "
                             >
-                                <LogOut size={14} />
-                                Logout
-                            </button>
+                                <Link
+                                    href="/profile"
+                                    className="
+                inline-flex
+                h-9
+                items-center
+                justify-center
+                gap-2
+
+                rounded-xl
+
+                border
+                border-violet-500/30
+
+                bg-violet-500/10
+
+                text-xs
+                font-bold
+                text-violet-200
+
+                transition-colors
+
+                hover:border-violet-400/50
+                hover:bg-violet-500/20
+                hover:text-white
+            "
+                                >
+                                    <UserRound size={14} />
+                                    Profile
+                                </Link>
+
+                                <button
+                                    type="button"
+                                    onClick={logout}
+                                    className="
+                inline-flex
+                h-9
+                items-center
+                justify-center
+                gap-2
+
+                rounded-xl
+
+                border
+                border-zinc-700/70
+
+                bg-zinc-950/70
+
+                text-xs
+                font-bold
+                text-zinc-300
+
+                transition-colors
+
+                hover:border-red-500/40
+                hover:bg-red-500/10
+                hover:text-red-200
+            "
+                                >
+                                    <LogOut size={14} />
+                                    Logout
+                                </button>
+                            </div>
                         ) : (
                             <button
                                 type="button"

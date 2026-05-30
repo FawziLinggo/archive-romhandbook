@@ -28,16 +28,18 @@ func Migrate(db *sql.DB) error {
 		`,
 
 		`
-		CREATE TABLE IF NOT EXISTS user_profiles (
-			user_id TEXT PRIMARY KEY,
-			class_name TEXT,
-			rank_name TEXT NOT NULL DEFAULT 'Novice',
-			points_total INTEGER NOT NULL DEFAULT 0,
-			bio TEXT,
-			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-		);
+			CREATE TABLE IF NOT EXISTS user_profiles (
+				user_id TEXT PRIMARY KEY,
+				class_id TEXT,
+				class_name TEXT,
+				class_image TEXT,
+				rank_name TEXT NOT NULL DEFAULT 'Novice',
+				points_total INTEGER NOT NULL DEFAULT 0,
+				bio TEXT,
+				created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+			);
 		`,
 
 		`
