@@ -12,6 +12,24 @@ type Props = {
     counts: any
 }
 
+
+function rankProgressPercent(
+    pointsTotal: number,
+    nextRankPoints: number | null
+) {
+    if (!nextRankPoints || nextRankPoints <= 0) {
+        return 100
+    }
+
+    return Math.min(
+        100,
+        Math.max(
+            0,
+            Math.round((pointsTotal / nextRankPoints) * 100)
+        )
+    )
+}
+
 export default function SidebarClient({
     counts
 }: Props) {

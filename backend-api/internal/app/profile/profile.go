@@ -18,20 +18,23 @@ type Handler struct {
 }
 
 type ProfileResponse struct {
-	ID             string  `json:"id"`
-	Email          *string `json:"email"`
-	DisplayName    string  `json:"display_name"`
-	AvatarURL      *string `json:"avatar_url"`
-	Provider       string  `json:"provider"`
-	ProviderUserID string  `json:"provider_user_id"`
-	Role           string  `json:"role"`
-	Status         string  `json:"status"`
-	ClassID        *string `json:"class_id"`
-	ClassName      *string `json:"class_name"`
-	ClassImage     *string `json:"class_image"`
-	RankName       string  `json:"rank_name"`
-	PointsTotal    int     `json:"points_total"`
-	Bio            *string `json:"bio"`
+	ID               string  `json:"id"`
+	Email            *string `json:"email"`
+	DisplayName      string  `json:"display_name"`
+	AvatarURL        *string `json:"avatar_url"`
+	Provider         string  `json:"provider"`
+	ProviderUserID   string  `json:"provider_user_id"`
+	Role             string  `json:"role"`
+	Status           string  `json:"status"`
+	ClassID          *string `json:"class_id"`
+	ClassName        *string `json:"class_name"`
+	ClassImage       *string `json:"class_image"`
+	RankName         string  `json:"rank_name"`
+	PointsTotal      int     `json:"points_total"`
+	Bio              *string `json:"bio"`
+	NextRankName     *string `json:"next_rank_name"`
+	NextRankPoints   *int    `json:"next_rank_points"`
+	PointsToNextRank int     `json:"points_to_next_rank"`
 }
 
 type UpdateProfileRequest struct {
@@ -297,6 +300,44 @@ func (handler *Handler) requireUserID(c *gin.Context) (
 	return userID, true
 }
 
+func (handler *Handler) attachRankProgress(profile *ProfileResponse) {
+	var nextRankName string
+	var nextRankPoints int
+
+	err :=
+		handler.AppDB.QueryRow(
+			`
+			SELECT
+				rank_name,
+				min_points
+			FROM rank_rules
+			WHERE min_points > ?
+			ORDER BY min_points ASC
+			LIMIT 1
+			`,
+			profile.PointsTotal,
+		).Scan(
+			&nextRankName,
+			&nextRankPoints,
+		)
+
+	if err != nil {
+		profile.NextRankName = nil
+		profile.NextRankPoints = nil
+		profile.PointsToNextRank = 0
+		return
+	}
+
+	profile.NextRankName =
+		&nextRankName
+
+	profile.NextRankPoints =
+		&nextRankPoints
+
+	profile.PointsToNextRank =
+		nextRankPoints - profile.PointsTotal
+}
+
 func (handler *Handler) getProfileByUserID(
 	userID string,
 ) (
@@ -375,6 +416,8 @@ func (handler *Handler) getProfileByUserID(
 
 	profile.Bio =
 		stringPtrFromNull(bio)
+
+	handler.attachRankProgress(&profile)
 
 	return profile, nil
 }

@@ -23,6 +23,23 @@ type Props = {
     collapsed: boolean
 }
 
+function rankProgressPercent(
+    pointsTotal: number,
+    nextRankPoints: number | null
+) {
+    if (!nextRankPoints || nextRankPoints <= 0) {
+        return 100
+    }
+
+    return Math.min(
+        100,
+        Math.max(
+            0,
+            Math.round((pointsTotal / nextRankPoints) * 100)
+        )
+    )
+}
+
 function getInitial(
     value?: string | null
 ) {
@@ -73,6 +90,15 @@ export default function SidebarAccountCard({
 
     const pointsTotal =
         currentUser?.points_total || 0
+
+    const nextRankName =
+        currentUser?.next_rank_name || null
+
+    const nextRankPoints =
+        currentUser?.next_rank_points || null
+
+    const pointsToNextRank =
+        currentUser?.points_to_next_rank || 0
 
     if (collapsed) {
         return (
@@ -465,16 +491,36 @@ export default function SidebarAccountCard({
                     </div>
 
                     {showAuthenticated && (
-                        <div
-                            className="
-                                mt-2
-                                text-center
-                                text-[10px]
-                                font-medium
-                                text-zinc-500
-                            "
-                        >
-                            {pointsTotal} contribution points
+                        <div className="mt-3">
+                            <div className="flex items-center justify-between gap-2 text-[11px]">
+
+                                {nextRankName && (
+                                    <span className="font-black text-violet-300">
+                                        {pointsToNextRank} to {nextRankName}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="mt-2 h-2 overflow-hidden rounded-full border border-zinc-800 bg-black">
+                                <div
+                                    className="
+                    h-full
+                    rounded-full
+                    bg-gradient-to-r
+                    from-violet-500
+                    via-fuchsia-400
+                    to-cyan-300
+                    shadow-[0_0_16px_rgba(168,85,247,0.65)]
+                    transition-all
+                "
+                                    style={{
+                                        width: `${rankProgressPercent(
+                                            pointsTotal,
+                                            nextRankPoints
+                                        )}%`
+                                    }}
+                                />
+                            </div>
                         </div>
                     )}
                 </div>

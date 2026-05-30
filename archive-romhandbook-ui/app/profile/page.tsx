@@ -39,6 +39,23 @@ function emptyToNull(value: string) {
         : trimmed
 }
 
+function rankProgressPercent(
+    pointsTotal: number,
+    nextRankPoints: number | null
+) {
+    if (!nextRankPoints || nextRankPoints <= 0) {
+        return 100
+    }
+
+    return Math.min(
+        100,
+        Math.max(
+            0,
+            Math.round((pointsTotal / nextRankPoints) * 100)
+        )
+    )
+}
+
 function classImageUrl(image: string | null) {
     if (!image) {
         return null
@@ -495,6 +512,53 @@ export default function ProfilePage() {
                             Spam, duplicate reports, or deleted content may reduce points.
                             Large rewards are granted only after review.
                         </p>
+                    </div>
+
+                    <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <p className="text-xs font-black uppercase tracking-wide text-zinc-500">
+                                    Rank Progress
+                                </p>
+
+                                <p className="mt-1 text-sm font-bold text-zinc-300">
+                                    {profile.next_rank_name
+                                        ? `${profile.points_to_next_rank} points to ${profile.next_rank_name}`
+                                        : "Maximum rank reached"}
+                                </p>
+                            </div>
+
+                            <div className="text-right">
+                                <p className="text-lg font-black text-white">
+                                    {profile.points_total}
+                                </p>
+
+                                <p className="text-xs text-zinc-500">
+                                    / {profile.next_rank_points || profile.points_total}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 h-3 overflow-hidden rounded-full border border-zinc-800 bg-black">
+                            <div
+                                className="
+                h-full
+                rounded-full
+                bg-gradient-to-r
+                from-violet-500
+                via-fuchsia-400
+                to-cyan-300
+                shadow-[0_0_18px_rgba(168,85,247,0.7)]
+                transition-all
+            "
+                                style={{
+                                    width: `${rankProgressPercent(
+                                        profile.points_total,
+                                        profile.next_rank_points
+                                    )}%`
+                                }}
+                            />
+                        </div>
                     </div>
                 </aside>
 

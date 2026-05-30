@@ -13,6 +13,9 @@ export type Profile = {
     rank_name: string
     points_total: number
     bio: string | null
+    next_rank_name: string | null
+    next_rank_points: number | null
+    points_to_next_rank: number
 }
 
 export type JobClass = {

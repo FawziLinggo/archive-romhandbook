@@ -21,6 +21,9 @@ type AuthUser = {
     class_name: string | null
     rank_name: string
     points_total: number
+    next_rank_name: string | null
+    next_rank_points: number | null
+    points_to_next_rank: number
 }
 
 type AuthContextValue = {

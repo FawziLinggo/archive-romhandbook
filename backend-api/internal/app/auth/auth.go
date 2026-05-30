@@ -44,17 +44,20 @@ type DiscordUser struct {
 }
 
 type MeResponse struct {
-	ID             string  `json:"id"`
-	Email          *string `json:"email"`
-	DisplayName    string  `json:"display_name"`
-	AvatarURL      *string `json:"avatar_url"`
-	Provider       string  `json:"provider"`
-	ProviderUserID string  `json:"provider_user_id"`
-	Role           string  `json:"role"`
-	Status         string  `json:"status"`
-	ClassName      *string `json:"class_name"`
-	RankName       string  `json:"rank_name"`
-	PointsTotal    int     `json:"points_total"`
+	ID               string  `json:"id"`
+	Email            *string `json:"email"`
+	DisplayName      string  `json:"display_name"`
+	AvatarURL        *string `json:"avatar_url"`
+	Provider         string  `json:"provider"`
+	ProviderUserID   string  `json:"provider_user_id"`
+	Role             string  `json:"role"`
+	Status           string  `json:"status"`
+	ClassName        *string `json:"class_name"`
+	RankName         string  `json:"rank_name"`
+	PointsTotal      int     `json:"points_total"`
+	NextRankName     *string `json:"next_rank_name"`
+	NextRankPoints   *int    `json:"next_rank_points"`
+	PointsToNextRank int     `json:"points_to_next_rank"`
 }
 
 func NewHandler(
@@ -509,6 +512,44 @@ func (handler *Handler) createSession(
 	return err
 }
 
+func (handler *Handler) attachRankProgress(user *MeResponse) {
+	var nextRankName string
+	var nextRankPoints int
+
+	err :=
+		handler.DB.QueryRow(
+			`
+			SELECT
+				rank_name,
+				min_points
+			FROM rank_rules
+			WHERE min_points > ?
+			ORDER BY min_points ASC
+			LIMIT 1
+			`,
+			user.PointsTotal,
+		).Scan(
+			&nextRankName,
+			&nextRankPoints,
+		)
+
+	if err != nil {
+		user.NextRankName = nil
+		user.NextRankPoints = nil
+		user.PointsToNextRank = 0
+		return
+	}
+
+	user.NextRankName =
+		&nextRankName
+
+	user.NextRankPoints =
+		&nextRankPoints
+
+	user.PointsToNextRank =
+		nextRankPoints - user.PointsTotal
+}
+
 func (handler *Handler) getUserBySessionHash(
 	sessionTokenHash string,
 ) (
@@ -574,6 +615,8 @@ func (handler *Handler) getUserBySessionHash(
 
 	user.ClassName =
 		stringPtrFromNull(className)
+
+	handler.attachRankProgress(&user)
 
 	_, _ = handler.DB.Exec(
 		`
