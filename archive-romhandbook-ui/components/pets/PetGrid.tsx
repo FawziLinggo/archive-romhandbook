@@ -1,4 +1,4 @@
-import { Pet } from "@/lib/queries/pets"
+import { Pet } from "@/lib/types/Pets"
 import PetCard from "./PetCard"
 
 export default function PetGrid({

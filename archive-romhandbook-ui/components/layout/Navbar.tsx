@@ -5,7 +5,14 @@ import {
 } from "@/contexts/SidebarContext"
 import { assetUrl } from "@/lib/utils"
 
+import {
+    Info
+} from "lucide-react"
 import Link from "next/link"
+
+import {
+    openArchiveNotice
+} from "@/components/common/ArchiveNotice"
 
 export default function Navbar() {
 
@@ -210,6 +217,31 @@ export default function Navbar() {
                     </div>
 
                 </div>
+
+                <button
+                    type="button"
+                    onClick={openArchiveNotice}
+                    aria-label="Open archive notice"
+                    title="Archive notice"
+                    className="
+        ml-auto
+        inline-flex
+        h-10
+        items-center
+        justify-center
+        text-sm
+        font-bold
+        text-zinc-300
+
+        transition-colors
+        hover:border-violet-500/40
+        hover:bg-violet-500/10
+        hover:text-white
+    "
+                >
+                    <Info size={17} />
+
+                </button>
 
                 {/* RIGHT SIDE */}
 

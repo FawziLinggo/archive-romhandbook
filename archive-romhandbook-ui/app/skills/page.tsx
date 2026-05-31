@@ -4,6 +4,11 @@ import {
     apiFetch
 } from "@/lib/api"
 
+import type {
+    Skill,
+    SkillListResponse
+} from "@/lib/types/Skills"
+
 type Props = {
 
     searchParams: Promise<{
@@ -25,27 +30,22 @@ export default async function SkillsPage({
         await searchParams
 
     const page =
-        Number(params.page || "1")
+        Math.max(
+            1,
+            Number(params.page || "1")
+        )
 
     const query =
         params.q || ""
 
-    // =====================
-    // FETCH API
-    // =====================
-
     const response =
-        await apiFetch<any>(
+        await apiFetch<SkillListResponse>(
 
-            `/api/v1/skills?page=${page}&limit=24&query=${query}`
+            `/api/v1/skills?page=${page}&limit=24&query=${encodeURIComponent(query)}`
 
         )
 
-    // =====================
-    // API DATA
-    // =====================
-
-    const skills =
+    const skills: Skill[] =
         response.data
 
     const meta =
@@ -57,7 +57,6 @@ export default async function SkillsPage({
             className="
                 mx-auto
                 max-w-7xl
-
                 px-6
                 py-10
             "
@@ -70,7 +69,6 @@ export default async function SkillsPage({
                         flex
                         flex-col
                         gap-6
-
                         lg:flex-row
                         lg:items-end
                         lg:justify-between
@@ -82,37 +80,26 @@ export default async function SkillsPage({
                         <h1
                             className="
                                 mt-5
-
                                 text-5xl
                                 font-black
-
                                 tracking-tight
-
                                 text-white
                             "
                         >
-
                             Skills
-
                         </h1>
 
                         <p
                             className="
                                 mt-4
-
                                 max-w-2xl
-
                                 text-lg
                                 leading-8
-
                                 text-zinc-400
                             "
                         >
-
-                            Explore Ragnarok M skills,
-                            mechanics, formulas,
+                            Explore Ragnarok M skills, mechanics, formulas,
                             and hidden interactions.
-
                         </p>
 
                     </div>

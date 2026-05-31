@@ -22,9 +22,6 @@ func Migrate(db *sql.DB) error {
 		);
 		`,
 
-		`CREATE INDEX IF NOT EXISTS idx_comments_target
-		ON comments(target_type, target_id, created_at);`,
-
 		`CREATE INDEX IF NOT EXISTS idx_comments_parent_id
 		ON comments(parent_id);`,
 

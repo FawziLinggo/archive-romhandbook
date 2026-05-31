@@ -1,8 +1,8 @@
-import SkillCard from "./SkillCard"
-
 import type {
     Skill
-} from "@/lib/queries/skills"
+} from "@/lib/types/Skills"
+
+import SkillCard from "./SkillCard"
 
 type Props = {
 
@@ -16,10 +16,6 @@ export default function SkillGrid({
 
 }: Props) {
 
-    // =====================
-    // EMPTY STATE
-    // =====================
-
     if (!skills.length) {
 
         return (
@@ -29,43 +25,22 @@ export default function SkillGrid({
                     flex
                     items-center
                     justify-center
-
                     rounded-3xl
-
                     border
                     border-zinc-800
-
                     bg-zinc-950
-
                     py-24
                 "
             >
 
                 <div className="text-center">
 
-                    <h3
-                        className="
-                            text-2xl
-                            font-bold
-
-                            text-white
-                        "
-                    >
-
+                    <h3 className="text-2xl font-bold text-white">
                         No skills found
-
                     </h3>
 
-                    <p
-                        className="
-                            mt-3
-
-                            text-zinc-500
-                        "
-                    >
-
+                    <p className="mt-3 text-zinc-500">
                         Try another keyword or filter.
-
                     </p>
 
                 </div>
@@ -76,17 +51,12 @@ export default function SkillGrid({
 
     }
 
-    // =====================
-    // GRID
-    // =====================
-
     return (
 
         <div
             className="
                 grid
                 gap-6
-
                 md:grid-cols-2
                 xl:grid-cols-3
             "

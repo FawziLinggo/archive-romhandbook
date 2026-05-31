@@ -1,34 +1,11 @@
+import { Skill } from "@/lib/types/Skills"
 import { assetUrl } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 
 type Props = {
 
-    skill: {
-
-        id: string
-
-        detail_url: string
-
-        image: string
-
-        name: string
-
-        max_level: number
-
-        skill_type: string
-
-        damage_type: string
-
-        cooldown: string
-
-        range_value: string
-
-        cast_time: string
-
-        description: string
-
-    }
+    skill: Skill
 
 }
 
@@ -43,7 +20,7 @@ export default function SkillCard({
     // =====================
 
     function getTagStyle(
-        type?: string
+        type?: string | null
     ) {
 
         const value =
@@ -283,25 +260,29 @@ export default function SkillCard({
                         </div>
 
                         {/* SKILL TYPE */}
-                        <div
-                            className={`
-                                rounded-full
-                                border
+                        {skill.skill_type && (
 
-                                px-3
-                                py-1
+                            <div
+                                className={`
+            rounded-full
+            border
 
-                                text-xs
+            px-3
+            py-1
 
-                                ${getTagStyle(
-                                skill.skill_type
-                            )}
-                            `}
-                        >
+            text-xs
 
-                            {skill.skill_type}
+            ${getTagStyle(
+                                    skill.skill_type
+                                )}
+        `}
+                            >
 
-                        </div>
+                                {skill.skill_type}
+
+                            </div>
+
+                        )}
 
                         {/* DAMAGE TYPE */}
                         {skill.damage_type && (

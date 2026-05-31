@@ -11,6 +11,7 @@ import AIAssistant from "@/components/ai-assistant/AIAssistant"
 import { SidebarProvider } from "@/contexts/SidebarContext"
 
 
+import ArchiveNotice from "@/components/common/ArchiveNotice"
 import type {
   Metadata
 } from "next"
@@ -115,6 +116,9 @@ export default function RootLayout({
             </div>
 
             <AIAssistant />
+
+            <ArchiveNotice />
+
 
             <div className="hidden md:block">
               <MagicCursorTrail />

@@ -601,3 +601,46 @@ CREATE TABLE IF NOT EXISTS crafting_material_craft_materials (
     FOREIGN KEY(material_id) REFERENCES crafting_materials(id)
 );
 CREATE INDEX IF NOT EXISTS idx_crafting_material_craft_materials_material_id ON crafting_material_craft_materials(material_id);
+CREATE TABLE IF NOT EXISTS artifacts (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT UNIQUE,
+    image TEXT,
+    name TEXT,
+    artifact_type TEXT,
+    artifact_subtype TEXT,
+    description TEXT,
+    quality TEXT,
+    effect_text TEXT,
+    unlock_text TEXT,
+    availability_date TEXT,
+    raw_tags TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS artifact_formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artifact_id TEXT NOT NULL,
+    formula_id TEXT,
+    formula_index INTEGER NOT NULL,
+    formula_json TEXT,
+    UNIQUE(artifact_id, formula_index),
+    FOREIGN KEY(artifact_id) REFERENCES artifacts(id)
+);
+CREATE TABLE IF NOT EXISTS artifact_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artifact_id TEXT NOT NULL,
+    relation_type TEXT NOT NULL,
+    related_id TEXT,
+    related_name TEXT,
+    related_image TEXT,
+    related_url TEXT,
+    quantity TEXT,
+    relation_index INTEGER DEFAULT 0,
+    FOREIGN KEY(artifact_id) REFERENCES artifacts(id)
+);
+CREATE INDEX IF NOT EXISTS idx_artifacts_detail_url ON artifacts(detail_url);
+CREATE INDEX IF NOT EXISTS idx_artifacts_lower_name ON artifacts(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_artifacts_type ON artifacts(artifact_type);
+CREATE INDEX IF NOT EXISTS idx_artifacts_subtype ON artifacts(artifact_subtype);
+CREATE INDEX IF NOT EXISTS idx_artifact_formulas_artifact_id ON artifact_formulas(artifact_id);
+CREATE INDEX IF NOT EXISTS idx_artifact_relations_artifact_id ON artifact_relations(artifact_id);
+CREATE INDEX IF NOT EXISTS idx_artifact_relations_type ON artifact_relations(relation_type);

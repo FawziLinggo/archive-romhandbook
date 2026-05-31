@@ -1,4 +1,6 @@
-import { Buff } from "@/lib/queries/buffs"
+import type {
+    Buff
+} from "@/lib/types/Buff"
 
 import BuffCard from "./BuffCard"
 

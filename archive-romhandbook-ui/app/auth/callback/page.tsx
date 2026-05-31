@@ -1,6 +1,7 @@
 "use client"
 
 import {
+    Suspense,
     useEffect,
     useRef
 } from "react"
@@ -18,7 +19,7 @@ import {
     useAuth
 } from "@/contexts/AuthContext"
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
     const router =
         useRouter()
 
@@ -61,6 +62,12 @@ export default function AuthCallbackPage() {
     ])
 
     return (
+        <AuthCallbackLoading />
+    )
+}
+
+function AuthCallbackLoading() {
+    return (
         <div className="flex min-h-[50vh] items-center justify-center">
             <div className="rounded-3xl border border-zinc-800 bg-black p-6 text-center">
                 <Loader2
@@ -77,5 +84,13 @@ export default function AuthCallbackPage() {
                 </p>
             </div>
         </div>
+    )
+}
+
+export default function AuthCallbackPage() {
+    return (
+        <Suspense fallback={<AuthCallbackLoading />}>
+            <AuthCallbackContent />
+        </Suspense>
     )
 }

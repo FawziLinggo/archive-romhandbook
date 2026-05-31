@@ -1,22 +1,19 @@
 "use client"
 
+import type {
+    Skill,
+    SkillListResponse
+} from "@/lib/types/Skills"
 import {
     useEffect,
     useState
 } from "react"
 
-import type {
-    Skill
-} from "@/lib/types/Skills"
-
-import SkillGrid from "./SkillGrid"
-
 import Pagination from "../common/Pagination"
-
 import SearchInput from "../search/SearchInput"
 import SearchStatus from "../search/SearchStatus"
-
 import useDebounce from "../search/useDebounce"
+import SkillGrid from "./SkillGrid"
 
 type Props = {
 
@@ -37,187 +34,126 @@ export default function SkillSearchClient({
 
 }: Props) {
 
-    // =====================
-    // STATE
-    // =====================
-
     const [
-
         query,
         setQuery
-
     ] = useState("")
 
     const [
-
         loading,
         setLoading
-
     ] = useState(false)
 
     const [
-
         skills,
         setSkills
-
     ] = useState<Skill[]>(initialSkills)
 
     const [
-
         currentPage,
         setCurrentPage
-
     ] = useState(page)
 
     const [
-
         searchHasNext,
         setSearchHasNext
-
     ] = useState(hasNext)
-
-    // =====================
-    // DEBOUNCE
-    // =====================
 
     const debouncedQuery =
         useDebounce(query, 300)
 
-    // =====================
-    // RESET PAGE
-    // =====================
+    const isSearching =
+        debouncedQuery.length >= 4
 
     useEffect(() => {
-
         setCurrentPage(1)
-
     }, [
-
         debouncedQuery
-
     ])
 
-    // =====================
-    // SEARCH
-    // =====================
-
     useEffect(() => {
-
-        // RESET TO SSR DATA
-        if (debouncedQuery.length < 4) {
-
+        if (!isSearching) {
             setSkills(initialSkills)
-
             setSearchHasNext(hasNext)
-
+            setLoading(false)
             return
         }
 
-        setLoading(true)
+        let cancelled =
+            false
 
         async function fetchSkills() {
+            setLoading(true)
 
             try {
-
                 const API_URL =
-                    process.env.NEXT_PUBLIC_API_URL
+                    process.env.NEXT_PUBLIC_API_URL ||
+                    "http://127.0.0.1:8080"
 
                 const res =
                     await fetch(
-
                         `${API_URL}/api/v1/skills?page=${currentPage}&limit=${LIMIT}&query=${encodeURIComponent(debouncedQuery)}`
-
                     )
 
                 if (!res.ok) {
-
-                    throw new Error(
-                        "Failed to fetch skills"
-                    )
+                    throw new Error("Failed to fetch skills")
                 }
 
                 const data =
-                    await res.json()
+                    await res.json() as SkillListResponse
 
-                setSkills(
-                    data.data
-                )
+                if (cancelled) {
+                    return
+                }
 
-                setSearchHasNext(
-                    data.meta.has_next
-                )
-
-            } catch (err) {
-                setSkills([])
-
+                setSkills(data.data)
+                setSearchHasNext(data.meta.has_next)
+            } catch {
+                if (!cancelled) {
+                    setSkills([])
+                    setSearchHasNext(false)
+                }
             } finally {
-
-                setLoading(false)
+                if (!cancelled) {
+                    setLoading(false)
+                }
             }
         }
 
         fetchSkills()
 
+        return () => {
+            cancelled = true
+        }
     }, [
-
+        isSearching,
         debouncedQuery,
         currentPage,
         initialSkills,
         hasNext
-
     ])
 
-    // =====================
-    // PAGINATION
-    // =====================
-
     function nextPage() {
-
         if (!searchHasNext) {
-
             return
         }
 
-        setCurrentPage(
-
-            (prev) => prev + 1
-
-        )
+        setCurrentPage((prev) => prev + 1)
     }
 
     function prevPage() {
-
         if (currentPage <= 1) {
-
             return
         }
 
-        setCurrentPage(
-
-            (prev) => prev - 1
-
-        )
+        setCurrentPage((prev) => prev - 1)
     }
-
-    // =====================
-    // RENDER
-    // =====================
 
     return (
 
-        <div
-            className="
-                space-y-8
-            "
-        >
+        <div className="space-y-8">
 
-            {/* SEARCH */}
-
-            <div
-                className="
-                    space-y-3
-                "
-            >
+            <div className="space-y-3">
 
                 <SearchInput
                     value={query}
@@ -233,15 +169,11 @@ export default function SkillSearchClient({
 
             </div>
 
-            {/* GRID */}
-
             <SkillGrid
                 skills={skills}
             />
 
-            {/* NORMAL PAGINATION */}
-
-            {query.length < 4 && (
+            {!isSearching && (
 
                 <Pagination
                     page={page}
@@ -252,92 +184,54 @@ export default function SkillSearchClient({
 
             )}
 
-            {/* SEARCH PAGINATION */}
+            {isSearching && (
 
-            {query.length >= 4 && (
-
-                <div
-                    className="
-                        flex
-                        items-center
-                        justify-center
-                        gap-4
-                    "
-                >
-
-                    {/* PREV */}
+                <div className="flex items-center justify-center gap-4">
 
                     <button
+                        type="button"
                         onClick={prevPage}
                         disabled={currentPage <= 1}
                         className="
                             h-12
-                            px-5
-
                             rounded-xl
-
                             border
                             border-zinc-800
-
                             bg-zinc-900
-
+                            px-5
                             text-white
-
                             transition-all
-
+                            hover:bg-zinc-800
                             disabled:pointer-events-none
                             disabled:opacity-40
-
-                            hover:bg-zinc-800
                         "
                     >
-
-                        ← Prev
-
+                        Prev
                     </button>
 
-                    {/* PAGE */}
-
-                    <div
-                        className="
-                            text-sm
-                            text-zinc-400
-                        "
-                    >
-
+                    <div className="text-sm text-zinc-400">
                         Page {currentPage}
-
                     </div>
 
-                    {/* NEXT */}
-
                     <button
+                        type="button"
                         onClick={nextPage}
                         disabled={!searchHasNext}
                         className="
                             h-12
-                            px-5
-
                             rounded-xl
-
                             border
                             border-zinc-800
-
                             bg-zinc-900
-
+                            px-5
                             text-white
-
                             transition-all
-
+                            hover:bg-zinc-800
                             disabled:pointer-events-none
                             disabled:opacity-40
-
-                            hover:bg-zinc-800
                         "
                     >
-
-                        Next →
-
+                        Next
                     </button>
 
                 </div>
