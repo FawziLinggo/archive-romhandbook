@@ -225,6 +225,30 @@ def rebuild_search_fts():
             )
         FROM artifacts
         WHERE name IS NOT NULL AND TRIM(name) != ''
+
+
+        UNION ALL
+
+        SELECT
+            'ancient_equip',
+            name,
+            CASE
+                WHEN detail_url LIKE '/things/%'
+                THEN detail_url
+                ELSE '/things/' || detail_url
+            END,
+            image,
+            TRIM(
+                COALESCE(equip_type, '') || ' ' ||
+                COALESCE(quality, '') || ' ' ||
+                COALESCE(description, '') || ' ' ||
+                COALESCE(equip_effects, '') || ' ' ||
+                COALESCE(random_attributes, '') || ' ' ||
+                COALESCE(unlock_text, '') || ' ' ||
+                COALESCE(raw_tags, '')
+            )
+        FROM ancient_equips
+        WHERE name IS NOT NULL AND TRIM(name) != ''
 ;
         """
     )

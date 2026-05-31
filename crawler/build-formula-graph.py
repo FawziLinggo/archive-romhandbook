@@ -365,6 +365,7 @@ def add_entity_nodes():
         ("cooking_ingredient", "cooking_ingredients"),
         ("pet_headwear_unlock_item", "pet_headwear_unlock_items"),
         ("artifact", "artifacts"),
+        ("ancient_equip", "ancient_equips"),
     ]
 
     for node_type, table_name in entity_tables:
@@ -550,6 +551,7 @@ def add_formula_json_edges():
         ("furniture", "furniture_formulas", "furniture_id"),
         ("cooking_ingredient", "cooking_ingredient_formulas", "ingredient_id"),
         ("artifact", "artifact_formulas", "artifact_id"),
+            ("ancient_equip", "ancient_equip_formulas", "ancient_equip_id"),
     ]
 
     for entity_type, formula_table, owner_column in sources:

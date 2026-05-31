@@ -62,6 +62,10 @@ TABLE_CONFIGS = [
         "table": "pet_headwear_unlock_items",
         "type": "pet_headwear_unlock_item",
     },
+    {
+    "table": "ancient_equips",
+    "type": "ancient_equip",
+},
 
 ]
 
