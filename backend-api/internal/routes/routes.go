@@ -612,4 +612,17 @@ func SetupRoutes(
 		adminLimit,
 		featureRequestHandler.UpdateAdminStatus,
 	)
+	mapHandler :=
+		handlers.MapHandler{
+			DB: db,
+		}
+	router.GET(
+		"/api/v1/maps",
+		mapHandler.GetMaps,
+	)
+
+	router.GET(
+		"/api/v1/maps/:slug",
+		mapHandler.GetMapBySlug,
+	)
 }
