@@ -14,10 +14,7 @@ BASE_URL = os.getenv(
     "https://romhandbook.com"
 ).rstrip("/")
 
-DB_FILE = os.getenv(
-    "DB_FILE",
-    "database.db"
-)
+DB_FILE = "../backend-api/storage/rom.db"
 
 SAVE_DIR = os.getenv(
     "SAVE_DIR",

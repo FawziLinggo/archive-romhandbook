@@ -12,10 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
 
-DB_FILE = os.getenv(
-    "DB_FILE",
-    "database.db",
-)
+DB_FILE = "../backend-api/storage/rom.db"
 
 DB_PATH = str(
     Path(DB_FILE).resolve()

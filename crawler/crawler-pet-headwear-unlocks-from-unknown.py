@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parent
 load_dotenv(dotenv_path=ROOT.parent / ".env")
 
 BASE_URL = os.getenv("BASE_URL", "https://romhandbook.com").strip().rstrip("/")
-DB_FILE = os.getenv("DB_FILE", "../backend-api/storage/rom.db")
+DB_FILE = "../backend-api/storage/rom.db"
 DB_PATH = (ROOT / DB_FILE).resolve()
 
 HEADERS = {

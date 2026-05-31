@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path="../.env")
 
 BASE_URL = os.getenv("BASE_URL", "https://romhandbook.com").strip().rstrip("/")
-DB_FILE = os.getenv("DB_FILE", "../backend-api/storage/rom.db")
+DB_FILE = "../backend-api/storage/rom.db"
 DB_PATH = str(Path(DB_FILE).resolve())
 HEADERS = {
     "User-Agent": (

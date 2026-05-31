@@ -18,10 +18,7 @@ BASE_URL = os.getenv(
     "https://romhandbook.com",
 )
 
-DB_FILE = os.getenv(
-    "DB_FILE",
-    "db/archive.db",
-)
+DB_FILE = "../backend-api/storage/rom.db"
 
 
 TABLE_CONFIGS = [

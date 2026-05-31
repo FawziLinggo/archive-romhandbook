@@ -32,34 +32,34 @@ def connect_db():
 
     conn.executescript(
         """
-        CREATE TABLE IF NOT EXISTS artifacts (
+        CREATE TABLE IF NOT EXISTS ancient_equips (
             id TEXT PRIMARY KEY,
             detail_url TEXT UNIQUE,
             image TEXT,
             name TEXT,
-            artifact_type TEXT,
-            artifact_subtype TEXT,
-            description TEXT,
+            equip_type TEXT,
             quality TEXT,
-            effect_text TEXT,
+            description TEXT,
+            equip_effects TEXT,
+            random_attributes TEXT,
             unlock_text TEXT,
-            availability_date TEXT,
+            jobs TEXT,
             raw_tags TEXT,
             raw_html TEXT
         );
 
-        CREATE TABLE IF NOT EXISTS artifact_formulas (
+        CREATE TABLE IF NOT EXISTS ancient_equip_formulas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            artifact_id TEXT NOT NULL,
+            ancient_equip_id TEXT NOT NULL,
             formula_id TEXT,
             formula_index INTEGER NOT NULL,
             formula_json TEXT,
-            UNIQUE(artifact_id, formula_index)
+            UNIQUE(ancient_equip_id, formula_index)
         );
 
-        CREATE TABLE IF NOT EXISTS artifact_relations (
+        CREATE TABLE IF NOT EXISTS ancient_equip_relations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            artifact_id TEXT NOT NULL,
+            ancient_equip_id TEXT NOT NULL,
             relation_type TEXT NOT NULL,
             related_id TEXT,
             related_name TEXT,
@@ -77,26 +77,23 @@ def connect_db():
             detail_url TEXT
         );
 
-        CREATE INDEX IF NOT EXISTS idx_artifacts_detail_url
-        ON artifacts(detail_url);
+        CREATE INDEX IF NOT EXISTS idx_ancient_equips_detail_url
+        ON ancient_equips(detail_url);
 
-        CREATE INDEX IF NOT EXISTS idx_artifacts_lower_name
-        ON artifacts(LOWER(name));
+        CREATE INDEX IF NOT EXISTS idx_ancient_equips_lower_name
+        ON ancient_equips(LOWER(name));
 
-        CREATE INDEX IF NOT EXISTS idx_artifacts_type
-        ON artifacts(artifact_type);
+        CREATE INDEX IF NOT EXISTS idx_ancient_equips_type
+        ON ancient_equips(equip_type);
 
-        CREATE INDEX IF NOT EXISTS idx_artifacts_subtype
-        ON artifacts(artifact_subtype);
+        CREATE INDEX IF NOT EXISTS idx_ancient_equip_formulas_item_id
+        ON ancient_equip_formulas(ancient_equip_id);
 
-        CREATE INDEX IF NOT EXISTS idx_artifact_formulas_artifact_id
-        ON artifact_formulas(artifact_id);
+        CREATE INDEX IF NOT EXISTS idx_ancient_equip_relations_item_id
+        ON ancient_equip_relations(ancient_equip_id);
 
-        CREATE INDEX IF NOT EXISTS idx_artifact_relations_artifact_id
-        ON artifact_relations(artifact_id);
-
-        CREATE INDEX IF NOT EXISTS idx_artifact_relations_type
-        ON artifact_relations(relation_type);
+        CREATE INDEX IF NOT EXISTS idx_ancient_equip_relations_type
+        ON ancient_equip_relations(relation_type);
         """
     )
 
@@ -120,9 +117,8 @@ def normalize_path(value):
 
     absolute = urljoin(BASE_URL + "/", value.strip())
     parsed = urlparse(absolute)
-    base_host = urlparse(BASE_URL).netloc
 
-    if parsed.netloc != base_host:
+    if parsed.netloc != urlparse(BASE_URL).netloc:
         return None
 
     return parsed.path.rstrip("/")
@@ -152,27 +148,6 @@ def id_from_path(path):
         return match.group(1)
 
     return slug
-
-
-def relation_type_from_label(label):
-    return (
-        label.strip()
-        .lower()
-        .replace(" ", "_")
-        .replace("-", "_")
-    )
-
-
-def parse_quantity_and_name(text):
-    if not text:
-        return None, None
-
-    match = re.match(r"^(\d+)\s*x\s*(.+)$", text.strip(), re.I)
-
-    if match:
-        return match.group(1), clean_text(match.group(2))
-
-    return None, clean_text(text)
 
 
 def request_page(session, path, max_retries=3, sleep_seconds=1.0):
@@ -235,28 +210,49 @@ def fetch_detail(session, path, sleep_seconds, max_retries):
 
 
 def fetch_list_paths(session, sleep_seconds, max_retries):
-    html = request_page(
-        session,
-        "/artifacts",
-        max_retries=max_retries,
-        sleep_seconds=sleep_seconds,
-    )
-
-    soup = BeautifulSoup(html, "lxml")
     paths = []
     seen = set()
+    page = 1
 
-    for link in soup.select('a[href^="/things/"]'):
-        path = normalize_path(link.get("href"))
+    while True:
+        path = "/ancient_equips" if page == 1 else f"/ancient_equips?page={page}"
 
-        if not path:
-            continue
+        print("[LIST]", path)
 
-        if path in seen:
-            continue
+        try:
+            html = request_page(
+                session,
+                path,
+                max_retries=max_retries,
+                sleep_seconds=sleep_seconds,
+            )
+        except Exception as exc:
+            print("[STOP LIST]", path, "-", exc)
+            break
 
-        seen.add(path)
-        paths.append(path)
+        soup = BeautifulSoup(html, "lxml")
+        page_paths = []
+
+        for link in soup.select('a[href^="/things/"]'):
+            detail_path = normalize_path(link.get("href"))
+
+            if not detail_path:
+                continue
+
+            if detail_path in seen:
+                continue
+
+            seen.add(detail_path)
+            page_paths.append(detail_path)
+            paths.append(detail_path)
+
+        print("[LIST FOUND]", path, len(page_paths), "new ancient equips")
+
+        if not page_paths:
+            break
+
+        page += 1
+        time.sleep(sleep_seconds)
 
     return paths
 
@@ -280,27 +276,10 @@ def extract_badges(soup):
     for badge in soup.select("span.inline-flex"):
         text = clean_text(badge.get_text(" ", strip=True))
 
-        if text:
+        if text and text not in badges:
             badges.append(text)
 
     return badges
-
-
-def extract_artifact_type(badges):
-    for badge in badges:
-        if badge.startswith("Artifact"):
-            return badge
-
-    return None
-
-
-def extract_artifact_subtype(artifact_type):
-    if not artifact_type:
-        return None
-
-    subtype = artifact_type.replace("Artifact", "", 1).strip()
-
-    return subtype or None
 
 
 def extract_sections(soup):
@@ -328,73 +307,73 @@ def extract_sections(soup):
     return sections
 
 
-def extract_section_texts(section):
-    if not section:
-        return []
-
-    texts = []
-
-    for node in section.select("p, span, div"):
-        text = clean_text(node.get_text(" ", strip=True))
-
-        if not text:
-            continue
-
-        if text in texts:
-            continue
-
-        if text in {
-            "Quality",
-            "Effect",
-            "Unlock",
-            "Jobs",
-            "Materials",
-            "Skills",
-            "Availability Date",
-            "Formula",
-        }:
-            continue
-
-        texts.append(text)
-
-    if not texts:
-        text = clean_text(section.get_text(" ", strip=True))
-
-        if text:
-            texts.append(text)
-
-    return texts
+def normalize_relation_type(label):
+    return (
+        label.strip()
+        .lower()
+        .replace(" ", "_")
+        .replace("-", "_")
+    )
 
 
-def extract_quality(section):
-    texts = extract_section_texts(section)
-
-    for text in texts:
-        for quality in ["White", "Green", "Blue", "Purple", "Orange"]:
-            if quality.lower() == text.lower():
-                return quality
-
-    return texts[0] if texts else None
-
-
-def extract_plain_items(section):
+def extract_text_list(section):
     if not section:
         return []
 
     values = []
 
-    for node in section.select("span, a, p, div"):
+    for node in section.select("p, span, div, li"):
         text = clean_text(node.get_text(" ", strip=True))
 
         if not text:
             continue
 
-        if text in values:
+        if text in {
+            "Quality",
+            "Effect",
+            "Effects",
+            "Equip Effects",
+            "Random Attributes",
+            "Unlock",
+            "Jobs",
+            "Materials",
+            "Formula",
+        }:
             continue
 
-        values.append(text)
+        if text not in values:
+            values.append(text)
+
+    if not values:
+        text = clean_text(section.get_text(" ", strip=True))
+
+        if text:
+            values.append(text)
 
     return values
+
+
+def extract_quality(section):
+    texts = extract_text_list(section)
+
+    for text in texts:
+        for quality in ["White", "Green", "Blue", "Purple", "Orange"]:
+            if text.lower() == quality.lower():
+                return quality
+
+    return texts[0] if texts else None
+
+
+def parse_quantity_and_name(text):
+    if not text:
+        return None, None
+
+    match = re.match(r"^(\d+)\s*x\s*(.+)$", text.strip(), re.I)
+
+    if match:
+        return match.group(1), clean_text(match.group(2))
+
+    return None, clean_text(text)
 
 
 def extract_relation_items(section):
@@ -407,21 +386,21 @@ def extract_relation_items(section):
     for link in section.select("a[href]"):
         href = normalize_path(link.get("href"))
 
-        if not href or href in seen:
+        if not href:
             continue
 
-        seen.add(href)
+        key = href
+
+        if key in seen:
+            continue
+
+        seen.add(key)
 
         img = link.select_one("img")
         image = normalize_asset(img.get("src")) if img else None
 
         name_node = link.select_one("span")
-        raw_name = None
-
-        if name_node:
-            raw_name = clean_text(name_node.get_text(" ", strip=True))
-        else:
-            raw_name = clean_text(link.get_text(" ", strip=True))
+        raw_name = clean_text(name_node.get_text(" ", strip=True)) if name_node else clean_text(link.get_text(" ", strip=True))
 
         quantity, name = parse_quantity_and_name(raw_name)
 
@@ -442,15 +421,10 @@ def extract_formulas(soup):
     formulas = []
 
     for code in soup.select("code.language-json, pre code"):
-        formula_text = code.get_text("\n", strip=True)
+        text = code.get_text("\n", strip=True)
 
-        if not formula_text:
-            continue
-
-        if formula_text in formulas:
-            continue
-
-        formulas.append(formula_text)
+        if text and text not in formulas:
+            formulas.append(text)
 
     return formulas
 
@@ -458,7 +432,6 @@ def extract_formulas(soup):
 def formula_id_from_json(formula_text):
     try:
         parsed = json.loads(formula_text)
-
         value = parsed.get("id")
 
         if value is None:
@@ -469,14 +442,27 @@ def formula_id_from_json(formula_text):
         return None
 
 
-def parse_artifact(path, soup, raw_html):
+def extract_image(soup):
+    for img in soup.select("img.h-12, img.h-10, img.h-9, main img, .docs-content img, img"):
+        src = normalize_asset(img.get("src") or img.get("data-src"))
+
+        if src:
+            return src
+
+    return None
+
+
+def extract_equip_type(badges):
+    for badge in badges:
+        if badge:
+            return badge
+
+    return None
+
+
+def parse_ancient_equip(path, soup, raw_html):
     badges = extract_badges(soup)
-    artifact_type = extract_artifact_type(badges)
-
-    if not artifact_type:
-        raise RuntimeError("Artifact badge not found")
-
-    artifact_subtype = extract_artifact_subtype(artifact_type)
+    sections = extract_sections(soup)
 
     name = first_text(
         soup,
@@ -488,11 +474,7 @@ def parse_artifact(path, soup, raw_html):
         ],
     )
 
-    image = None
-    img = soup.select_one("img.h-12, img.h-10, img.h-9, img")
-
-    if img:
-        image = normalize_asset(img.get("src") or img.get("data-src"))
+    image = extract_image(soup)
 
     description = first_text(
         soup,
@@ -504,28 +486,40 @@ def parse_artifact(path, soup, raw_html):
         ],
     )
 
-    sections = extract_sections(soup)
+    equip_type = extract_equip_type(badges)
 
-    quality = extract_quality(sections.get("Quality"))
-    effect_text = extract_section_texts(sections.get("Effect"))
-    unlock_text = extract_section_texts(sections.get("Unlock"))
-    availability_date = None
+    quality = extract_quality(
+        sections.get("Quality")
+    )
 
-    availability_texts = extract_section_texts(sections.get("Availability Date"))
+    equip_effects = (
+        extract_text_list(sections.get("Equip Effects"))
+        or extract_text_list(sections.get("Effect"))
+        or extract_text_list(sections.get("Effects"))
+    )
 
-    if availability_texts:
-        availability_date = availability_texts[0]
+    random_attributes = extract_text_list(
+        sections.get("Random Attributes")
+    )
+
+    unlock_text = extract_text_list(
+        sections.get("Unlock")
+    )
+
+    jobs = extract_text_list(
+        sections.get("Jobs")
+    )
 
     relations = []
 
     for label, section in sections.items():
-        relation_type = relation_type_from_label(label)
+        relation_type = normalize_relation_type(label)
 
         if relation_type in {
             "materials",
-            "skills",
             "craft_materials",
             "craftable",
+            "skills",
             "synth_from",
             "synth_to",
         }:
@@ -534,15 +528,12 @@ def parse_artifact(path, soup, raw_html):
                 relations.append(item)
 
         if relation_type == "jobs":
-            for index, job_name in enumerate(extract_plain_items(section)):
-                if not job_name or job_name == "Jobs":
-                    continue
-
+            for job in jobs:
                 relations.append(
                     {
                         "relation_type": "jobs",
                         "id": None,
-                        "name": job_name,
+                        "name": job,
                         "image": None,
                         "url": None,
                         "quantity": None,
@@ -556,13 +547,13 @@ def parse_artifact(path, soup, raw_html):
         "detail_url": path,
         "image": image,
         "name": name,
-        "artifact_type": artifact_type,
-        "artifact_subtype": artifact_subtype,
-        "description": description,
+        "equip_type": equip_type,
         "quality": quality,
-        "effect_text": json.dumps(effect_text, ensure_ascii=False),
+        "description": description,
+        "equip_effects": json.dumps(equip_effects, ensure_ascii=False),
+        "random_attributes": json.dumps(random_attributes, ensure_ascii=False),
         "unlock_text": json.dumps(unlock_text, ensure_ascii=False),
-        "availability_date": availability_date,
+        "jobs": json.dumps(jobs, ensure_ascii=False),
         "raw_tags": json.dumps(badges, ensure_ascii=False),
         "raw_html": raw_html,
         "relations": relations,
@@ -570,21 +561,21 @@ def parse_artifact(path, soup, raw_html):
     }
 
 
-def save_artifact(conn, data):
+def save_ancient_equip(conn, data):
     conn.execute(
         """
-        INSERT OR REPLACE INTO artifacts (
+        INSERT OR REPLACE INTO ancient_equips (
             id,
             detail_url,
             image,
             name,
-            artifact_type,
-            artifact_subtype,
-            description,
+            equip_type,
             quality,
-            effect_text,
+            description,
+            equip_effects,
+            random_attributes,
             unlock_text,
-            availability_date,
+            jobs,
             raw_tags,
             raw_html
         )
@@ -595,13 +586,13 @@ def save_artifact(conn, data):
             data["detail_url"],
             data["image"],
             data["name"],
-            data["artifact_type"],
-            data["artifact_subtype"],
-            data["description"],
+            data["equip_type"],
             data["quality"],
-            data["effect_text"],
+            data["description"],
+            data["equip_effects"],
+            data["random_attributes"],
             data["unlock_text"],
-            data["availability_date"],
+            data["jobs"],
             data["raw_tags"],
             data["raw_html"],
         ),
@@ -609,8 +600,8 @@ def save_artifact(conn, data):
 
     conn.execute(
         """
-        DELETE FROM artifact_formulas
-        WHERE artifact_id = ?
+        DELETE FROM ancient_equip_formulas
+        WHERE ancient_equip_id = ?
         """,
         (data["id"],),
     )
@@ -618,8 +609,8 @@ def save_artifact(conn, data):
     for index, formula in enumerate(data["formulas"]):
         conn.execute(
             """
-            INSERT OR REPLACE INTO artifact_formulas (
-                artifact_id,
+            INSERT OR REPLACE INTO ancient_equip_formulas (
+                ancient_equip_id,
                 formula_id,
                 formula_index,
                 formula_json
@@ -636,8 +627,8 @@ def save_artifact(conn, data):
 
     conn.execute(
         """
-        DELETE FROM artifact_relations
-        WHERE artifact_id = ?
+        DELETE FROM ancient_equip_relations
+        WHERE ancient_equip_id = ?
         """,
         (data["id"],),
     )
@@ -645,8 +636,8 @@ def save_artifact(conn, data):
     for index, item in enumerate(data["relations"]):
         conn.execute(
             """
-            INSERT INTO artifact_relations (
-                artifact_id,
+            INSERT INTO ancient_equip_relations (
+                ancient_equip_id,
                 relation_type,
                 related_id,
                 related_name,
@@ -682,7 +673,7 @@ def save_artifact(conn, data):
         """,
         (
             data["id"],
-            "artifact",
+            "ancient_equip",
             data["name"],
             data["image"],
             data["detail_url"],
@@ -694,14 +685,13 @@ def already_saved(conn, path):
     row = conn.execute(
         """
         SELECT 1
-        FROM artifacts
-        WHERE detail_url IN (?, ?)
+        FROM ancient_equips
+        WHERE detail_url = ?
            OR id = ?
         LIMIT 1
         """,
         (
             path,
-            BASE_URL + path,
             id_from_path(path),
         ),
     ).fetchone()
@@ -733,7 +723,6 @@ def main():
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Fetch and overwrite rows even if artifact already exists.",
     )
 
     parser.add_argument(
@@ -756,7 +745,7 @@ def main():
         paths = paths[:args.limit]
 
     print("[INFO] DB:", DB_PATH)
-    print("[INFO] Artifact paths:", len(paths))
+    print("[INFO] Ancient equip paths:", len(paths))
 
     counts = {
         "inserted": 0,
@@ -785,13 +774,13 @@ def main():
                 args.max_retries,
             )
 
-            data = parse_artifact(
+            data = parse_ancient_equip(
                 path,
                 soup,
                 raw_html,
             )
 
-            save_artifact(
+            save_ancient_equip(
                 conn,
                 data,
             )
@@ -804,7 +793,7 @@ def main():
                 "[OK]",
                 data["name"],
                 "|",
-                data["artifact_type"],
+                data["equip_type"],
                 "| formulas:",
                 len(data["formulas"]),
                 "| relations:",
@@ -816,6 +805,7 @@ def main():
         except Exception as exc:
             counts["failed"] += 1
             conn.rollback()
+
             print("[FAILED]", path, "-", exc)
 
             time.sleep(args.sleep)

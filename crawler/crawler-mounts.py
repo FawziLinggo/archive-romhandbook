@@ -22,10 +22,7 @@ BASE_URL = os.getenv(
     "https://romhandbook.com"
 )
 
-DB_FILE = os.getenv(
-    "DB_FILE",
-    "database.db"
-)
+DB_FILE = "../backend-api/storage/rom.db"
 
 HEADERS = {
     "User-Agent": (
