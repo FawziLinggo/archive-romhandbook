@@ -39,6 +39,7 @@ TABLES = [
     "cooking_ingredients",
     "pet_headwear_unlock_items",
     "artifacts",
+    "maps",
     ]
 
 FORCE_ITEM_FOLDER_TABLES = {
@@ -151,7 +152,7 @@ def download_image(
         )
 
         if os.path.exists(filepath):
-            print(f"[SKIP] {filepath}")
+            # print(f"[SKIP] {filepath}")
             return
 
         response = session.get(

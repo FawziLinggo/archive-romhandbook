@@ -644,3 +644,28 @@ CREATE INDEX IF NOT EXISTS idx_artifacts_subtype ON artifacts(artifact_subtype);
 CREATE INDEX IF NOT EXISTS idx_artifact_formulas_artifact_id ON artifact_formulas(artifact_id);
 CREATE INDEX IF NOT EXISTS idx_artifact_relations_artifact_id ON artifact_relations(artifact_id);
 CREATE INDEX IF NOT EXISTS idx_artifact_relations_type ON artifact_relations(relation_type);
+CREATE TABLE IF NOT EXISTS maps (
+    id TEXT PRIMARY KEY,
+    detail_url TEXT UNIQUE,
+    image TEXT,
+    name TEXT,
+    raw_html TEXT
+);
+CREATE TABLE IF NOT EXISTS map_monsters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    map_id TEXT NOT NULL,
+    monster_id TEXT,
+    monster_name TEXT,
+    monster_image TEXT,
+    monster_url TEXT,
+    level TEXT,
+    race TEXT,
+    element TEXT,
+    size TEXT,
+    relation_index INTEGER DEFAULT 0,
+    FOREIGN KEY(map_id) REFERENCES maps(id)
+);
+CREATE INDEX IF NOT EXISTS idx_maps_detail_url ON maps(detail_url);
+CREATE INDEX IF NOT EXISTS idx_maps_lower_name ON maps(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_map_monsters_map_id ON map_monsters(map_id);
+CREATE INDEX IF NOT EXISTS idx_map_monsters_monster_id ON map_monsters(monster_id);
