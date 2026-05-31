@@ -625,4 +625,19 @@ func SetupRoutes(
 		"/api/v1/maps/:slug",
 		mapHandler.GetMapBySlug,
 	)
+
+	ancientEquipHandler :=
+		handlers.AncientEquipHandler{
+			DB: db,
+		}
+
+	router.GET(
+		"/api/v1/ancient-equips",
+		ancientEquipHandler.GetAncientEquips,
+	)
+
+	router.GET(
+		"/api/v1/ancient-equips/:slug",
+		ancientEquipHandler.GetAncientEquipBySlug,
+	)
 }

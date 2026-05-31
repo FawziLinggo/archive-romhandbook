@@ -247,3 +247,61 @@ type ArtifactDetail struct {
 
 	Jobs []ThingRelation `json:"jobs"`
 }
+
+type AncientEquip struct {
+	ID string `json:"id"`
+
+	DetailURL string `json:"detail_url"`
+
+	Image *string `json:"image"`
+
+	Name string `json:"name"`
+
+	EquipType *string `json:"equip_type"`
+
+	Quality *string `json:"quality"`
+
+	Description *string `json:"description"`
+}
+
+type AncientEquipDetail struct {
+	ID string `json:"id"`
+
+	DetailURL string `json:"detail_url"`
+
+	Image *string `json:"image"`
+
+	Name string `json:"name"`
+
+	EquipType *string `json:"equip_type"`
+
+	Quality *string `json:"quality"`
+
+	Description *string `json:"description"`
+
+	EquipEffects *string `json:"equip_effects"`
+
+	RandomAttributes *string `json:"random_attributes"`
+
+	UnlockText *string `json:"unlock_text"`
+
+	JobsText *string `json:"jobs"`
+
+	RawTags *string `json:"raw_tags"`
+
+	RawHTML *string `json:"raw_html"`
+
+	Formulas []ThingFormula `json:"formulas"`
+
+	Relations []ThingRelation `json:"relations"`
+
+	Materials []ThingRelation `json:"materials"`
+
+	Skills []ThingRelation `json:"skills"`
+
+	Jobs []ThingRelation `json:"jobs"`
+
+	Craftable []ThingRelation `json:"craftable"`
+
+	CraftMaterials []ThingRelation `json:"craft_materials"`
+}
