@@ -209,3 +209,41 @@ type CraftingMaterialDetail struct {
 
 	DroppedBy []CraftingMaterialDroppedBy `json:"dropped_by"`
 }
+
+type ArtifactDetail struct {
+	ID string `json:"id"`
+
+	DetailURL string `json:"detail_url"`
+
+	Image *string `json:"image"`
+
+	Name string `json:"name"`
+
+	ArtifactType *string `json:"artifact_type"`
+
+	ArtifactSubtype *string `json:"artifact_subtype"`
+
+	Description *string `json:"description"`
+
+	Quality *string `json:"quality"`
+
+	EffectText *string `json:"effect_text"`
+
+	UnlockText *string `json:"unlock_text"`
+
+	AvailabilityDate *string `json:"availability_date"`
+
+	RawTags *string `json:"raw_tags"`
+
+	RawHTML *string `json:"raw_html"`
+
+	Formulas []ThingFormula `json:"formulas"`
+
+	Relations []ThingRelation `json:"relations"`
+
+	Materials []ThingRelation `json:"materials"`
+
+	Skills []ThingRelation `json:"skills"`
+
+	Jobs []ThingRelation `json:"jobs"`
+}

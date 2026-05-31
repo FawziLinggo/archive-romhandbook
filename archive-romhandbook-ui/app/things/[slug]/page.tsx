@@ -12,13 +12,14 @@ import EquipmentDetail from "@/components/things/EquipmentDetail"
 import ArchiveThingDetail from "@/components/things/ArchiveThingDetail"
 
 import CommentsPanel from "@/components/comments/CommentsPanel"
-
 import type {
+    ArtifactDetail,
     CookingIngredientDetail,
     CraftingMaterialDetail,
     FurnitureDetail,
     PetHeadwearUnlockItemDetail
 } from "@/lib/types/Thing"
+import { notFound } from "next/navigation"
 
 import type {
     HeadwearDetail as HeadwearDetailType
@@ -41,7 +42,6 @@ import { serverApiFetchEnvelope } from "@/lib/server-api"
 import type {
     PetEgg
 } from "@/lib/types/Pets"
-import { notFound } from "next/dist/client/components/navigation"
 
 type ThingResponse<T> = {
 
@@ -341,6 +341,33 @@ export default async function ThingPage({
                     <CommentsPanel
                         targetType="crafting_material"
                         targetId={material.id}
+                    />
+                </>
+            )
+        }
+
+        case "artifact": {
+            const artifact =
+                thingResponse.data as ArtifactDetail | undefined
+
+            if (!artifact) {
+                return (
+                    <div>
+                        Artifact not found
+                    </div>
+                )
+            }
+
+            return (
+                <>
+                    <ArchiveThingDetail
+                        type="artifact"
+                        detail={artifact}
+                    />
+
+                    <CommentsPanel
+                        targetType="artifact"
+                        targetId={artifact.id}
                     />
                 </>
             )

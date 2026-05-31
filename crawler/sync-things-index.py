@@ -26,6 +26,10 @@ DB_FILE = os.getenv(
 
 TABLE_CONFIGS = [
     {
+    "table": "artifacts",
+    "type": "artifact",
+},
+    {
         "table": "cards",
         "type": "card",
     },

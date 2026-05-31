@@ -740,3 +740,96 @@ func GetCraftingMaterialByID(
 
 	return &material, nil
 }
+
+func GetArtifactByID(
+	db *sql.DB,
+	id string,
+) (
+	*models.ArtifactDetail,
+	error,
+) {
+	var artifact models.ArtifactDetail
+
+	err := db.QueryRow(`
+
+		SELECT
+			id,
+			detail_url,
+			image,
+			name,
+			artifact_type,
+			artifact_subtype,
+			description,
+			quality,
+			effect_text,
+			unlock_text,
+			availability_date,
+			raw_tags,
+			raw_html
+
+		FROM artifacts
+
+		WHERE id = ?
+
+		LIMIT 1
+
+	`, id).Scan(
+		&artifact.ID,
+		&artifact.DetailURL,
+		&artifact.Image,
+		&artifact.Name,
+		&artifact.ArtifactType,
+		&artifact.ArtifactSubtype,
+		&artifact.Description,
+		&artifact.Quality,
+		&artifact.EffectText,
+		&artifact.UnlockText,
+		&artifact.AvailabilityDate,
+		&artifact.RawTags,
+		&artifact.RawHTML,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	formulas, err :=
+		getThingFormulas(
+			db,
+			"artifact_formulas",
+			"artifact_id",
+			id,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	relations, err :=
+		getThingRelations(
+			db,
+			"artifact_relations",
+			"artifact_id",
+			id,
+			true,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	artifact.Formulas = formulas
+	artifact.Relations = relations
+	artifact.Materials =
+		filterThingRelations(relations, "materials")
+	artifact.Skills =
+		filterThingRelations(relations, "skills")
+	artifact.Jobs =
+		filterThingRelations(relations, "jobs")
+
+	return &artifact, nil
+}

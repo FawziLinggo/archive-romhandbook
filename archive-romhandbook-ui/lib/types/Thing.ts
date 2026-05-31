@@ -125,3 +125,24 @@ export type CraftingMaterialDetail = {
     craftable: CraftingMaterialCraftable[]
     dropped_by: CraftingMaterialDroppedBy[]
 }
+
+export type ArtifactDetail = {
+    id: string
+    detail_url: string
+    image: string | null
+    name: string
+    artifact_type: string | null
+    artifact_subtype: string | null
+    description: string | null
+    quality: string | null
+    effect_text: string | null
+    unlock_text: string | null
+    availability_date: string | null
+    raw_tags: string | null
+    raw_html: string | null
+    formulas: ThingFormula[]
+    relations: ThingRelation[]
+    materials: ThingRelation[]
+    skills: ThingRelation[]
+    jobs: ThingRelation[]
+}

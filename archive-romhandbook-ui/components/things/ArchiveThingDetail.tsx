@@ -5,12 +5,14 @@ import RomHtmlViewerToggle from "@/components/common/RomHtmlViewerToggle"
 import DetailContainer from "@/components/layout/DetailContainer"
 
 import type {
+    ArtifactDetail,
     CookingIngredientDetail,
     CraftingMaterialDetail,
     FurnitureDetail,
     PetHeadwearUnlockItemDetail,
     ThingRelation
 } from "@/lib/types/Thing"
+
 import { assetUrl } from "@/lib/utils"
 
 type ArchiveThingType =
@@ -18,12 +20,14 @@ type ArchiveThingType =
     | "cooking_ingredient"
     | "pet_headwear_unlock_item"
     | "crafting_material"
+    | "artifact"
 
 type ArchiveThingDetail =
     | FurnitureDetail
     | CookingIngredientDetail
     | PetHeadwearUnlockItemDetail
     | CraftingMaterialDetail
+    | ArtifactDetail
 
 type Props = {
     type: ArchiveThingType
@@ -148,7 +152,11 @@ function RelationCard({
     relation
 }: {
     relation: ThingRelation
+
+
 }) {
+    const imageUrl =
+        assetUrl(relation.related_image)
     return (
         <Link
             href={normalizeHref(relation.related_url)}
@@ -170,26 +178,38 @@ function RelationCard({
         >
             <span
                 className="
-                    relative
-                    h-10
-                    w-10
-                    shrink-0
-                    overflow-hidden
-                    rounded-xl
-                    border
-                    border-zinc-800
-                    bg-black
-                "
+        relative
+        flex
+        h-10
+        w-10
+        shrink-0
+        items-center
+        justify-center
+        overflow-hidden
+        rounded-xl
+        border
+        border-zinc-800
+        bg-black
+        text-xs
+        font-black
+        text-violet-300
+    "
             >
-                <img
-                    src={assetUrl(relation.related_image)}
-                    alt={relation.related_name || "Related item"}
-                    className="
-                        h-full
-                        w-full
-                        object-cover
-                    "
-                />
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={relation.related_name || "Related item"}
+                        className="
+                h-full
+                w-full
+                object-cover
+            "
+                    />
+                ) : (
+                    <span>
+                        {(relation.related_name || "?").slice(0, 2).toUpperCase()}
+                    </span>
+                )}
             </span>
 
             <span className="min-w-0">
@@ -286,8 +306,19 @@ function getTitle(type: ArchiveThingType) {
         return "Cooking Ingredient"
     }
 
+    if (type === "pet_headwear_unlock_item") {
+        return "Pet Headwear Unlock Item"
+    }
 
-    return "Pet Headwear Unlock Item"
+    if (type === "crafting_material") {
+        return "Crafting Material"
+    }
+
+    if (type === "artifact") {
+        return "Artifact"
+    }
+
+    return "Archive Thing"
 }
 
 function getBadges(type: ArchiveThingType, detail: ArchiveThingDetail) {
@@ -338,6 +369,17 @@ function getBadges(type: ArchiveThingType, detail: ArchiveThingDetail) {
             badges.push(item.material_type)
         }
     }
+    if (type === "artifact") {
+        const item = detail as ArtifactDetail
+
+        if (item.artifact_type) {
+            badges.push(item.artifact_type)
+        }
+
+        if (item.artifact_subtype) {
+            badges.push(item.artifact_subtype)
+        }
+    }
 
     return badges
 }
@@ -386,6 +428,11 @@ export default function ArchiveThingDetail({
     const craftingMaterial =
         type === "crafting_material"
             ? detail as CraftingMaterialDetail
+            : null
+
+    const artifact =
+        type === "artifact"
+            ? detail as ArtifactDetail
             : null
 
     return (
@@ -566,6 +613,43 @@ export default function ArchiveThingDetail({
                                 relations={materialDroppedByToRelations(craftingMaterial)}
                             />
                         </>
+                    )}
+
+                    {artifact && (
+                        <>
+                            <RelationSection
+                                title="Materials"
+                                relations={artifact.materials}
+                            />
+
+                            <RelationSection
+                                title="Skills"
+                                relations={artifact.skills}
+                            />
+
+                            <RelationSection
+                                title="Jobs"
+                                relations={artifact.jobs}
+                            />
+                        </>
+                    )}
+
+                    {artifact?.effect_text && (
+                        <Section title="Effect">
+                            <TextBlock value={artifact.effect_text} />
+                        </Section>
+                    )}
+
+                    {artifact?.unlock_text && (
+                        <Section title="Unlock">
+                            <TextBlock value={artifact.unlock_text} />
+                        </Section>
+                    )}
+
+                    {artifact?.availability_date && (
+                        <Section title="Availability Date">
+                            <TextBlock value={artifact.availability_date} />
+                        </Section>
                     )}
 
                     {formulaCode && (

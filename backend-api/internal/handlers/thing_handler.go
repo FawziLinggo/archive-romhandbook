@@ -341,6 +341,35 @@ func (h *ThingHandler) GetThingByID(
 
 		return
 
+	case "artifact":
+		artifact, err :=
+			repositories.GetArtifactByID(
+				h.DB,
+				id,
+			)
+
+		if err != nil {
+			utils.Error(c, 500, err.Error())
+			return
+		}
+
+		if artifact == nil {
+			utils.Error(c, 404, "Artifact not found")
+			return
+		}
+
+		c.JSON(
+			200,
+			gin.H{
+				"success": true,
+				"type":    thing.Type,
+				"data":    artifact,
+				"meta":    nil,
+			},
+		)
+
+		return
+
 	default:
 		c.JSON(
 			http.StatusNotImplemented,

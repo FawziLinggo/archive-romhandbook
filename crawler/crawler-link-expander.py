@@ -139,6 +139,7 @@ THING_TYPE_BY_TABLE = {
     "pet_eggs": "pet_egg",
     "furnitures": "furniture",
     "cooking_ingredients": "cooking_ingredient",
+    "artifacts": "artifact",
     "pet_headwear_unlock_items": "pet_headwear_unlock_item",
 }
 
@@ -151,6 +152,15 @@ INSERT_COLUMNS = {
         "card_type",
         "raw_html",
     ],
+    "artifacts": [
+    "id",
+    "detail_url",
+    "image",
+    "name",
+    "artifact_type",
+    "description",
+    "raw_html",
+],
     "equipments": [
         "id",
         "detail_url",
@@ -805,6 +815,9 @@ def classify_thing(soup):
 
     if "egg" in name.lower():
         return "pet_eggs", "Pet Egg", badges
+    
+    if text.startswith("Artifact"):
+        return "artifacts", text, badges
 
     return None, None, badges
 

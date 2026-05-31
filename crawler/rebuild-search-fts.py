@@ -201,7 +201,31 @@ def rebuild_search_fts():
                 COALESCE(raw_formula, '')
             )
         FROM pet_headwear_unlock_items
-        WHERE name IS NOT NULL AND TRIM(name) != '';
+        WHERE name IS NOT NULL AND TRIM(name) != ''
+        
+        UNION ALL
+
+        SELECT
+            'Artifact',
+            name,
+            CASE
+                WHEN detail_url LIKE '/things/%'
+                THEN detail_url
+                ELSE '/things/' || detail_url
+            END,
+            image,
+            TRIM(
+                COALESCE(artifact_type, '') || ' ' ||
+                COALESCE(artifact_subtype, '') || ' ' ||
+                COALESCE(quality, '') || ' ' ||
+                COALESCE(description, '') || ' ' ||
+                COALESCE(effect_text, '') || ' ' ||
+                COALESCE(unlock_text, '') || ' ' ||
+                COALESCE(raw_tags, '')
+            )
+        FROM artifacts
+        WHERE name IS NOT NULL AND TRIM(name) != ''
+;
         """
     )
 
