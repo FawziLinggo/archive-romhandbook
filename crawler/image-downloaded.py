@@ -37,6 +37,7 @@ TABLES = [
     "pet_headwear_unlock_items",
     "artifacts",
     "maps",
+    "ancient_equips",
     ]
 
 FORCE_ITEM_FOLDER_TABLES = {
@@ -46,6 +47,7 @@ FORCE_ITEM_FOLDER_TABLES = {
     "cooking_ingredients",
     "pet_headwear_unlock_items",
     "artifacts",
+    "ancient_equips",
 }
 
 HEADERS = {
