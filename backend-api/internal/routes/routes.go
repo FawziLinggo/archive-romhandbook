@@ -16,6 +16,7 @@ import (
 	"backend-api/internal/app/reports"
 	"backend-api/internal/app/session"
 	"backend-api/internal/handlers"
+	"backend-api/internal/openapi"
 )
 
 func requireAuth(appDB *sql.DB) gin.HandlerFunc {
@@ -38,6 +39,9 @@ func SetupRoutes(
 	appDB *sql.DB,
 	config *configs.Config,
 ) {
+	if config == nil {
+		config = configs.LoadConfig()
+	}
 
 	rateLimiter :=
 		middleware.NewRateLimiter()
@@ -107,6 +111,8 @@ func SetupRoutes(
 		)
 
 	router.Use(apiGlobalLimit)
+
+	openapi.Register(router)
 
 	skillHandler :=
 		handlers.SkillHandler{

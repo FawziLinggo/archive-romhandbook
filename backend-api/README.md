@@ -2,6 +2,24 @@
 
 Backend service for the ROM Handbook Archive ecosystem.
 
+## API Documentation
+
+After starting the backend, open the interactive Swagger UI at:
+
+```text
+http://localhost:8080/swagger/
+```
+
+The raw OpenAPI 3.0 document is available at:
+
+```text
+http://localhost:8080/openapi.json
+```
+
+Swagger UI supports public archive endpoints and authenticated community/admin
+endpoints. Discord authentication uses the `rom_session` HTTP-only cookie, so
+authenticated requests work from Swagger after logging in through the same host.
+
 This API will power authentication, community systems, archived game data services, and future interactive features for the ROM Handbook Archive platform.
 
 ---
