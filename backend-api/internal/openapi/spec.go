@@ -47,7 +47,10 @@ func Document() map[string]any {
 			},
 		},
 		"servers": []any{
-			map[string]any{"url": "/", "description": "Current server"},
+			map[string]any{
+				"url":         ".",
+				"description": "Current server",
+			},
 		},
 		"tags":  tags(),
 		"paths": paths,

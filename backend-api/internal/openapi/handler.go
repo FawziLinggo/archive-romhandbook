@@ -48,13 +48,14 @@ body {
   <script>
     window.onload = function () {
       SwaggerUIBundle({
-        url: "/openapi.json",
+        url: "../openapi.json",
         dom_id: "#swagger-ui",
         deepLinking: true,
         displayRequestDuration: true,
         filter: true,
-        persistAuthorization: true,
-        tryItOutEnabled: true
+
+        tryItOutEnabled: false,
+        supportedSubmitMethods: []
       });
     };
   </script>
@@ -69,14 +70,16 @@ func Register(router *gin.Engine) {
 		c.JSON(http.StatusOK, Document())
 	})
 
-	router.GET("/swagger", func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/swagger/")
-	})
+	swaggerHandler := func(c *gin.Context) {
+		c.Data(
+			http.StatusOK,
+			"text/html; charset=utf-8",
+			[]byte(swaggerHTML),
+		)
+	}
 
-	router.GET("/swagger/", func(c *gin.Context) {
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(swaggerHTML))
-	})
-
+	router.GET("/swagger", swaggerHandler)
+	router.GET("/swagger/", swaggerHandler)
 	router.GET("/docs", func(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, "/swagger/")
 	})
